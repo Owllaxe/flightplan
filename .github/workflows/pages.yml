@@ -1,0 +1,41 @@
+# Publishes the static site in site/ to GitHub Pages on every push to main.
+#
+# Uses the artifact-based deployment rather than a gh-pages branch, so the
+# folder can stay at site/ instead of being moved to the repo root or docs/.
+# No build step: the site is plain HTML, CSS and ES modules, uploaded as-is.
+
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: read the repo, write a Pages deployment, sign the artifact.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deployments race; the newest push wins.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
