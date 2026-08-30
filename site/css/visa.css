@@ -84,13 +84,12 @@
   min-height: 152px;
   padding: 12px 56px 12px 31px;
 }
-.vs-hero__avatar {
-  flex: 0 0 128px;
-  width: 128px; height: 128px;
-  border-radius: 50%;
-  background: var(--placeholder);
-  box-shadow: 0 0 0 3px #fff;
-}
+/* Size and fill come from `.avatar.avatar--lg` in base.css, the same initials
+   circle Home, Career and Profile use for their 128px slot; only the flex
+   basis is restated so the hero row keeps reserving the track. The white ring
+   this rule used to draw is gone — it framed the grey placeholder and no other
+   128px avatar on the site carries one. */
+.vs-hero__avatar { flex: 0 0 128px; }
 .vs-hero__id { min-width: 0; }
 .vs-hero__name {
   font-family: var(--font-hand);

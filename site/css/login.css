@@ -1,0 +1,486 @@
+/* ---------------------------------------------------------------------------
+   Build B port — (a) the auth gate  (b) the pigeon onboarding quiz
+   Geometry and colour from tools/buildB-spec.md §1.2–1.3 and §2.1–2.5.
+
+   This file is loaded two ways:
+     · <link> in login.html                  — the gate
+     · injected by js/app.js on every page   — the quiz overlay
+   So every gate rule is scoped under `.auth-page` (a class only login.html
+   carries) and every quiz rule hangs off the `[data-q*]` attributes that only
+   exist on the overlay js/app.js builds. Nothing here can touch the nine pages.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* B's palette. The ones A already has to the byte reuse A's token; the four
+     that differ are declared here so the port is exact rather than "close".
+       A --bg        #f6f2e9 == B page bg        ✔ reused
+       A --panel-alt #fdfbf6 == B panel          ✔ reused
+       A --ink       #1b1916 == B ink            ✔ reused
+       A --ink-2     #5c554a == B ink2           ✔ reused
+       A --ink-4     #a9a192 == B faint          ✔ reused
+       A --green     #5a7355 == B green          ✔ reused
+       A --border    #e5e0d7 != B rule    #e4ded0
+       A --ink-3     #8c8578 != B ink3    #8f8779
+       A --accent    #8c4535 != B accent  #a2593a                              */
+  --b-accent:   #a2593a;
+  --b-rule:     #e4ded0;
+  --b-ink3:     #8f8779;
+  --b-dim:      #b4ac9c;
+  --b-err-ink:  #8c3a1e;
+  --b-err-bg:   #fbe9e4;
+  --b-err-line: #d99b84;
+  --b-pend-bg:  #fbf7ef;
+  --b-pend-ln:  #dfc2ac;
+  --b-pend-ink: #7e3f22;
+
+  /* B's "hand / serif" stack (spec §7.2) — headings and the gate title. */
+  --font-hand-serif: 'Pathfinder Hand', 'Newsreader', Georgia, serif;
+}
+
+/* ===========================================================================
+   (a) THE GATE — spec §1.2 / §1.3
+   =========================================================================== */
+
+.auth-page { background: var(--bg); }
+
+/* Several gate parts are `display:block` primitives that the mode switch hides
+   with the `hidden` attribute; without this the block wins over the UA's
+   `[hidden]{display:none}` and "← Back" leaks into login mode. */
+.auth-page [hidden] { display: none !important; }
+
+.auth {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.auth__col { width: 100%; max-width: 400px; }
+
+/* --- brand lockup ---------------------------------------------------------- */
+
+.auth__brand { text-align: center; margin-bottom: 26px; }
+
+.auth__rock { width: 62px; height: 57px; margin: 0 auto 14px; }
+
+.auth__wordmark {
+  font-family: var(--font-hand);
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.auth__tagline {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  color: var(--b-ink3);
+  margin-top: 6px;
+}
+
+/* --- card ------------------------------------------------------------------ */
+
+.auth__card {
+  background: var(--panel-alt);
+  border: 1px solid var(--b-rule);
+  border-radius: 14px;
+  padding: 26px 24px;
+  box-shadow: 0 12px 36px rgba(27, 25, 22, .08);
+}
+
+.auth__title {
+  font-family: var(--font-hand-serif);
+  font-weight: 600;
+  font-size: 23px;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.auth__sub {
+  font-size: 12.5px;
+  color: var(--b-ink3);
+  margin-bottom: 18px;
+  text-wrap: pretty;
+}
+
+/* The honesty notice, in B's own dashed "pending" treatment (§1.3.3) — the
+   slot B used for "the catalog service is not reachable" now carries the one
+   thing this screen genuinely has to say about itself. */
+.auth__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  background: var(--b-pend-bg);
+  border: 1px dashed var(--b-pend-ln);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--b-pend-ink);
+  text-wrap: pretty;
+}
+
+.auth__notice-tag {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .12em;
+  line-height: 1.9;
+  color: var(--b-pend-ink);
+  border: 1px solid #e6cdb8;
+  border-radius: 6px;
+  padding: 0 6px;
+  background: var(--panel-alt);
+}
+
+/* --- fields ---------------------------------------------------------------- */
+
+.auth__input {
+  display: block;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--b-rule);
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.auth__input::placeholder { color: var(--b-dim); }
+.auth__input:focus-visible { outline: 2px solid var(--b-accent); outline-offset: 1px; }
+
+.auth__input--stacked { margin-bottom: 9px; }
+
+/* The password field. Present so the composition is B's, inert so the screen
+   does not imply a check it cannot perform. */
+.auth__input--dead {
+  background: var(--sunken);
+  color: var(--ink-4);
+  cursor: not-allowed;
+  text-overflow: ellipsis;
+}
+.auth__input--dead::placeholder { color: var(--ink-4); }
+
+.auth__section {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .12em;
+  color: var(--b-dim);
+  margin: 15px 0 6px;
+}
+
+.auth__select { cursor: pointer; }
+
+/* --- remember-me ----------------------------------------------------------- */
+
+.auth__remember { display: flex; align-items: center; gap: 9px; margin-top: 15px; }
+
+.auth__box {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--panel-alt);
+  background: transparent;
+  border: 1.5px solid #c9c0ae;
+}
+
+.auth__box[aria-checked="true"] { background: var(--green); border-color: var(--green); }
+.auth__box[aria-checked="true"]::after { content: '\2713'; }
+
+.auth__remember-label { font-size: 12.5px; color: var(--ink-2); cursor: pointer; }
+
+/* --- actions --------------------------------------------------------------- */
+
+.auth__submit {
+  display: block;
+  width: 100%;
+  margin-top: 17px;
+  background: var(--b-accent);
+  color: var(--panel-alt);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.auth__submit:hover { filter: brightness(1.07); }
+.auth__submit:active { transform: translateY(1px); }
+
+.auth__backstep {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  font-size: 12px;
+  color: var(--ink-4);
+}
+.auth__backstep:hover { color: var(--ink-2); }
+
+.auth__error {
+  margin-top: 13px;
+  font-size: 12.5px;
+  color: var(--b-err-ink);
+  background: var(--b-err-bg);
+  border: 1px solid var(--b-err-line);
+  border-radius: 7px;
+  padding: 9px 11px;
+  text-wrap: pretty;
+}
+
+.auth__switch { text-align: center; margin-top: 16px; }
+.auth__switch button { font-size: 12.5px; color: var(--b-accent); }
+.auth__switch button:hover { text-decoration: underline; }
+
+/* Short viewports: let the column scroll rather than clip. */
+@media (max-height: 700px) { .auth { align-items: flex-start; padding-block: 32px; } }
+
+/* ===========================================================================
+   (b) THE PIGEON ONBOARDING QUIZ — spec §2.1–2.5, values verbatim
+   =========================================================================== */
+
+[data-qov] {
+  position: fixed;
+  inset: 0;
+  background: rgba(60, 45, 35, .45);
+  z-index: 430;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+[data-quiz] {
+  background: #fffdf8;
+  border-radius: 20px;
+  padding: 30px 42px 34px;
+  width: 720px;
+  max-width: 92vw;
+  position: relative;
+  overflow: hidden;
+  min-height: 430px;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+[data-qx] { position: absolute; top: 14px; right: 18px; color: #9a8f7d; font-size: 16px; z-index: 3; }
+
+/* --- progress + heading ---------------------------------------------------- */
+
+[data-qdots] { display: flex; gap: 9px; margin-bottom: 8px; justify-content: center; }
+[data-qdot]  { width: 8px; height: 8px; border-radius: 50%; background: #e2d9c9; display: inline-block; }
+[data-qdot="1"] { background: var(--b-accent); width: 10px; height: 10px; }
+
+[data-qcap] {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: #736657;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+[data-qh] {
+  font-family: var(--font-hand-serif);
+  font-weight: 600;
+  color: #242019;
+  font-size: 27px;
+  margin: 0 0 20px;
+  max-width: 430px;
+  line-height: 1.22;
+}
+
+/* --- options / inputs / chips ---------------------------------------------- */
+
+[data-qopt] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1.4px solid #3a352d;
+  border-radius: 14px;
+  padding: 13px 16px;
+  margin: 10px 0;
+  cursor: pointer;
+  font-size: 14.5px;
+  background: #fff;
+  max-width: 440px;
+  width: 100%;
+  text-align: left;
+}
+[data-qopt]:hover { background: var(--b-err-bg); }
+[data-qopt][data-sel="1"] { border-color: var(--b-accent); background: var(--b-err-bg); }
+
+[data-radio] {
+  width: 18px;
+  height: 18px;
+  border: 1.6px solid #b7a998;
+  border-radius: 50%;
+  flex: none;
+  position: relative;
+}
+[data-radio][data-multi="1"] { border-radius: 5px; }
+
+[data-qopt][data-sel="1"] [data-radio]::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--b-accent);
+}
+[data-qopt][data-sel="1"] [data-radio][data-multi="1"]::after {
+  content: '\2713';
+  inset: 0;
+  background: none;
+  color: var(--b-accent);
+  font-size: 12px;
+  text-align: center;
+  line-height: 15px;
+  border-radius: 0;
+}
+
+[data-qtags] { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; max-width: 440px; }
+
+[data-qtag] {
+  background: var(--b-err-bg);
+  border: 1px solid var(--b-accent);
+  color: var(--b-accent);
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+[data-qsugg] {
+  background: #fff;
+  border: 1px dashed #c9bda9;
+  color: #736657;
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+}
+[data-qsugg]:hover { background: var(--b-err-bg); }
+
+[data-qin] {
+  width: 100%;
+  max-width: 440px;
+  border: 1.4px solid #3a352d;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 14px;
+  margin: 6px 0;
+  display: block;
+  background: #fff;
+  font-family: inherit;
+  color: var(--ink);
+}
+
+[data-qnote] { font-size: 11.5px; color: #736657; max-width: 440px; margin-top: 6px; }
+[data-qnote][data-err="1"] { color: var(--b-err-ink); }
+
+/* --- footer + pigeon ------------------------------------------------------- */
+
+[data-qfoot] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 22px;
+  max-width: 440px;
+}
+
+[data-qback] {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.4px solid #cfc5b4;
+  background: #fff;
+  font-size: 16px;
+  color: #736657;
+}
+
+[data-qnext] {
+  background: var(--b-accent);
+  color: #fff;
+  border: 0;
+  border-radius: 24px;
+  padding: 13px 46px;
+  font-size: 14.5px;
+}
+[data-qnext][data-off="1"] { opacity: .45; }
+
+[data-qwrap] {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@media (max-width: 860px) { [data-qwrap] { display: none; } }
+
+/* Sprite sheet: pigeon-stage.webp is 11 × 11 frames. At this scale the whole
+   sheet is 2046 × 2167, so one frame is 186 × 197 (spec §2.5). The frame is
+   chosen by background-position from JS. */
+#pigeon-quiz {
+  width: 186px;
+  height: 197px;
+  background-image: url('../assets/b/pigeon-stage.webp');
+  background-size: 2046px 2167px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 2;
+}
+#pigeon-quiz[data-shake="1"] { animation: fpQuizShake .42s ease-in-out; }
+
+@keyframes fpQuizShake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-5px); }
+  75%      { transform: translateX(5px); }
+}
+
+#pigeon-quiz-planet {
+  width: 205px;
+  height: 189px;
+  margin-top: -32px;
+  background-image: url('../assets/b/brand-rock.webp');
+  background-size: 205px 189px;
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
+}
+
+/* The card is 720px wide but the content column is capped at 440px, which is
+   what leaves the pigeon its corner. Below 860px the pigeon is hidden (above)
+   and the padding tightens so nothing overflows. */
+@media (max-width: 620px) { [data-quiz] { padding: 28px 22px 30px; } }
+
+/* ===========================================================================
+   (c) SIGN OUT — injected into the sidebar footer by js/app.js
+   =========================================================================== */
+
+.signout {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--b-ink3);
+  border: 1px solid var(--b-rule);
+  border-radius: 6px;
+  padding: 5px 9px;
+  background: var(--panel-alt);
+  margin-top: 12px;
+  display: block;
+}
+.signout:hover { color: var(--b-pend-ink); border-color: var(--b-pend-ln); }

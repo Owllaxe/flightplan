@@ -189,11 +189,13 @@
 .career-body.is-expanded .startups:not(.is-flying) { display: none; }
 
 .career-body.is-detail { grid-template-columns: minmax(280px, 0.722fr) minmax(0, 1fr); }
-.career-body.is-detail .jobs:not(.is-flying) { display: none; }
+.career-body.is-detail .jobs:not(.is-held) { display: none; }
 
 /* the start-ups panel taking the whole content width */
 .career-body.is-startups-wide { grid-template-columns: minmax(0, 1fr); }
-.career-body.is-startups-wide .jobs:not(.is-flying) { display: none; }
+/* `.is-held` is the listings grid parked over its own rect while the start-ups
+   panel sweeps across it — it has to stay painted until the panel covers it. */
+.career-body.is-startups-wide .jobs:not(.is-held) { display: none; }
 
 /* One rule for both states: the card keeps roughly its drawn width and the column
    count follows the space it is given — 2 up compact and 4 up expanded at 1440,
@@ -298,31 +300,48 @@
   display: flex;
   flex-direction: column;
 }
-/* --- the leaving half ------------------------------------------------------
-   Both expansions use the same two steps: pin the half that is leaving over the
-   rect it occupies right now (`fixed`, so neither `.main`'s clip nor a panel's
-   scroll box crops it), then translate it off the near edge. The start-ups panel
-   leaves to the RIGHT when the listings grid expands; the listings grid leaves
-   to the LEFT when the start-ups directory expands. Transform and opacity only. */
-.startups.is-flying,
-.jobs.is-flying {
+/* --- the listings ⤢: the start-ups panel leaves ----------------------------
+   Pin the panel over the rect it occupies right now (`fixed`, so neither
+   `.main`'s clip nor a panel's scroll box crops it), then translate it off the
+   right edge. Transform and opacity only. */
+.startups.is-flying {
   position: fixed;
   z-index: 4;
   margin: 0;
   will-change: transform;
 }
-/* the transition is a second class so the half can be *placed* off screen
+/* the transition is a second class so the panel can be *placed* off screen
    without animating, then animated back from there */
-.startups.is-moving,
-.jobs.is-moving {
+.startups.is-moving {
   transition: transform var(--panel-ms) var(--ease-in),
               opacity   var(--panel-ms) linear;
 }
-.startups.is-moving.is-back,
-.jobs.is-moving.is-back { transition-timing-function: var(--ease-out), linear; }
+.startups.is-moving.is-back { transition-timing-function: var(--ease-out), linear; }
 
-.startups.is-gone      { transform: translateX(calc(100% + 80px));  opacity: 0; }
-.jobs.is-gone-left     { transform: translateX(calc(-100% - 80px)); opacity: 0; }
+.startups.is-gone { transform: translateX(calc(100% + 80px)); opacity: 0; }
+
+/* --- the directory ↗: the start-ups panel itself sweeps ---------------------
+   The other expansion moves the SAME panel, and only that panel. It is pinned
+   over the FULL content width it is about to occupy and starts offset to the
+   right by exactly the gap between that box and its half-width home, so the
+   opening move is a leftward sweep across the listings grid. The grid does not
+   go anywhere: it is parked over its own rect (`.jobs.is-held`) one layer down
+   and is simply covered, then dropped once the panel is over it. Closing runs
+   the identical move in reverse and uncovers it again. Transform only — no
+   width animates, so nothing here can move the page. */
+.jobs.is-held {
+  position: fixed;
+  z-index: 3;                 /* under the sweeping panel, which is 4 */
+  margin: 0;
+}
+/* the panel keeps the wide arrangement for the whole sweep, in both directions,
+   so its insides never reflow mid-flight */
+.startups.is-sweep .startups__wide { display: block; }
+.startups.is-sweep .startups__list { flex: 0 0 38%; }
+/* the offset pose: full width already, but sitting over its half-width home */
+.startups.is-swept { transform: translateX(var(--sweep-x, 0px)); }
+/* a sweep settles into a resting place at both ends, so it eases out both ways */
+.startups.is-moving.is-sweep { transition-timing-function: var(--ease-out), linear; }
 
 .startups__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex: 0 0 auto; }
 .startups__title { font-family: var(--font-hand); font-size: 24px; font-weight: 400; color: #000; }
@@ -451,9 +470,10 @@
 
 /* The directory arrives exactly the way the newly revealed job cards do —
    `jobRise`, `--card-ms`, `--rise-from`, a `--stagger-ms` step per row — and
-   leaves exactly the way they leave. On the way out the block is pinned over
-   the rect it just had, so the panel can shrink back to half width underneath
-   it while the rows drop. */
+   leaves exactly the way they leave. It needs no pin of its own: the panel it
+   sits in is the thing that sweeps, so the block rides along with it and keeps
+   its geometry for free. career.js squeezes `--stagger-out-ms` so the last row
+   is gone by the time the sweep ends and the panel is half width again. */
 .startups__wide.is-rising > * {
   animation: jobRise var(--card-ms) var(--ease-out) both;
   animation-delay: calc(var(--i, 0) * var(--stagger-ms));
@@ -544,10 +564,11 @@
 
   .career-page .app { height: 100vh; min-height: 0; }
 
+  /* Height and flow only — the padding stays the canonical gutter from
+     base.css so this page frames its content like every other one. */
   .career-page .main {
     height: 100vh;
     min-height: 0;
-    padding-bottom: 24px;
     display: flex;
     flex-direction: column;
     overflow: hidden;

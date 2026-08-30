@@ -165,6 +165,35 @@ patch(
     "no edge layer at rest",
 )
 
+# ------------------------------------------------------------ 4. screen bridge ---
+# The bundle ships five screens behind its own 198px nav rail, and site/planner.html
+# hides that rail. The page's Board view / Semester view pills need the same switch
+# the rail used — `setState({ screen })` — because the `defaultView` prop only
+# decides the *initial* screen: `screen = this.state.screen ?? props.defaultView`,
+# so the prop stops being read the moment anything inside the app sets the state
+# (the timeline's "See alternatives →", the finder's "Ask an advisor", and the
+# term overlay's "Ask about this term" all do). componentDidMount therefore
+# publishes a two-function bridge on the iframe's own window; nothing else in the
+# app reads it, and the app behaves identically when the host never calls it.
+patch(
+    "  componentDidMount() { this.measure();",
+    "  componentDidMount() { window.__plannerScreenBridge = {"
+    " get: () => this.state.screen ?? (this.props.defaultView ?? 'dashboard'),"
+    " set: s => this.setState({ screen: s }) }; this.measure();",
+    "screen bridge",
+)
+
+# And the reverse direction: the app can move itself between screens, so every
+# render reports the screen it is about to draw and the host repaints the pills.
+# Guarded and wrapped, so a host that never installs the hook — or one whose hook
+# throws — changes nothing about the render.
+patch(
+    "    const screen = this.state.screen ?? (this.props.defaultView ?? 'dashboard');",
+    "    const screen = this.state.screen ?? (this.props.defaultView ?? 'dashboard');\n"
+    "    try { if (window.__plannerOnScreen) window.__plannerOnScreen(screen); } catch (e) {}",
+    "screen reported to the host",
+)
+
 
 def main():
     lines = BUNDLE.read_text(encoding="utf-8").split("\n")

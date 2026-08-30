@@ -1,6 +1,6 @@
 /* Home — Figma 388:1275 (dashboard) and 388:1454 (intake modal over it) */
 
-.page-home .main { padding: 20px 40px 40px 20px; }
+/* The content gutter is the canonical one in base.css — no page override. */
 
 /* --- semester card --------------------------------------------------------- */
 
@@ -17,7 +17,10 @@
 .semester__hello { font-family: var(--font-hand); font-size: 48px; font-weight: 400; line-height: 1.05; }
 .semester__meta { font-size: 16px; color: var(--ink-2); margin-top: 8px; }
 
-.semester__eyebrow { margin: 14px 0 18px 26px; letter-spacing: .96px; font-size: 12px; }
+/* Flush with the head row and the schedule below it — every other `.eyebrow`
+   on the site sits on its container's content edge, and the 26px indent this
+   one carried was the only thing in the column that did not line up. */
+.semester__eyebrow { margin: 14px 0 18px; letter-spacing: .96px; font-size: 12px; }
 
 /* --- lower row ------------------------------------------------------------- */
 

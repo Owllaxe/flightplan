@@ -1,7 +1,7 @@
 /* Resume editor — Figma 388:1145 */
 
 .page-resume { background: var(--panel); }
-.page-resume .main { padding: 28px 21px 40px 38px; }
+/* The content gutter is the canonical one in base.css — no page override. */
 
 /* --- toolbar --------------------------------------------------------------- */
 

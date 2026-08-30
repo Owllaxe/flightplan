@@ -1,17 +1,50 @@
-/* Career Plan board: the whiteboard engine (shared with goals.html), plus the
-   board's own behaviour — calendar, habit dots, collage cards, and the
-   double-click edit-goal modal from frame 388:1656. */
+/* Goals — build B's Personal-goals board (tools/buildB-spec.md §5) on build A's
+   whiteboard engine.
+
+   The engine below is A's, unchanged in substance and shared with goals.html.
+   The board it carries is now B's: the §5.2 banner and the ten §5.8 modules,
+   laid out on B's grid, dragged the way B drags them (a translate offset from
+   the grid slot), persisted the way B persists them — but through A's store.
+
+   WHERE THIS DELIBERATELY DIVERGES FROM B
+   1. Pan deltas. B adds the raw screen delta to its pan offset AND divides
+      module-drag deltas by the zoom, so panning drifts away from the cursor at
+      any zoom but 1.0 while dragging does not. A's engine is correct at both:
+      the pan moves `translate()`, which is applied outside `scale()`, so one
+      screen pixel of cursor is one screen pixel of board at every zoom; the
+      module drag divides by k because it writes board-space units. Kept.
+   2. Pointer-anchored zoom. B has no wheel or pinch zoom at all — only two
+      buttons that step a scalar, so the board slides under the cursor. A's
+      zoom solves for the pan that keeps the board point under the pointer
+      fixed. Kept. The buttons step by B's 0.1, from the centre of the view.
+   3. Zoom limits. B clamps 0.6–1.3. A clamps 0.4–2.5, which is what lets the
+      1400px board fit a small window and lets a card be inspected close up.
+      Kept A's, so B's range sits inside it.
+   4. A reset. B has neither pan bounds nor any way back once the board has
+      been dragged off-screen. A's zoom pill doubles as "reset the view" and is
+      kept. Hard pan bounds were NOT added — clamping the pan would break the
+      1:1 cursor tracking that is the whole point of item 1.
+   5. `animation:fpdrop` on the newest star jar star (B line 3413) names a
+      keyframe that is never defined in B's bundle, so that star renders at
+      opacity 0. Not ported: every star is simply drawn.
+   6. B's dead `fp-dotted` / `fp-grow` classes have no CSS anywhere. Not ported.
+   7. B's stat capsule hardcodes "· letter sealed ✉" whether or not a letter
+      exists. Here it reflects the letter module's actual state.
+   8. B's goals card advertises "Drag badges to re-rank", which B never
+      implemented. The copy says only what the card does.
+   9. B's module menu lists the goals card as hideable even though the card
+      cannot be deleted. Here that row is inert and always shown.        */
 
 import { store } from './store.js';
-import { openModal, closeModal, init } from './app.js';
 
 /* ===========================================================================
    Whiteboard — pan, zoom, draw, erase, drag a panel, add a panel.
 
    One transform, one source of truth: `view = { x, y, k }` is written onto
    .wb-stage as `translate(x, y) scale(k)` with transform-origin 0 0. Everything
-   in board space (the cards, the SVG ink layer, added panels) is a child of the
-   stage, so it all moves together and nothing has to be kept in sync by hand.
+   in board space (the banner, the modules, the SVG ink layer, added panels) is
+   a child of the stage, so it all moves together and nothing has to be kept in
+   sync by hand.
 
        board -> screen :  s = b * k + xy
        screen -> board :  b = (s - xy) / k
@@ -23,19 +56,27 @@ import { openModal, closeModal, init } from './app.js';
    is added to the panel's board position, so the panel tracks the cursor exactly
    at any zoom and stays glued to its neighbours through a later pan or zoom.
 
-   The header, the tools, the zoom pill, the picker and the mascot live outside
-   the stage and are `fixed`, which is what keeps them pinned and unscaled.
+   A panel marked `data-drag="offset"` keeps its place in the page's normal flow
+   (B's model for the ten modules) and is moved with a `--dx/--dy` translate
+   instead of `left/top`; everything else about the drag is identical.
+
+   The tools, the zoom pill, the picker and the mascot live outside the stage and
+   are `fixed`, which is what keeps them pinned and unscaled.
    =========================================================================== */
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MIN_K = 0.4;
 const MAX_K = 2.5;
-const GRID = 17;               // the dotted paper pitch, scaled with the zoom
+const ZOOM_STEP = 0.1;         // B's step size, on A's pointer-anchored zoom
+const GRID = 18;               // B's dotted paper pitch, in BOARD px
+const DOT_R = 1.2;             // B's dot radius, in BOARD px
+const DOT_FEATHER = 1.4;       // B's transparent stop, in BOARD px
 const STROKE_W = 2.6;          // board units, so ink scales with the cards
 
 /* A pointerdown on any of these is the element's own business — neither a pan
    nor a panel drag. Checkboxes, buttons, links, fields and contenteditables all
-   keep working exactly as they would without the whiteboard. */
+   keep working exactly as they would without the whiteboard. (B's startModDrag
+   bails on the same list.) */
 const INTERACTIVE = 'a, button, input, textarea, select, label, [contenteditable=""], [contenteditable="true"]';
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -51,7 +92,7 @@ function debounce(fn, ms) {
 }
 
 /* --- panel templates for the + tool ----------------------------------------
-   Each one is modelled on a panel the board already has, so the picker adds
+   Each one is modelled on a module the board already has, so the picker adds
    more of the same vocabulary rather than a new one. */
 
 const DOTS = Array.from({ length: 15 }, () =>
@@ -106,10 +147,25 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
 
   /* --- the transform ------------------------------------------------------ */
 
+  /* The paper ground is painted on the viewport rather than inside the stage —
+     an 18px pattern stretched over a board big enough to pan around would be a
+     huge painted area — so the transform has to be applied to it by hand.
+
+     BOTH halves of the pattern are board-space quantities and BOTH get k:
+       · the pitch, via background-size — 18 board px between dots;
+       · the dot itself, via the gradient's two radii — 1.2 board px of colour
+         feathering out by 1.4. These are stops inside the tile, so they do NOT
+         follow background-size; leaving them at their literal px was the bug
+         that kept the dots one fixed screen size while their spacing moved,
+         which reads as the dots swelling as you zoom out.
+     background-position is the pan, i.e. the screen position of board (0, 0),
+     so the tile is phase-locked to the board and a dot stays under the same
+     board point through any pan. */
   function apply() {
     stage.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.k})`;
-    // the paper ground is painted on the viewport, so it has to be panned by hand
     const g = GRID * view.k;
+    canvas.style.backgroundImage = `radial-gradient(var(--fp-dot) ${(DOT_R * view.k).toFixed(4)}px,`
+      + ` transparent ${(DOT_FEATHER * view.k).toFixed(4)}px)`;
     canvas.style.backgroundSize = `${g}px ${g}px`;
     canvas.style.backgroundPosition = `${view.x}px ${view.y}px`;
     if (level) level.textContent = `${Math.round(view.k * 100)}%`;
@@ -140,10 +196,17 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
     zoomAt(r.left + r.width / 2, r.top + r.height / 2, factor);
   }
 
+  /* B steps the zoom by a flat 0.1 rather than a ratio; expressed as a factor so
+     it goes through the one pointer-anchored code path. */
+  function zoomNudge(dir) {
+    const target = clamp(view.k + dir * ZOOM_STEP, MIN_K, MAX_K);
+    if (Math.abs(target - view.k) < 1e-6) return;
+    zoomCentre(target / view.k);
+  }
+
   /* Home: the whole board width in view, its top edge at the top of the window.
-     Board y 0–126 is the band the frame reserved for the header, which is now
-     pinned screen chrome sitting over exactly that band. Returns false when the
-     canvas has no geometry yet (a background tab, or a hidden ancestor). */
+     Returns false when the canvas has no geometry yet (a background tab, or a
+     hidden ancestor). */
   function home() {
     const r = canvas.getBoundingClientRect();
     const w = board.offsetWidth || 1;
@@ -166,12 +229,42 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
   const saveInk = debounce(
     () => store.set('lists', `${key}-ink`, strokes.map((s) => ({ w: s.w, pts: s.pts }))), 250);
 
+  const isOffset = (el) => el.dataset.drag === 'offset';
+
+  function boardPos(el) {
+    if (isOffset(el)) {
+      return {
+        x: parseFloat(el.style.getPropertyValue('--dx')) || 0,
+        y: parseFloat(el.style.getPropertyValue('--dy')) || 0,
+      };
+    }
+    // an inline left/top is the moved position; otherwise the CSS (Figma) one,
+    // which offsetLeft/Top report directly because every layer origin is (0, 0)
+    if (el.style.left) return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+    return { x: el.offsetLeft, y: el.offsetTop };
+  }
+
+  function setBoardPos(el, x, y) {
+    if (isOffset(el)) {
+      el.style.setProperty('--dx', `${x}px`);
+      el.style.setProperty('--dy', `${y}px`);
+    } else {
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+    }
+  }
+
   /* Board panels persist as a plain id -> {x, y} map, so a panel that has never
-     been moved simply has no entry and keeps its CSS (Figma) position. */
+     been moved simply has no entry and keeps its layout position. */
   const savePos = debounce(() => {
     const map = {};
     board.querySelectorAll('[data-panel]').forEach((el) => {
-      if (el.style.left) map[el.dataset.panel] = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+      if (isOffset(el)) {
+        const x = parseFloat(el.style.getPropertyValue('--dx'));
+        if (Number.isFinite(x)) map[el.dataset.panel] = { x, y: parseFloat(el.style.getPropertyValue('--dy')) || 0 };
+      } else if (el.style.left) {
+        map[el.dataset.panel] = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+      }
     });
     store.set('lists', `${key}-pos`, Object.keys(map).length ? map : undefined);
   }, 250);
@@ -354,20 +447,13 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
 
   /* --- panel drag (board units) ------------------------------------------- */
 
-  function boardPos(el) {
-    // an inline left/top is the moved position; otherwise the CSS (Figma) one,
-    // which offsetLeft/Top report directly because every layer origin is (0, 0)
-    if (el.style.left) return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
-    return { x: el.offsetLeft, y: el.offsetTop };
-  }
-
   function startPanelDrag(e, el) {
     const o = boardPos(el);
     const sx = e.clientX;
     const sy = e.clientY;
     let moved = false;
     // No preventDefault: capturing the pointer or eating the default would kill
-    // the compatibility click/dblclick that opens the edit-goal modal.
+    // the compatibility click/dblclick the goal rows rely on.
     drag((ev) => {
       const dxs = ev.clientX - sx;
       const dys = ev.clientY - sy;
@@ -379,8 +465,7 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
         el.style.zIndex = String((zTop += 1));
         document.getSelection?.()?.removeAllRanges();
       }
-      el.style.left = `${o.x + dxs / view.k}px`;  // <- the /k: board units
-      el.style.top = `${o.y + dys / view.k}px`;
+      setBoardPos(el, o.x + dxs / view.k, o.y + dys / view.k);   // <- the /k
     }, () => {
       canvas.classList.remove('is-dragging');
       el.classList.remove('is-dragging');
@@ -392,8 +477,7 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
   /* --- pan ---------------------------------------------------------------- */
 
   /* Window-level listeners rather than setPointerCapture: capture retargets the
-     compatibility mouse events and would break the double-click that opens the
-     edit-goal modal. */
+     compatibility mouse events and would break click/dblclick on the cards. */
   function drag(onMove, onEnd) {
     const move = (ev) => onMove(ev);
     const up = () => {
@@ -407,6 +491,10 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
     window.addEventListener('pointercancel', up);
   }
 
+  /* The pan is added to `translate()`, which sits OUTSIDE `scale()`, so the
+     board moves by exactly the cursor delta at every zoom. B adds the same raw
+     delta to a transform whose translate is applied *before* its own scale, so
+     its board drifts by delta*(1/k) — the drift bug that is not ported. */
   function startPan(e) {
     const sx = e.clientX;
     const sy = e.clientY;
@@ -466,8 +554,8 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
   zoom?.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-zoom]');
     if (!btn) return;
-    if (btn.dataset.zoom === 'in') zoomCentre(1.2);
-    else if (btn.dataset.zoom === 'out') zoomCentre(1 / 1.2);
+    if (btn.dataset.zoom === 'in') zoomNudge(1);
+    else if (btn.dataset.zoom === 'out') zoomNudge(-1);
     else home();
   });
 
@@ -484,8 +572,8 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
     if (e.code === 'Space') { spaceDown = true; canvas.classList.add('is-grab'); e.preventDefault(); return; }
     if (e.key === '0') { home(); return; }
     if (e.key === '1') { zoomCentre(1 / view.k); return; }   // exactly 100%
-    if (e.key === '=' || e.key === '+') { zoomCentre(1.2); return; }
-    if (e.key === '-' || e.key === '_') zoomCentre(1 / 1.2);
+    if (e.key === '=' || e.key === '+') { zoomNudge(1); return; }
+    if (e.key === '-' || e.key === '_') zoomNudge(-1);
   });
   window.addEventListener('keyup', (e) => {
     if (e.code === 'Space') { spaceDown = false; canvas.classList.remove('is-grab'); }
@@ -504,7 +592,7 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
   if (savedPos) {
     Object.entries(savedPos).forEach(([id, p]) => {
       const el = board.querySelector(`[data-panel="${CSS.escape(id)}"]`);
-      if (el && Number.isFinite(p?.x)) { el.style.left = `${p.x}px`; el.style.top = `${p.y}px`; }
+      if (el && Number.isFinite(p?.x)) setBoardPos(el, p.x, p.y);
     });
   }
 
@@ -535,202 +623,784 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
   }
 
   return {
-    view, strokes, notes, home, zoomAt, zoomCentre, toBoard, addPanel, setTool, tool,
+    view, strokes, notes, home, zoomAt, zoomCentre, zoomNudge, toBoard, addPanel,
+    setTool, tool, setPicker,
     templates: Object.keys(TEMPLATES),
-    limits: { min: MIN_K, max: MAX_K },
+    limits: { min: MIN_K, max: MAX_K, step: ZOOM_STEP },
   };
 }
 
 /* ===========================================================================
-   The career-plan board itself. Only runs on plan.html — goals.js imports the
+   Build B's Personal-goals board. Only runs on plan.html — goals.js imports the
    engine above from this module.
+
+   Everything B kept in `flightplan.*` localStorage keys is kept here in A's one
+   JSON blob, under the existing `lists` bucket:
+
+     lists['plan-pos']          {id: {x, y}}       module drag offsets
+     lists['plan-hidden']       [id, …]            hidden modules
+     lists['plan-goal-rename']  {original: new}    goal renames (B's goalRename)
+     lists['plan-goal-meta']    {original: {where, how}}
+     lists['plan-goal-extra']   [text, …]          goals added with "+ add a goal"
+     lists['plan-habits']       {habit: [0|1, …]}  star-jar ticks (B never saved these)
+     lists['plan-skills']       [{n, wks, p}]      skill bars
+     lists['plan-letter']       {text, deliver}    the letter
+     lists['plan-todo']         [{t, done}]
+     lists['plan-long']         [text, …]
+     lists['plan-people']       [{n, ctx, note}]
+     lists['plan-wins']         [text, …]
+
+   plus the engine's own lists['plan-view' | 'plan-ink' | 'plan-notes'] and the
+   goal checkboxes in the shared `checks` bucket. No new store bucket was added.
    =========================================================================== */
 
+const MODULES = [
+  ['goals',  'Semester goals'],
+  ['cal',    'Calendar'],
+  ['habits', 'Habit tracker & star jar'],
+  ['week',   'This week'],
+  ['todo',   'To do list'],
+  ['letter', 'Letter to future self'],
+  ['long',   'Long-term goals'],
+  ['people', 'People I met'],
+  ['wins',   'Wins log'],
+  ['skill',  'Skill in progress'],
+];
+
+/* §5.9 — the module texts the cursor-following tip shows. */
+const TIPS = {
+  goals:  'your semester goals — tap one to add where + how, double-click to rename, tick the box when it’s done. drag any card to rearrange the page',
+  cal:    'your live calendar — the arrows flip between months',
+  habits: 'click a circle to tick a habit — every tick drops a star into the jar',
+  week:   'this week’s classes, auto-filled from your semester courses',
+  todo:   'your running to-do list — tick a box to finish a task, + adds a new one',
+  letter: 'write a letter to future you — pick a date and the pigeon delivers it near graduation',
+  long:   'big-picture goals past this semester — check one off when life catches up',
+  people: 'people you meet — save them here so follow-ups don’t slip',
+  wins:   'your wins log — + adds a win; these turn into resume bullets later',
+  skill:  'skills you’re learning — click anywhere on a bar to set progress, + adds a skill, ✕ removes one',
+};
+
+const GOAL_SEED = [
+  { rank: 1, t: 'find an on-campus job', where: 'LinkedIn & Handshake', how: 'apply to 3+ jobs, see who answers back' },
+  { rank: 2, t: 'GPA 4.0', where: 'ace calc midterms ✓', how: 'A on english essay' },
+  { rank: 3, t: 'apply to 3 internships', where: 'Career Match list', how: '1 per week' },
+  { rank: null, t: 'talk to one professor about research', where: '', how: '' },
+];
+
+const HABIT_SEED = [
+  { k: 'sleep', n: 'sleep before 1am', filled: 6, total: 14 },
+  { k: 'gym', n: 'gym x2 / week', filled: 4, total: 14 },
+  { k: 'network', n: 'one networking msg', filled: 3, total: 12 },
+];
+
+/* B's FP_JAR pile is a fixed 31-slot layout; the spec records its bounds
+   (x 14–161, y 60–221, rotation −30°…24°) rather than the array itself, so this
+   is a reconstruction. Rather than scatter slots inside that bounding box —
+   which puts stars through the glass wherever the jar is narrower than the box,
+   i.e. the whole shoulder and base — the slots were solved against the jar's
+   actual silhouette, read out of star-jar-front.png: for every row the left and
+   right edges of the ink were measured, inset 7px for the glass wall, and each
+   slot placed so that the star's ROTATED bounding box (37x36 turned by r, so up
+   to 50x50) still fits between them over its full vertical extent.
+
+   Each entry is [left, top, rotationDeg] in the jar's 210x280 space, for a
+   37x36 star rotated about its centre. Seven rows, filled bottom-up, so the
+   pile grows off the base of the jar as stars are earned. Resulting bounds:
+   left 23–152, top 60–210, rotation −26°…24° — inside the spec's box, and
+   inside the glass, which the box alone would not have guaranteed. */
+const JAR_PILE = [
+  [50, 208, -6], [72, 210, 10], [97, 209, -18], [121, 207, 4],
+  [30, 182, 14], [54, 183, -10], [88, 184, 20], [111, 183, -2], [144, 185, 8],
+  [24, 161, -22], [52, 163, 6], [85, 162, 16], [116, 158, -8], [150, 159, 22],
+  [23, 134, 2], [54, 136, -14], [83, 136, 12], [116, 133, 24], [150, 137, -4],
+  [23, 110, 18], [63, 111, -20], [110, 113, 8], [152, 110, -2],
+  [29, 87, -12], [65, 88, 22], [104, 89, 4], [146, 86, -26],
+  [43, 60, 16], [73, 60, -8], [102, 63, 20], [128, 64, 6],
+];
+
+/* §5.8 module 4 — "courses come from the fetched semester plan" in B. A has no
+   catalog service, so the week is filled from the courses A's own Home and
+   Profile screens already show for this term. */
+const WEEK_COURSES = [
+  ['Mon', ['CS 210', 'PHYS']],
+  ['Tue', ['ENGL', 'MATH']],
+  ['Wed', ['CS 210', 'PSY']],
+  ['Thu', ['ENGL', 'MATH']],
+  ['Fri', ['CS 210', 'PHYS']],
+];
+const COURSE_TINT = {
+  'CS 210': 'var(--c-cs)', PHYS: 'var(--c-phys)', ENGL: 'var(--c-engl)',
+  MATH: 'var(--c-math)', PSY: 'var(--c-psy)',
+};
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+};
+const getList = (id, fallback) => {
+  const v = store.get('lists', id, undefined);
+  return Array.isArray(v) ? v : fallback;
+};
+const getMap = (id) => {
+  const v = store.get('lists', id, undefined);
+  return v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+};
+const setList = (id, v) => store.set('lists', id, v && (Array.isArray(v) ? v.length : Object.keys(v).length) ? v : undefined);
+
 function bootPlanBoard() {
-  /* --- September — 7 day-of-week labels + 35 day cells --------------------- */
+  /* --- banner (§5.2) ------------------------------------------------------ */
 
-  const cal = document.getElementById('calGrid');
-  const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  // Sep 2026 starts on a Tuesday, so the grid opens with Aug 30–31.
-  const CELLS = [
-    { n: 30, mute: true }, { n: 31, mute: true }, { n: 1 }, { n: 2 }, { n: 3 }, { n: 4 }, { n: 5 },
-    { n: 6 }, { n: 7 }, { n: 8, today: true }, { n: 9 }, { n: 10 }, { n: 11 }, { n: 12 },
-    ...Array.from({ length: 19 }, () => ({ n: '' })),
-    { n: '', dark: true }, { n: '', dark: true },
-  ];
+  const identity = store.all().identity || {};
+  const term = store.all().term || {};
+  const firstName = String(identity.name || '').trim().split(/\s+/)[0] || 'Your';
+  $('fpTitle').textContent = `${firstName}’s career plan`;
+  $('fpDate').textContent = term.label || '';
 
-  DOW.forEach((d) => {
-    const el = document.createElement('div');
-    el.className = 'cal__dow';
-    el.textContent = d;
-    cal.append(el);
-  });
+  function refreshBanner() {
+    const n = $('fpGoalList').querySelectorAll('.fp-goal').length;
+    $('fpGoalCount').textContent = `${n} goal${n === 1 ? '' : 's'}`;
+  }
 
-  CELLS.forEach((c) => {
-    const el = document.createElement('div');
-    el.className = 'cal__day'
-      + (c.mute ? ' cal__day--mute' : '')
-      + (c.dark ? ' cal__day--dark' : '')
-      + (c.today ? ' cal__day--today' : '');
-    el.textContent = c.n;
-    cal.append(el);
-  });
+  /* --- module show / hide (§5.5, §5.3) ------------------------------------ */
 
-  /* --- habit dots — 3 habits x 15 dots ------------------------------------ */
+  let hidden = getList('plan-hidden', []).filter((id) => id !== 'goals');
+  const menu = $('wbModules');
 
-  const PRESET = {
-    sleep:   [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0],
-    gym:     [0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1],
-    network: [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1],
-  };
+  function paintModules() {
+    document.querySelectorAll('.fp-card[data-panel]').forEach((card) => {
+      card.hidden = hidden.includes(card.dataset.panel);
+    });
+    menu.querySelectorAll('[data-mod]').forEach((row) => {
+      row.classList.toggle('is-off', hidden.includes(row.dataset.mod));
+    });
+  }
 
-  document.querySelectorAll('.habit').forEach((habit) => {
-    const key = habit.dataset.habit;
-    const host = habit.querySelector('.habit__dots');
-    const saved = store.get('lists', `habit-${key}`, PRESET[key]);
-    saved.forEach((on, i) => {
-      const dot = document.createElement('button');
-      dot.className = 'habit__dot' + (on ? ' is-on' : '');
-      dot.type = 'button';
-      dot.setAttribute('aria-label', `Day ${i + 1}`);
-      dot.addEventListener('click', () => {
-        dot.classList.toggle('is-on');
-        const next = [...host.children].map((d) => (d.classList.contains('is-on') ? 1 : 0));
-        store.set('lists', `habit-${key}`, next);
+  MODULES.forEach(([id, label]) => {
+    const row = el('button', 'wb-picker__mod');
+    row.type = 'button';
+    row.dataset.mod = id;
+    row.append(el('span', 'wb-picker__dot'), el('span', null, label));
+    if (id === 'goals') {
+      // B lists the goals card here even though it cannot be removed; inert.
+      row.disabled = true;
+      row.title = 'The goals card can’t be removed';
+      row.style.cursor = 'default';
+    } else {
+      row.addEventListener('click', () => {
+        hidden = hidden.includes(id) ? hidden.filter((h) => h !== id) : [...hidden, id];
+        setList('plan-hidden', hidden);
+        paintModules();
       });
-      host.append(dot);
+    }
+    menu.append(row);
+  });
+
+  document.querySelectorAll('.fp-card__x').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.hide;
+      if (!hidden.includes(id)) hidden = [...hidden, id];
+      setList('plan-hidden', hidden);
+      paintModules();
     });
   });
 
-  /* --- edit-goal modal ---------------------------------------------------- */
+  /* --- 1. semester goals (§5.8) ------------------------------------------- */
 
-  const goalList = document.getElementById('goalList');
-  const geName   = document.getElementById('geName');
-  const geDue    = document.getElementById('geDue');
-  const gePri    = document.getElementById('gePriority');
-  let editing = null;
+  const goalList = $('fpGoalList');
+  const renames = getMap('plan-goal-rename');
+  const metas = getMap('plan-goal-meta');
+  let extra = getList('plan-goal-extra', []);
 
-  function paintPriority(pri) {
-    gePri.querySelectorAll('.pri').forEach((b) => b.classList.toggle('is-on', b.dataset.pri === pri));
-  }
-
-  function openGoal(article) {
-    editing = article;
-    geName.textContent = article.querySelector('.pl-goal__name').textContent;
-    geDue.value = article.dataset.due || '';
-    paintPriority(article.dataset.pri || 'medium');
-    openModal('goalEdit');
-  }
-
-  goalList.addEventListener('dblclick', (e) => {
-    const article = e.target.closest('.pl-goal');
-    if (article) openGoal(article);
-  });
-
-  gePri.addEventListener('click', (e) => {
-    const btn = e.target.closest('.pri');
-    if (btn) paintPriority(btn.dataset.pri);
-  });
-
-  document.getElementById('geSave').addEventListener('click', () => {
-    if (editing) {
-      editing.dataset.due = geDue.value;
-      // the badge colour is driven off data-pri, so this repaints it too
-      editing.dataset.pri = gePri.querySelector('.pri.is-on')?.dataset.pri || 'medium';
+  /* B line 3028: goals from the pigeon quiz replace the seed entirely, ranked
+     1..n with empty where/how. The quiz lives in js/app.js in this build and
+     files its answers under the store's `flightplan` key. */
+  function baseGoals() {
+    const fromQuiz = store.all().flightplan?.quiz?.goals;
+    if (Array.isArray(fromQuiz) && fromQuiz.length) {
+      return fromQuiz.map((t, i) => ({ rank: i + 1, t, where: '', how: '' }));
     }
-    closeModal('goalEdit');
-  });
-
-  document.getElementById('geDelete').addEventListener('click', () => {
-    editing?.remove();
-    editing = null;
-    closeModal('goalEdit');
-    refreshCount();
-  });
-
-  /* --- add a goal --------------------------------------------------------- */
-
-  let goalSeq = 0;
-
-  function refreshCount() {
-    const n = goalList.querySelectorAll('.pl-goal').length;
-    document.getElementById('goalCount').textContent = `${n} goal${n === 1 ? '' : 's'}`;
+    return GOAL_SEED.map((g) => ({ ...g }));
   }
 
-  document.getElementById('addGoal').addEventListener('click', () => {
-    const name = prompt('Goal');
-    if (!name) return;
-    goalSeq += 1;
-    const rank = goalList.querySelectorAll('.pl-goal__badge').length + 1;
-    const article = document.createElement('article');
-    article.className = 'pl-goal';
-    article.dataset.goal = `new-${goalSeq}`;
-    article.dataset.pri = 'medium';
-    article.dataset.due = '';
-    article.innerHTML = `
-      <span class="pl-goal__badge">${rank}</span>
-      <div class="pl-goal__row">
-        <input class="pl-check" type="checkbox" data-check="pl-goal-new-${goalSeq}">
-        <span class="pl-goal__name"></span>
-      </div>
-      <div class="pl-goal__meta"><p>where? · how?</p></div>`;
-    article.querySelector('.pl-goal__name').textContent = name;
-    goalList.append(article);
-    init(article);
-    refreshCount();
+  function goalRows() {
+    const base = baseGoals();
+    return [
+      ...base,
+      ...extra.map((t, i) => ({ rank: base.length + i + 1, t, where: '', how: '' })),
+    ];
+  }
+
+  function makeGoal(g, i) {
+    const orig = g.t;
+    const key = `pl-goal-${orig.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+    const meta = metas[orig] || { where: g.where, how: g.how };
+    const row = el('article', 'fp-goal');
+    row.dataset.goal = orig;
+
+    const badge = el('span', 'fp-goal__badge');
+    const card = el('div', 'fp-goal__card');
+    const line = el('div', 'fp-goal__row');
+
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.className = 'fp-check';
+    box.checked = store.get('checks', key, false);
+
+    const name = el('button', 'fp-goal__name', renames[orig] || orig);
+    name.type = 'button';
+
+    const rank = el('span', 'fp-goal__rank', g.rank == null ? '' : String(g.rank));
+    if (g.rank == null) rank.style.visibility = 'hidden';
+
+    line.append(box, name, rank);
+    const summary = el('p', 'fp-goal__sum');
+    card.append(line, summary);
+    row.append(badge, card);
+
+    /* the where / how sub-editor */
+    const editor = el('div', 'fp-goal__edit');
+    editor.hidden = true;
+    const fields = {};
+    [['where', 'where?'], ['how', 'how?']].forEach(([k, label]) => {
+      const f = el('div', 'fp-goal__field');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = meta[k] || '';
+      input.addEventListener('input', () => {
+        metas[orig] = { where: fields.where.value.trim(), how: fields.how.value.trim() };
+        if (!metas[orig].where && !metas[orig].how) delete metas[orig];
+        setList('plan-goal-meta', metas);
+        paintSummary();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== 'Escape') return;
+        e.preventDefault();
+        editor.hidden = true;
+        paintSummary();          // the read-only summary takes the editor's place
+      });
+      fields[k] = input;
+      f.append(el('span', null, label), input);
+      editor.append(f);
+    });
+    card.append(editor);
+
+    function paintSummary() {
+      const m = metas[orig] || { where: '', how: '' };
+      const bits = [m.where, m.how].filter(Boolean);
+      summary.textContent = bits.join(' · ');
+      summary.hidden = bits.length === 0 || !editor.hidden;
+    }
+
+    function paintDone() {
+      row.classList.toggle('is-done', box.checked);
+      badge.textContent = box.checked ? '✓' : String(i + 1);
+    }
+
+    box.addEventListener('change', () => {
+      store.set('checks', key, box.checked || undefined);
+      paintDone();
+    });
+
+    /* single click toggles the sub-editor; a second click inside 380 ms
+       (B's window) cancels that and opens the inline rename instead. */
+    let timer = 0;
+    name.addEventListener('click', () => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = 0;
+        startRename();
+        return;
+      }
+      timer = setTimeout(() => {
+        timer = 0;
+        editor.hidden = !editor.hidden;
+        paintSummary();
+        if (!editor.hidden) fields.where.focus();
+      }, 380);
+    });
+
+    function startRename() {
+      const input = el('input', 'fp-goal__rename');
+      input.type = 'text';
+      input.value = name.textContent;
+      name.replaceWith(input);
+      input.focus();
+      input.select();
+      const finish = (commit) => {
+        const next = input.value.trim();
+        if (commit && next && next !== orig) renames[orig] = next;
+        else if (commit && (!next || next === orig)) delete renames[orig];
+        setList('plan-goal-rename', renames);
+        name.textContent = renames[orig] || orig;
+        input.replaceWith(name);
+      };
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+        else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+      });
+      input.addEventListener('blur', () => finish(true));
+    }
+
+    paintDone();
+    paintSummary();
+    return row;
+  }
+
+  function renderGoals() {
+    goalList.textContent = '';
+    goalRows().forEach((g, i) => goalList.append(makeGoal(g, i)));
+    refreshBanner();
+  }
+
+  const goalInput = $('fpGoalInput');
+  $('fpGoalAdd').addEventListener('click', () => {
+    goalInput.hidden = !goalInput.hidden;
+    if (!goalInput.hidden) goalInput.focus();
+  });
+  goalInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { goalInput.value = ''; goalInput.hidden = true; return; }
+    if (e.key !== 'Enter') return;
+    const v = goalInput.value.trim();
+    if (!v) return;
+    extra = [...extra, v];
+    setList('plan-goal-extra', extra);
+    goalInput.value = '';
+    renderGoals();
   });
 
-  refreshCount();
+  renderGoals();
 
-  /* --- the smaller collage affordances ------------------------------------ */
+  /* --- 2. calendar (§5.8) ------------------------------------------------- */
 
-  document.getElementById('addTask').addEventListener('click', () => {
-    const text = prompt('Task for today');
-    if (!text) return;
-    const label = document.createElement('label');
-    label.className = 'pl-week__task';
-    label.innerHTML = '<input type="checkbox"><span></span>';
-    label.querySelector('span').textContent = text;
-    document.getElementById('weekTasks').append(label);
+  const calGrid = $('fpCalGrid');
+  const calTitle = $('fpCalTitle');
+  let calOff = 0;
+
+  function renderCal() {
+    const now = new Date();
+    const view = new Date(now.getFullYear(), now.getMonth() + calOff, 1);
+    calTitle.textContent = `${MONTHS[view.getMonth()]} ${view.getFullYear()}`;
+    calGrid.textContent = '';
+    const lead = view.getDay();
+    const days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    const prev = new Date(view.getFullYear(), view.getMonth(), 0).getDate();
+    const cells = [];
+    for (let i = lead - 1; i >= 0; i -= 1) cells.push({ n: prev - i, out: true });
+    for (let d = 1; d <= days; d += 1) {
+      cells.push({
+        n: d,
+        today: calOff === 0 && d === now.getDate(),
+      });
+    }
+    while (cells.length % 7) cells.push({ n: cells.length - lead - days + 1, out: true });
+    cells.forEach((c) => {
+      const cell = el('div', 'fp-cal__day' + (c.out ? ' is-out' : '') + (c.today ? ' is-today' : ''), String(c.n));
+      calGrid.append(cell);
+    });
+  }
+
+  document.querySelectorAll('[data-cal]').forEach((btn) => btn.addEventListener('click', () => {
+    calOff += Number(btn.dataset.cal);
+    renderCal();
+  }));
+  renderCal();
+
+  /* --- 3. habits + star jar (§5.8) ---------------------------------------- */
+
+  const habitHost = $('fpHabitList');
+  const jar = $('fpJar');
+  const jarFront = jar.querySelector('.fp-jar__front');
+  const jarLabel = $('fpJarLabel');
+  const ticks = getMap('plan-habits');
+
+  $('fpHabitTitle').textContent = `habits — ${MONTHS[new Date().getMonth()].toLowerCase()}`;
+
+  HABIT_SEED.forEach((h) => {
+    if (!Array.isArray(ticks[h.k]) || ticks[h.k].length !== h.total) {
+      // an untouched habit falls back to its seeded run, so the card looks lived-in
+      ticks[h.k] = Array.from({ length: h.total }, (_, i) => (i < h.filled ? 1 : 0));
+    }
   });
 
-  document.getElementById('addInterest').addEventListener('click', () => {
-    const text = prompt('Goal or interest');
-    if (!text) return;
-    const chip = document.createElement('span');
-    chip.className = 'pl-long__chip';
-    chip.textContent = text;
-    document.getElementById('interestChips').append(chip);
-  });
+  function starCount() {
+    return HABIT_SEED.reduce((n, h) => n + ticks[h.k].reduce((a, b) => a + (b ? 1 : 0), 0), 0);
+  }
 
-  document.getElementById('addPerson').addEventListener('click', () => {
-    const text = prompt('Who did you meet?');
-    if (!text) return;
-    const p = document.createElement('p');
-    p.className = 'pl-people__name';
-    p.textContent = text;
-    document.getElementById('peopleList').append(p);
-  });
+  function renderJar() {
+    jar.querySelectorAll('.fp-jar__star').forEach((s) => s.remove());
+    const n = starCount();
+    for (let i = 0; i < Math.min(n, JAR_PILE.length); i += 1) {
+      const [x, y, r] = JAR_PILE[i];
+      const img = document.createElement('img');
+      img.className = 'fp-jar__star';
+      img.src = 'assets/b/star.png';
+      img.alt = '';
+      img.width = 37;
+      img.height = 36;
+      img.style.left = `${x}px`;
+      img.style.top = `${y}px`;
+      img.style.transform = `rotate(${r}deg)`;
+      jar.insertBefore(img, jarFront);
+    }
+    jarLabel.textContent = `${n} star${n === 1 ? '' : 's'} in the jar — fill it up`;
+    $('fpStarCount').textContent = String(n);
+  }
 
-  document.getElementById('addWin').addEventListener('click', () => {
-    const text = prompt('What went well?');
-    if (!text) return;
-    const p = document.createElement('p');
-    p.className = 'pl-wins__item';
-    p.textContent = text;
-    document.getElementById('winsList').append(p);
+  HABIT_SEED.forEach((h) => {
+    const block = el('div', 'fp-habit');
+    block.append(el('p', 'fp-habit__name', h.n));
+    const dots = el('div', 'fp-habit__dots');
+    ticks[h.k].forEach((on, i) => {
+      const dot = el('button', 'fp-habit__dot' + (on ? ' is-on' : ''));
+      dot.type = 'button';
+      dot.title = on ? 'Ticked — click to clear' : 'Tick this day';
+      dot.setAttribute('aria-label', `${h.n}, day ${i + 1}`);
+      dot.addEventListener('click', () => {
+        ticks[h.k][i] = ticks[h.k][i] ? 0 : 1;
+        dot.classList.toggle('is-on', !!ticks[h.k][i]);
+        dot.title = ticks[h.k][i] ? 'Ticked — click to clear' : 'Tick this day';
+        store.set('lists', 'plan-habits', ticks);
+        renderJar();
+      });
+      dots.append(dot);
+    });
+    block.append(dots);
+    habitHost.append(block);
   });
+  renderJar();
 
-  const share = document.getElementById('shareToggle');
-  share.classList.toggle('is-on', store.get('checks', 'plan-share', false));
-  share.setAttribute('aria-pressed', String(share.classList.contains('is-on')));
-  share.addEventListener('click', () => {
-    const on = store.toggle('checks', 'plan-share');
-    share.classList.toggle('is-on', on);
-    share.setAttribute('aria-pressed', String(on));
+  /* --- 4. this week (§5.8) ------------------------------------------------ */
+
+  const weekGrid = $('fpWeekGrid');
+  const weekTitle = $('fpWeekTitle');
+  let weekOff = 0;
+
+  function mondayOf(offset) {
+    const d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + offset * 7);
+    return d;
+  }
+
+  function renderWeek() {
+    weekTitle.textContent = weekOff === 0
+      ? 'this week — classes auto-filled'
+      : `week of ${mondayOf(weekOff).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    weekGrid.textContent = '';
+    WEEK_COURSES.forEach(([day, courses]) => {
+      const col = el('div');
+      col.append(el('p', 'fp-week__day', day));
+      courses.forEach((c) => {
+        const chip = el('div', 'fp-week__chip', c);
+        chip.style.background = COURSE_TINT[c] || 'var(--sunken)';
+        col.append(chip);
+      });
+      weekGrid.append(col);
+    });
+  }
+
+  document.querySelectorAll('[data-week]').forEach((btn) => btn.addEventListener('click', () => {
+    weekOff += Number(btn.dataset.week);
+    renderWeek();
+  }));
+  renderWeek();
+
+  /* --- 5. to do list (§5.8) ----------------------------------------------- */
+
+  $('fpTodoDate').textContent = new Date()
+    .toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+
+  const todoHost = $('fpTodoList');
+  let todo = getList('plan-todo', [
+    { t: `finish ${WEEK_COURSES[0][1][0]} pset`, done: false },
+    { t: 'send 1 networking msg', done: false },
+  ]);
+
+  function renderTodo() {
+    todoHost.textContent = '';
+    todo.forEach((item, i) => {
+      const row = el('label', 'fp-todo__row' + (item.done ? ' is-done' : ''));
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.className = 'fp-check';
+      box.checked = !!item.done;
+      box.addEventListener('change', () => {
+        todo[i].done = box.checked;
+        store.set('lists', 'plan-todo', todo);
+        row.classList.toggle('is-done', box.checked);
+      });
+      row.append(box, el('span', null, item.t));
+      todoHost.append(row);
+    });
+  }
+
+  wireAdd($('fpTodoAdd'), $('fpTodoInput'), (v) => {
+    todo = [...todo, { t: v, done: false }];
+    store.set('lists', 'plan-todo', todo);
+    renderTodo();
+  });
+  renderTodo();
+
+  /* --- 6. letter to future self (§5.8) ------------------------------------ */
+
+  const letterHost = $('fpLetter');
+  let letter = store.get('lists', 'plan-letter', null);
+  if (!letter || typeof letter !== 'object') letter = null;
+  let letterMode = null;                    // null | 'editing'
+  let letterOpen = false;
+
+  const today = () => new Date().toISOString().slice(0, 10);
+
+  function letterState() {
+    if (letterMode === 'editing') return 'editing';
+    if (!letter || !letter.text) return 'none';
+    return letter.deliver && today() >= letter.deliver ? 'ready' : 'sealed';
+  }
+
+  function prettyDate(iso) {
+    if (!iso) return 'the day you chose';
+    const d = new Date(`${iso}T00:00:00`);
+    return Number.isNaN(d.getTime()) ? iso
+      : d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  function renderLetter() {
+    const state = letterState();
+    letterHost.textContent = '';
+
+    if (state === 'none' || state === 'sealed') {
+      const btn = el('button', 'fp-letter__none');
+      btn.type = 'button';
+      const img = document.createElement('img');
+      img.src = 'assets/b/letter-closed.png';
+      img.alt = 'A sealed envelope';
+      img.width = 340;
+      img.height = 197;
+      btn.append(img);
+      btn.append(el('p', 'fp-letter__cap', state === 'none'
+        ? 'write a letter — the pigeon delivers it near graduation'
+        : `sealed — pigeon delivers it on ${prettyDate(letter.deliver)}`));
+      // B offers no way back out of the sealed state; this one re-opens the editor.
+      btn.addEventListener('click', () => { letterMode = 'editing'; renderLetter(); });
+      letterHost.append(btn);
+    } else if (state === 'editing') {
+      const ta = el('textarea', 'fp-letter__text');
+      ta.placeholder = 'Dear future me…';
+      ta.value = letter?.text || '';
+      const when = el('p', 'fp-letter__when', 'DELIVER ON');
+      const date = el('input', 'fp-letter__date');
+      date.type = 'date';
+      date.value = letter?.deliver || '';
+      const seal = el('button', 'fp-letter__seal', 'Seal it ✉');
+      seal.type = 'button';
+      seal.addEventListener('click', () => {
+        const text = ta.value.trim();
+        if (!text) { ta.focus(); return; }
+        letter = { text, deliver: date.value || '' };
+        store.set('lists', 'plan-letter', letter);
+        letterMode = null;
+        renderLetter();
+      });
+      letterHost.append(ta, when, date, seal);
+      ta.focus();
+    } else {
+      const stack = el('div', 'fp-letter__stack' + (letterOpen ? ' is-open' : ''));
+      const open = document.createElement('img');
+      open.className = 'fp-letter__open';
+      open.src = 'assets/b/letter-open.png';
+      open.alt = '';
+      const closed = document.createElement('img');
+      closed.className = 'fp-letter__closed';
+      closed.src = 'assets/b/letter-closed.png';
+      closed.alt = '';
+      const body = el('div', 'fp-letter__body', letter.text);
+      stack.append(open, closed, body);
+      stack.addEventListener('click', () => {
+        letterOpen = !letterOpen;
+        stack.classList.toggle('is-open', letterOpen);
+        cap.textContent = letterOpen ? 'click to tuck it back in' : 'your letter has arrived — click to open';
+      });
+      const cap = el('p', 'fp-letter__cap', letterOpen
+        ? 'click to tuck it back in'
+        : 'your letter has arrived — click to open');
+      letterHost.append(stack, cap);
+    }
+
+    const label = { none: '· no letter yet ✉', editing: '· writing a letter ✉', sealed: '· letter sealed ✉', ready: '· letter delivered ✉' };
+    $('fpLetterState').textContent = label[state];
+  }
+  renderLetter();
+
+  /* --- 7. long-term goals (§5.8) ------------------------------------------ */
+
+  const longHost = $('fpLongList');
+  let long = getList('plan-long', ['UX research', 'work with kids', 'drawing / visual work', 'space industry']);
+
+  function renderLong() {
+    longHost.textContent = '';
+    long.forEach((t, i) => {
+      const chip = el('span', 'fp-chip', t);
+      const x = el('button', 'fp-chip__x', '✕');
+      x.type = 'button';
+      x.setAttribute('aria-label', `Remove ${t}`);
+      x.addEventListener('click', () => {
+        long = long.filter((_, j) => j !== i);
+        store.set('lists', 'plan-long', long);
+        renderLong();
+      });
+      chip.append(x);
+      longHost.append(chip);
+    });
+  }
+
+  wireAdd($('fpLongAdd'), $('fpLongInput'), (v) => {
+    long = [...long, v];
+    store.set('lists', 'plan-long', long);
+    renderLong();
+  });
+  renderLong();
+
+  /* --- 8. people I met (§5.8) --------------------------------------------- */
+
+  const peopleHost = $('fpPeopleList');
+  let people = getList('plan-people', [{ n: 'Sarah', ctx: 'career fair', note: 'follow up Thu' }]);
+
+  function renderPeople() {
+    peopleHost.textContent = '';
+    people.forEach((p) => {
+      const row = el('div', 'fp-person');
+      row.append(el('p', 'fp-person__name', p.ctx ? `${p.n} — ${p.ctx}` : p.n));
+      if (p.note) {
+        const note = el('p', 'fp-person__note', p.note);
+        note.append(el('small', null, '(pigeon reminds)'));
+        row.append(note);
+      }
+      peopleHost.append(row);
+    });
+  }
+
+  wireAdd($('fpPeopleAdd'), $('fpPeopleInput'), (v) => {
+    people = [...people, { n: v, ctx: '', note: '' }];
+    store.set('lists', 'plan-people', people);
+    renderPeople();
+  });
+  renderPeople();
+
+  /* --- 9. wins log (§5.8) ------------------------------------------------- */
+
+  const winsHost = $('fpWinsList');
+  let wins = getList('plan-wins', ['shipped my first website']);
+
+  function renderWins() {
+    winsHost.textContent = '';
+    wins.forEach((w) => winsHost.append(el('p', 'fp-win', w)));
+  }
+
+  wireAdd($('fpWinsAdd'), $('fpWinsInput'), (v) => {
+    wins = [...wins, v];
+    store.set('lists', 'plan-wins', wins);
+    renderWins();
+  });
+  renderWins();
+
+  /* --- 10. skill in progress (§5.8) --------------------------------------- */
+
+  const skillHost = $('fpSkillList');
+  let skills = getList('plan-skills', [{ n: 'Figma', wks: '3 wks', p: 62 }, { n: 'Python', wks: 'new', p: 18 }]);
+
+  function renderSkills() {
+    skillHost.textContent = '';
+    skills.forEach((s, i) => {
+      const row = el('div', 'fp-skill__row');
+      row.append(el('span', 'fp-skill__name', s.n));
+
+      const bar = el('button', 'fp-skill__bar');
+      bar.type = 'button';
+      bar.setAttribute('aria-label', `${s.n} progress, ${s.p}%`);
+      const fill = el('span', 'fp-skill__fill');
+      fill.style.width = `${s.p}%`;
+      bar.append(fill);
+      bar.addEventListener('click', (e) => {
+        const r = bar.getBoundingClientRect();
+        // r.width is already the on-screen width at the current zoom, so the
+        // ratio is zoom-independent without any extra maths
+        const pct = Math.round(((e.clientX - r.left) / r.width) * 100);
+        skills[i].p = Math.max(4, Math.min(100, pct));
+        store.set('lists', 'plan-skills', skills);
+        renderSkills();
+      });
+
+      const x = el('button', 'fp-skill__x', '✕');
+      x.type = 'button';
+      x.setAttribute('aria-label', `Remove ${s.n}`);
+      x.addEventListener('click', () => {
+        skills = skills.filter((_, j) => j !== i);
+        store.set('lists', 'plan-skills', skills);
+        renderSkills();
+      });
+
+      row.append(bar, el('span', 'fp-skill__wks', s.wks || ''), x);
+      skillHost.append(row);
+    });
+  }
+
+  wireAdd($('fpSkillAdd'), $('fpSkillInput'), (v) => {
+    skills = [...skills, { n: v, wks: 'new', p: 4 }];
+    store.set('lists', 'plan-skills', skills);
+    renderSkills();
+  });
+  renderSkills();
+
+  /* --- shared "+ add …" reveal-an-input pattern ---------------------------- */
+
+  function wireAdd(button, input, commit) {
+    button.addEventListener('click', () => {
+      input.hidden = !input.hidden;
+      if (!input.hidden) input.focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { input.value = ''; input.hidden = true; return; }
+      if (e.key !== 'Enter') return;
+      const v = input.value.trim();
+      if (!v) return;
+      input.value = '';
+      commit(v);
+    });
+  }
+
+  /* --- §5.9 cursor-following tip ------------------------------------------ */
+
+  const tip = el('div', 'fp-tip');
+  document.body.append(tip);
+  let tipCard = null;
+
+  document.addEventListener('pointermove', (e) => {
+    if (document.querySelector('.wb-canvas.is-panning, .wb-canvas.is-dragging')) {
+      tip.classList.remove('is-on');
+      tipCard = null;
+      return;
+    }
+    const card = e.target instanceof Element ? e.target.closest('[data-fp-card]') : null;
+    const id = card?.dataset.fpCard || null;
+    if (id !== tipCard) {
+      tipCard = id;
+      tip.textContent = id ? TIPS[id] || '' : '';
+      tip.classList.toggle('is-on', !!id);
+    }
+    if (!id) return;
+    tip.style.left = `${Math.min(window.innerWidth - 270, e.clientX + 18)}px`;
+    tip.style.top = `${Math.max(8, e.clientY - 52)}px`;
   });
 
   /* --- the board becomes a whiteboard ------------------------------------- */
+
+  paintModules();
 
   window.whiteboard = initWhiteboard({
     canvas: document.getElementById('wbCanvas'),

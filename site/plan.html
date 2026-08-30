@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Goals · Stellic Pathfinders</title>
+<title>Goals · Flightplan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/plan.css">
+<link rel="stylesheet" href="css/base.css?v=726c0a08">
+<link rel="stylesheet" href="css/plan.css?v=33bcd2e4">
 </head>
 <body class="page-plan">
 
@@ -16,8 +16,11 @@
 
   <!-- Canonical sidebar — identical on every page (Figma Home frame 388:1275) -->
   <aside class="sidebar">
-    <div class="sidebar__mark--box" role="presentation"></div>
-    <p class="sidebar__title">Name of Site</p>
+    <div class="sidebar__brand">
+      <img class="sidebar__mark" src="assets/b/brand-rock.webp" alt="" width="40" height="37">
+      <p class="sidebar__title">Flightplan</p>
+      <p class="sidebar__tagline">DEGREE&nbsp;+&nbsp;CAREER</p>
+    </div>
     <nav class="sidebar__nav">
       <a class="sidebar__link" href="index.html">Home</a>
       <a class="sidebar__link" href="planner.html">Planner</a>
@@ -26,266 +29,182 @@
       <a class="sidebar__link" href="contacts.html">Contacts</a>
       <a class="sidebar__link" href="visa.html">Visa</a>
     </nav>
+    <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
+         js/sidebar.js repaints them from the store on load. -->
+    <div class="sidebar__term">
+      <p class="term__label">THIS TERM</p>
+      <p class="term__line"><span data-term-label>Spring 2026</span> · <span data-term-inprog>15</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
+      <div class="term__bar">
+        <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
+        <div class="term__bar-prog" data-term-bar-prog style="width:13%"></div>
+      </div>
+    </div>
     <div class="sidebar__foot">
-      <a class="sidebar__avatar" href="profile.html" aria-label="Your profile">
-        <img src="assets/pigeon-avatar.png" alt="">
+      <a class="sidebar__avatar avatar" href="profile.html" aria-label="Your profile">
+        <span class="avatar__initials" data-avatar-initials aria-hidden="true">JL</span>
       </a>
     </div>
   </aside>
 
   <main class="main">
 
-    <!-- The whiteboard. .wb-canvas is the screen-sized viewport; everything inside
-         .wb-stage lives in board space and is moved by a single transform, so the
-         cards, the ink layer and any added panels pan and zoom together.
+    <!-- The whiteboard. .wb-canvas is the screen-sized viewport; everything
+         inside .wb-stage lives in board space and is moved by a single
+         transform, so the banner, the ten modules, the ink layer and any added
+         panels pan and zoom together.
 
-         .board is a fixed 1283 x 1238 board-space canvas — exactly the drawing
-         area of Figma frame 388:669 (the 1448px frame minus its 165px sidebar).
-         Every panel is absolutely placed at its Figma coordinate minus that 165px,
-         so board space and the frame share one coordinate system. -->
+         .board is build B's Personal-goals column (spec §5): a fixed 1400px
+         wide flow layout — banner, then two grid rows of cards — laid out with
+         B's own tracks. Cards keep their grid slot; a drag writes a translate
+         offset from it, so moving one never reflows the rest. -->
     <div class="wb-canvas" id="wbCanvas">
       <div class="wb-stage" id="wbStage">
 
     <div class="board" id="board">
 
-      <!-- Decorative hand marks, drawn on the frame as loose vectors.
-           Board content, so they pan and zoom with the cards. -->
-      <img class="pl-mark pl-mark--x1"    src="assets/mark-x.svg" alt="" aria-hidden="true">
-      <img class="pl-mark pl-mark--x2"    src="assets/mark-x.svg" alt="" aria-hidden="true">
-      <img class="pl-mark pl-mark--week"  src="assets/mark-arrow.svg" alt="" aria-hidden="true">
-      <img class="pl-mark pl-mark--refl"  src="assets/mark-arrow.svg" alt="" aria-hidden="true">
-      <img class="pl-mark pl-mark--ppl"   src="assets/mark-arrow.svg" alt="" aria-hidden="true">
-      <img class="pl-mark pl-mark--long"  src="assets/mark-arrow.svg" alt="" aria-hidden="true">
-
-      <!-- semester goals — frame 388:780 -->
-      <section class="pl-panel pl-goals" data-panel="goals">
-        <h2 class="pl-goals__title">SEMESTER GOALS</h2>
-        <p class="pl-goals__hint">(tap a goal to add where + how)</p>
-        <div class="pl-goals__rule"></div>
-
-        <div id="goalList">
-          <article class="pl-goal" data-goal="oncampus" data-pri="high" data-due="Sep 15">
-            <span class="pl-goal__badge">1</span>
-            <div class="pl-goal__row">
-              <input class="pl-check" type="checkbox" data-check="pl-goal-oncampus">
-              <span class="pl-goal__name">find an on-campus job</span>
-            </div>
-            <div class="pl-goal__meta">
-              <p>LinkedIn + Handshake</p>
-              <p>apply to 3+ jobs, see who answers back</p>
-            </div>
-          </article>
-
-          <article class="pl-goal" data-goal="gpa" data-pri="medium" data-due="Dec 12">
-            <span class="pl-goal__badge">2</span>
-            <div class="pl-goal__row">
-              <input class="pl-check" type="checkbox" data-check="pl-goal-gpa" checked>
-              <span class="pl-goal__name">Keep GPA above 3.5</span>
-            </div>
-            <div class="pl-goal__meta">
-              <p>For all class averages</p>
-              <p>Going to consistent office hours</p>
-            </div>
-          </article>
-
-          <article class="pl-goal" data-goal="internships" data-pri="low" data-due="Sep 15">
-            <span class="pl-goal__badge">3</span>
-            <div class="pl-goal__row">
-              <input class="pl-check" type="checkbox" data-check="pl-goal-internships">
-              <span class="pl-goal__name">apply to 3 internships</span>
-            </div>
-            <div class="pl-goal__meta">
-              <p>Career Match list</p>
-              <p>one a week, see who answers back</p>
-            </div>
-          </article>
-
-          <article class="pl-goal pl-goal--bare" data-goal="professor" data-pri="low" data-due="Oct 1">
-            <div class="pl-goal__row">
-              <input class="pl-check" type="checkbox" data-check="pl-goal-professor">
-              <span class="pl-goal__name">talk to one professor about research</span>
-            </div>
-          </article>
+      <!-- §5.2 top banner. Board content in B, and board content here: it pans
+           and zooms with the modules rather than floating over them. -->
+      <header class="fp-banner">
+        <h1 class="fp-banner__title" id="fpTitle">Jordan’s career plan</h1>
+        <p class="fp-banner__date" id="fpDate">Spring 2026</p>
+        <div class="fp-banner__stat">
+          <span id="fpGoalCount">4 goals</span>
+          <span class="fp-banner__stars">★ <span id="fpStarCount">0</span></span>
+          <span class="fp-banner__letter" id="fpLetterState">· no letter yet ✉</span>
         </div>
+      </header>
 
-        <div class="pl-goals__foot">
-          <div class="pl-goals__rule"></div>
-          <button class="pl-goals__add" id="addGoal">+ add a goal</button>
-          <div class="pl-goals__rule"></div>
-          <p class="pl-goals__note">
-            <span>goals card can't be deleted — everything else can</span>
-            <span>drag badges to re-rank · double-click a goal to edit</span>
-          </p>
-        </div>
-      </section>
+      <!-- §5.7 row 1 — goals | (calendar, this week) | (to do, habits) -->
+      <div class="fp-row fp-row--1">
 
-      <!-- september — frame 388:684 -->
-      <section class="pl-panel pl-cal" data-panel="cal">
-        <p class="cal__month">September</p>
-        <div class="cal__grid" id="calGrid"></div>
-      </section>
-
-      <!-- this week — frame 388:747 -->
-      <section class="pl-panel pl-week" data-panel="week">
-        <p class="pl-week__title">This week — classes auto-filled</p>
-        <div class="pl-week__grid">
-          <div>
-            <p class="pl-week__day">M</p>
-            <div class="pl-week__chip pl-week__chip--cs">CS 210</div>
-            <div class="pl-week__chip pl-week__chip--phys">PHYS</div>
+        <!-- 1. semester goals — the one module with no ✕ -->
+        <section class="fp-card fp-card--goals" data-panel="goals" data-drag="offset" data-fp-card="goals">
+          <div class="fp-goals__head">
+            <span class="fp-label">Semester goals</span>
+            <span class="fp-goals__hint">tap a goal to add where + how</span>
           </div>
-          <div>
-            <p class="pl-week__day">T</p>
-            <div class="pl-week__chip pl-week__chip--engl">ENGL</div>
-            <div class="pl-week__chip pl-week__chip--math">MATH</div>
-          </div>
-          <div>
-            <p class="pl-week__day">W</p>
-            <div class="pl-week__chip pl-week__chip--cs">CS 210</div>
-            <div class="pl-week__chip pl-week__chip--psy">PSY</div>
-          </div>
-          <div>
-            <p class="pl-week__day">T</p>
-            <div class="pl-week__chip pl-week__chip--engl">ENGL</div>
-            <div class="pl-week__chip pl-week__chip--math">MATH</div>
-          </div>
-          <div>
-            <p class="pl-week__day">F</p>
-            <div class="pl-week__chip pl-week__chip--cs">CS 210</div>
-            <div class="pl-week__chip pl-week__chip--phys">PHYS</div>
-          </div>
-        </div>
-
-        <p class="pl-week__today">today</p>
-        <div class="pl-week__tasks" id="weekTasks">
-          <label class="pl-week__task"><input type="checkbox" data-check="pl-task-phys"><span>finish PHYS pset</span></label>
-          <label class="pl-week__task"><input type="checkbox" data-check="pl-task-msg"><span>send 1 networking msg</span></label>
-        </div>
-        <button class="pl-week__add" id="addTask">+ add task</button>
-      </section>
-
-      <!-- habits — frame 410:72 (the washi tape is 388:817, half off the card) -->
-      <div class="pl-panel pl-habits-cell" data-panel="habits">
-        <div class="pl-habits__tape"></div>
-        <section class="pl-habits">
-          <p class="pl-habits__title">Habits — September</p>
-
-          <div class="habit" data-habit="sleep">
-            <p class="habit__name">sleep before 1am</p>
-            <div class="habit__dots"></div>
-          </div>
-          <div class="habit" data-habit="gym">
-            <p class="habit__name">gym x2 / week</p>
-            <div class="habit__dots"></div>
-          </div>
-          <div class="habit" data-habit="network">
-            <p class="habit__name">one networking msg</p>
-            <div class="habit__dots"></div>
-          </div>
-
-          <p class="pl-habits__caption">every tick = a star in the jar</p>
-          <img class="pl-habits__jar" src="assets/star-jar.svg" alt="">
+          <div class="fp-goals__list" id="fpGoalList"></div>
+          <button class="fp-add fp-goals__add" id="fpGoalAdd" type="button">+ add a goal</button>
+          <input class="fp-input" id="fpGoalInput" type="text" placeholder="New goal — press Enter" hidden>
+          <p class="fp-goals__note">Goals card can’t be deleted — everything else can.</p>
         </section>
+
+        <div class="fp-col">
+
+          <!-- 2. calendar -->
+          <section class="fp-card" data-panel="cal" data-drag="offset" data-fp-card="cal">
+            <button class="fp-card__x" type="button" data-hide="cal" title="Remove from your page (+ brings it back)">✕</button>
+            <div class="fp-cal__head">
+              <button class="fp-cal__nav" type="button" data-cal="-1" aria-label="Previous month">←</button>
+              <p class="fp-cal__title" id="fpCalTitle">September</p>
+              <button class="fp-cal__nav" type="button" data-cal="1" aria-label="Next month">→</button>
+            </div>
+            <div class="fp-cal__dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+            <div class="fp-cal__grid" id="fpCalGrid"></div>
+          </section>
+
+          <!-- 4. this week -->
+          <section class="fp-card" data-panel="week" data-drag="offset" data-fp-card="week">
+            <button class="fp-card__x" type="button" data-hide="week" title="Remove from your page (+ brings it back)">✕</button>
+            <div class="fp-week__head">
+              <button class="fp-week__nav" type="button" data-week="-1" aria-label="Previous week">←</button>
+              <p class="fp-week__title" id="fpWeekTitle">this week — classes auto-filled</p>
+              <button class="fp-week__nav" type="button" data-week="1" aria-label="Next week">→</button>
+            </div>
+            <div class="fp-week__grid" id="fpWeekGrid"></div>
+          </section>
+
+        </div>
+
+        <div class="fp-col">
+
+          <!-- 5. to do list -->
+          <section class="fp-card" data-panel="todo" data-drag="offset" data-fp-card="todo">
+            <button class="fp-card__x" type="button" data-hide="todo" title="Remove from your page (+ brings it back)">✕</button>
+            <div class="fp-todo__head">
+              <p class="fp-todo__title">TO DO LIST</p>
+              <p class="fp-todo__date" id="fpTodoDate"></p>
+            </div>
+            <div class="fp-todo__rule"></div>
+            <div id="fpTodoList"></div>
+            <button class="fp-add" id="fpTodoAdd" type="button">+ add task</button>
+            <input class="fp-input" id="fpTodoInput" type="text" placeholder="New task — press Enter" hidden>
+          </section>
+
+          <!-- 3. habit tracker & star jar -->
+          <section class="fp-card fp-card--habits" data-panel="habits" data-drag="offset" data-fp-card="habits">
+            <button class="fp-card__x" type="button" data-hide="habits" title="Remove from your page (+ brings it back)">✕</button>
+            <p class="fp-title fp-habits__title" id="fpHabitTitle">habits — September</p>
+            <div id="fpHabitList"></div>
+            <p class="fp-habits__cap">every tick = a star in the jar</p>
+            <div class="fp-jar" id="fpJar">
+              <img class="fp-jar__back" src="assets/b/star-jar-back.png" alt="" width="210" height="280">
+              <img class="fp-jar__front" src="assets/b/star-jar-front.png" alt="A jar of stars" width="210" height="280">
+            </div>
+            <p class="fp-jar__label" id="fpJarLabel">0 stars in the jar — fill it up</p>
+          </section>
+
+        </div>
       </div>
 
-      <!-- letter to future self — frame 398:72 -->
-      <section class="pl-panel pl-letter" data-panel="letter">
-        <p class="note-label">letter to future self</p>
-        <img src="assets/envelope.svg" alt="A sealed envelope">
-        <p class="pl-letter__caption">sealed — pigeon delivers at the date you chose</p>
-      </section>
+      <!-- §5.7 row 2 — letter | long-term | people | (wins, skill).
+           The fourth child wraps onto a second grid row, exactly as in B. -->
+      <div class="fp-row fp-row--2">
 
-      <!-- weekly reflections — frames 388:911 / 912 / 913 -->
-      <section class="pl-panel pl-reflect" data-panel="reflect">
-        <p class="note-label">weekly reflections</p>
-        <div class="pl-reflect__stack">
-          <div class="pl-reflect__card pl-reflect__card--back"></div>
-          <div class="pl-reflect__card pl-reflect__card--mid"></div>
-          <div class="pl-reflect__card pl-reflect__card--front">
-            <p class="pl-reflect__lead">this week:</p>
-            <p class="pl-reflect__q">"what did you enjoy most?"</p>
-            <div class="pl-reflect__line"></div>
-            <div class="pl-reflect__line"></div>
-            <p class="pl-reflect__foot">skip is ok — answered ones save here</p>
-            <a class="pl-reflect__look" href="#">look back →</a>
-          </div>
-        </div>
-      </section>
+        <!-- 6. letter to future self -->
+        <section class="fp-card fp-card--letter" data-panel="letter" data-drag="offset" data-fp-card="letter">
+          <button class="fp-card__x" type="button" data-hide="letter" title="Remove from your page (+ brings it back)">✕</button>
+          <p class="fp-title">letter to future self…</p>
+          <div id="fpLetter"></div>
+        </section>
 
-      <!-- long-term goals — frame 410:68 -->
-      <section class="pl-panel pl-long" data-panel="long">
-        <h2 class="pl-long__title">Long-term goals</h2>
-        <p class="pl-long__sub">where you're headed after graduation.<br>interests count — clearer goals = better job matches.</p>
-        <div class="pl-long__chips" id="interestChips">
-          <span class="pl-long__chip">UX research</span>
-          <span class="pl-long__chip">work with kids</span>
-          <span class="pl-long__chip">drawing / visual work</span>
-          <span class="pl-long__chip">space industry</span>
-        </div>
-        <button class="pl-long__add" id="addInterest">+ add a goal or interest</button>
-        <button class="pl-share" id="shareToggle" aria-pressed="false">
-          share with career advisor<span class="pl-share__knob"></span>
-        </button>
-        <p class="pl-long__foot">off by default — private until you turn it on</p>
-      </section>
+        <!-- 7. long-term goals -->
+        <section class="fp-card" data-panel="long" data-drag="offset" data-fp-card="long">
+          <button class="fp-card__x" type="button" data-hide="long" title="Remove from your page (+ brings it back)">✕</button>
+          <p class="fp-title">long-term goals</p>
+          <p class="fp-long__sub">where you’re headed after graduation. interests count — clearer goals + better job matches.</p>
+          <div class="fp-chips" id="fpLongList"></div>
+          <button class="fp-add" id="fpLongAdd" type="button">+ add a goal or interest</button>
+          <input class="fp-input" id="fpLongInput" type="text" placeholder="New interest — press Enter" hidden>
+        </section>
 
-      <!-- people i met — frame 410:69 -->
-      <section class="pl-panel pl-people" data-panel="people">
-        <p class="pl-people__title">People i met</p>
-        <div id="peopleList">
-          <p class="pl-people__name">Sarah — career fair</p>
-        </div>
-        <div class="pl-people__row">
-          <span class="pl-people__due">follow up Thu</span>
-          <small>(pigeon reminds)</small>
-        </div>
-        <button class="pl-people__add" id="addPerson">+ add a person</button>
-      </section>
+        <!-- 8. people I met -->
+        <section class="fp-card" data-panel="people" data-drag="offset" data-fp-card="people">
+          <button class="fp-card__x" type="button" data-hide="people" title="Remove from your page (+ brings it back)">✕</button>
+          <p class="fp-title">people I met</p>
+          <div id="fpPeopleList"></div>
+          <button class="fp-add" id="fpPeopleAdd" type="button">+ add a person</button>
+          <input class="fp-input" id="fpPeopleInput" type="text" placeholder="Name — press Enter" hidden>
+        </section>
 
-      <!-- wins log — frame 388:921 -->
-      <section class="pl-panel pl-wins" data-panel="wins">
-        <p class="pl-wins__title"><img src="assets/star.svg" alt="">WINS LOG</p>
-        <div id="winsList">
-          <p class="pl-wins__item" id="winFirst">shipped my first website!</p>
-        </div>
-        <button class="pl-wins__add" id="addWin">+ add a win</button>
-        <p class="pl-wins__foot">turns into resume bullets later</p>
-      </section>
+        <div class="fp-col">
 
-      <!-- skill in progress — frame 410:73 -->
-      <section class="pl-panel pl-skill" data-panel="skill">
-        <p class="pl-skill__title">SKILL IN PROGRESS...</p>
-        <div class="pl-skill__row">
-          <span>Figma</span>
-          <span class="pl-skill__bars">
-            <i class="pl-skill__bar"></i><i class="pl-skill__bar"></i><i class="pl-skill__bar"></i>
-            <i class="pl-skill__bar pl-skill__bar--off"></i>
-          </span>
-          <span class="pl-skill__amt">3 wks</span>
-        </div>
-        <div class="pl-skill__row">
-          <span>Python</span>
-          <span class="pl-skill__bars">
-            <i class="pl-skill__bar"></i>
-            <i class="pl-skill__bar pl-skill__bar--off"></i>
-            <i class="pl-skill__bar pl-skill__bar--off"></i>
-            <i class="pl-skill__bar pl-skill__bar--off"></i>
-          </span>
-          <span class="pl-skill__amt">new</span>
-        </div>
-        <p class="pl-skill__foot">feeds your job matches</p>
-      </section>
+          <!-- 9. wins log -->
+          <section class="fp-card fp-card--wins" data-panel="wins" data-drag="offset" data-fp-card="wins">
+            <button class="fp-card__x" type="button" data-hide="wins" title="Remove from your page (+ brings it back)">✕</button>
+            <div class="fp-wins__head">
+              <span class="fp-wins__star">★</span>
+              <span class="fp-wins__label">WINS LOG</span>
+            </div>
+            <div id="fpWinsList"></div>
+            <button class="fp-add" id="fpWinsAdd" type="button">+ add a win</button>
+            <input class="fp-input" id="fpWinsInput" type="text" placeholder="New win — press Enter" hidden>
+            <p class="fp-foot">turns into resume bullets later</p>
+          </section>
 
-      <!-- pigeon note — frame 388:746 -->
-      <section class="pl-panel pl-pigeon-note" data-panel="pigeon">
-        <p class="pl-pigeon-note__title">from your pigeon:</p>
-        <ul>
-          <li class="is-ok">gym — still open today</li>
-          <li class="is-miss">networking msg — missed</li>
-          <li class="is-flat">letter sealed, safe with me</li>
-        </ul>
-        <p class="pl-pigeon-note__foot">bubble grows with what needs you</p>
-      </section>
+          <!-- 10. skill in progress -->
+          <section class="fp-card" data-panel="skill" data-drag="offset" data-fp-card="skill">
+            <button class="fp-card__x" type="button" data-hide="skill" title="Remove from your page (+ brings it back)">✕</button>
+            <p class="fp-skill__label">SKILL IN PROGRESS…</p>
+            <div id="fpSkillList"></div>
+            <button class="fp-add" id="fpSkillAdd" type="button">+ add a skill</button>
+            <input class="fp-input" id="fpSkillInput" type="text" placeholder="Skill name — press Enter" hidden>
+            <p class="fp-foot">feeds your job matches</p>
+          </section>
+
+        </div>
+      </div>
 
     </div><!-- /.board -->
 
@@ -298,23 +217,11 @@
       </div><!-- /.wb-stage -->
     </div><!-- /.wb-canvas -->
 
-    <!-- Screen chrome. Pinned to the viewport, never panned and never scaled.
-         The header is `pointer-events: none` apart from its own controls, so the
-         board underneath stays pannable, drawable and clickable through it. -->
-    <header class="pl-header">
-      <h1 class="pl-header__title">Jordan's career plan</h1>
-      <p class="pl-header__date">Tuesday, Sep 9</p>
-      <a class="pl-header__link" href="goals.html">brain dump board →</a>
-      <div class="pl-header__pill">
-        <span id="goalCount">4 goals</span>
-        <span><img src="assets/star.svg" alt="">12</span>
-        <span>· letter sealed ✉</span>
-      </div>
-    </header>
-
+    <!-- Screen chrome. Pinned to the viewport, never panned and never scaled —
+         B pins the same set (toolbar, module menu, sidebar, pigeon). -->
     <div class="wb-chrome">
       <div class="pl-tools">
-        <button data-tool="add" aria-label="Add a panel" aria-haspopup="true" aria-expanded="false"><img src="assets/tool-plus.svg" alt=""></button>
+        <button data-tool="add" aria-label="Add a panel or show/hide a module" aria-haspopup="true" aria-expanded="false"><img src="assets/tool-plus.svg" alt=""></button>
         <button data-tool="draw" aria-label="Draw"><img src="assets/tool-pencil.svg" alt=""></button>
         <button data-tool="erase" aria-label="Erase"><img src="assets/tool-eraser.svg" alt=""></button>
       </div>
@@ -325,8 +232,9 @@
       </div>
     </div>
 
-    <!-- Template picker for the + tool. A popover in the board's own idiom,
-         anchored to the tool rail; not a new visual language. -->
+    <!-- The + tool's popover: A's panel templates on top, then B's module
+         show/hide menu (§5.3) underneath — the "+ brings it back" half of the
+         ✕ on each of the nine removable cards. -->
     <div class="wb-picker" id="wbPicker" hidden>
       <p class="wb-picker__title">add a panel</p>
       <div class="wb-picker__grid">
@@ -351,6 +259,9 @@
           <span class="wb-picker__name">wins log</span>
         </button>
       </div>
+      <div class="wb-picker__rule"></div>
+      <p class="wb-picker__title">Your modules — click to show · hide</p>
+      <div class="wb-picker__grid" id="wbModules"></div>
     </div>
 
     <div class="pl-mascot">
@@ -361,28 +272,8 @@
   </main>
 </div>
 
-<!-- Edit-goal modal — frame 388:1656 -->
-<div class="modal-backdrop" id="goalEdit">
-  <div class="modal goal-edit" role="dialog" aria-modal="true" aria-labelledby="geName">
-    <p class="goal-edit__eyebrow">edit goal</p>
-    <h2 class="goal-edit__name" id="geName">apply to 3 internships</h2>
-
-    <p class="goal-edit__label">priority</p>
-    <div class="goal-edit__pills" id="gePriority">
-      <button class="pri" data-pri="high">high</button>
-      <button class="pri" data-pri="medium">medium</button>
-      <button class="pri" data-pri="low">low</button>
-    </div>
-
-    <p class="goal-edit__label">due date</p>
-    <input class="goal-edit__due" id="geDue" value="Sep 15">
-
-    <button class="goal-edit__delete" id="geDelete">delete goal</button>
-    <button class="goal-edit__save" id="geSave">save</button>
-  </div>
-</div>
-
-<script type="module" src="js/app.js"></script>
-<script type="module" src="js/plan.js"></script>
+<script type="module" src="js/sidebar.js?v=0be5ec33"></script>
+<script type="module" src="js/app.js?v=fd350191"></script>
+<script type="module" src="js/plan.js?v=85161aae"></script>
 </body>
 </html>

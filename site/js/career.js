@@ -3,15 +3,22 @@
      388:245  expanded grid (rail hidden)
      388:470  start-up detail (grid hidden, detail pane open)
 
-   There are two expansions on this screen and they now share ONE vocabulary:
+   There are two expansions on this screen, and both of them move the SAME
+   element — the start-ups panel. Nothing else ever travels.
 
-     the listings ⤢   .startups leaves to the RIGHT, cards 9-16 rise in
-     the directory ↗   .jobs     leaves to the LEFT,  the wide rows rise in
+     the listings ⤢   .startups flies off to the RIGHT and the revealed job
+                      cards rise in behind it
+     the directory ↗   .startups sweeps LEFTWARD from its right half across the
+                      whole content width, covering the listings grid, and the
+                      wide rows rise in inside it
 
-   In both cases the half that leaves is pinned `position: fixed` over the rect
-   it occupies at that instant and translated off the near edge over
-   `--panel-ms`; the content that arrives animates `jobRise` over `--card-ms`
-   with a `--stagger-ms` step. Transform and opacity only, so no step of either
+   In both cases the panel is pinned `position: fixed` over a measured rect for
+   the duration, so neither `.main`'s clip nor a scroll box can crop it, and it
+   is moved with `transform` alone. The listings grid never animates in either
+   sequence: the ⤢ reveals it in place, and the directory sweep parks it over
+   its own rect (`.jobs.is-held`) one layer down and simply covers it. The
+   content that arrives animates `jobRise` over `--card-ms` with a
+   `--stagger-ms` step. Transform and opacity only, so no step of either
    sequence can move the page.
 
    Every duration lives in career.css as a custom property on `.career-page`;
@@ -80,7 +87,8 @@ function pin(el, rect) {
   el.style.margin = '0';
 }
 
-const FLIGHT = ['is-flying', 'is-moving', 'is-gone', 'is-gone-left', 'is-back'];
+const FLIGHT = ['is-flying', 'is-moving', 'is-gone', 'is-back',
+                'is-sweep', 'is-swept', 'is-held'];
 
 /** Put a flown half back exactly as the stylesheet leaves it. */
 function land(el) {
@@ -135,6 +143,15 @@ function riseIn(nodes, t, host, cls = 'is-rising') {
 function hold(el) {
   const resting = el.getBoundingClientRect();
   el.classList.add('is-flying');
+  pin(el, resting);
+}
+
+/** Park an element over the box it occupies right now and leave it there,
+    untransformed and unanimated. Used for the listings grid while the start-ups
+    panel sweeps across it: it is covered, not moved. */
+function holdStill(el) {
+  const resting = el.getBoundingClientRect();
+  el.classList.add('is-held');
   pin(el, resting);
 }
 
@@ -286,8 +303,8 @@ filters.addEventListener('click', (e) => {
 });
 
 /* --- start-ups: the full-width directory -----------------------------------
-   The mirror image of the listings expansion. Nothing here is used by the
-   detail pane — opening a detail runs none of it. */
+   The panel is the thing that moves. Nothing here is used by the detail pane —
+   opening a detail runs none of it. */
 
 const isWide = () => body.classList.contains('is-startups-wide');
 
@@ -303,20 +320,52 @@ function setWide(on) {
     : 'Open the full start-up directory');
 }
 
+/** The rect the panel rests in at half width. Measured by taking the wide class
+    off and putting it straight back inside one task, so nothing paints in
+    between and the reading is the real resting geometry, not an estimate. */
+function halfRect() {
+  const on = body.classList.contains('is-startups-wide');
+  body.classList.remove('is-startups-wide');
+  document.body.classList.remove('is-startups-wide');
+  const r = startups.getBoundingClientRect();
+  body.classList.toggle('is-startups-wide', on);
+  document.body.classList.toggle('is-startups-wide', on);
+  return r;
+}
+
+/** Pin the panel over `box` and hold the wide arrangement inside it, so its
+    insides cannot reflow while it is in flight. */
+function pinSweep(box) {
+  startups.classList.add('is-flying', 'is-sweep');
+  pin(startups, box);
+}
+
 function enterWide() {
   settle();
   const t = timing();
   if (still(t)) { setWide(true); return; }
 
-  /* hold the listings grid over the box it has now ... */
-  hold(jobs);
+  const home = startups.getBoundingClientRect();   /* its right-half rect */
+
+  /* park the listings grid over the box it has now: it does not move, it gets
+     covered — so it must stay painted while the panel travels across it */
+  holdStill(jobs);
 
   setWide(true);              /* panel -> full width, the directory shows */
+
+  const full = startups.getBoundingClientRect();   /* the whole content width */
+  pinSweep(full);
+
+  /* start it full width but sitting over its half-width home ... */
+  startups.style.setProperty('--sweep-x', `${home.left - full.left}px`);
+  startups.classList.add('is-swept');
+  void startups.offsetWidth;                       /* placed, untransitioned */
+  startups.classList.add('is-moving');
+  startups.classList.remove('is-swept');           /* ... then sweep leftward */
+
   riseIn([...wide.children], t, wide);
 
-  flyOut(jobs, 'is-gone-left');  /* ... then slide off left */
-
-  later(() => land(jobs), t.panel);
+  later(() => { land(startups); land(jobs); }, t.panel);
 }
 
 function leaveWide() {
@@ -324,25 +373,35 @@ function leaveWide() {
   const t = timing();
   if (still(t)) { setWide(false); return; }
 
-  /* freeze the directory over its rect so its rows can drop out while the
-     panel shrinks back to half width beneath them */
+  const full = startups.getBoundingClientRect();   /* the whole content width */
+  const home = halfRect();                         /* where it is going back to */
+
+  pinSweep(full);
+
+  /* the directory rows drop out inside the panel as it travels — no pin of
+     their own, they ride along. The step is squeezed so the last row is gone
+     by the time the panel lands and the wide arrangement goes away. */
   const rows = [...wide.children];
+  const step = rows.length > 1
+    ? Math.min(t.staggerOut, Math.max(0, (t.panel - t.cardOut) / (rows.length - 1)))
+    : 0;
+  wide.style.setProperty('--stagger-out-ms', `${step}ms`);
   rows.forEach((n, i) => n.style.setProperty('--i', i));
-  pin(wide, wide.getBoundingClientRect());
   wide.classList.add('is-leaving');
 
-  setWide(false);             /* panel -> half width, .jobs back in flow */
-  flyIn(jobs, 'is-gone-left');/* pinned off screen left, then slides back */
+  setWide(false);             /* .jobs back in flow, still and covered */
 
-  later(() => land(jobs), t.panel);
+  startups.style.setProperty('--sweep-x', `${home.left - full.left}px`);
+  void startups.offsetWidth;                       /* placed, untransitioned */
+  startups.classList.add('is-moving', 'is-swept'); /* sweep back rightward */
 
-  const total = t.cardOut + t.staggerOut * Math.max(0, rows.length - 1);
   later(() => {
+    land(startups);
     wide.classList.remove('is-leaving');
     wide.removeAttribute('style');
     stop(wide);
     clearRise(rows);
-  }, total + 30);
+  }, t.panel);
 }
 
 /* --- start-up cards -------------------------------------------------------- */

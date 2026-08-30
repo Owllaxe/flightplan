@@ -11,6 +11,27 @@ const DEFAULTS = {
   lists: {},            // id -> array
   onboarding: null,     // answers from the Home intake modal
   dismissed: {},        // banner id -> true
+
+  /* Who the sidebar's profile circle stands for. A has no accounts, so the
+     initials are seeded from the name the rest of the build already uses
+     (resume.html / js/resume.js say "Jordan Lee"; Home says "Jordan"). */
+  identity: {
+    name: 'Jordan Lee',
+    initials: 'JL',
+  },
+
+  /* Sidebar THIS TERM block. Build B fetches these from its coursemap API;
+     A seeds them here so they agree with what its own screens claim:
+       Home    — "Spring 2026, 15 credits in progress"
+       Profile — 42 credits earned of 120 required, 35% major progress       */
+  term: {
+    label:     'Spring 2026',
+    doneCr:    42,
+    totalCr:   120,
+    inProgCr:  15,
+    pct:       35,
+    unitLabel: 'credits',
+  },
 };
 
 function read() {

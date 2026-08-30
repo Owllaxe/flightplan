@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Visa · Stellic Pathfinders</title>
+<title>Visa · Flightplan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/visa.css">
+<link rel="stylesheet" href="css/base.css?v=726c0a08">
+<link rel="stylesheet" href="css/visa.css?v=3d1e551a">
 </head>
 <body class="page-visa">
 
@@ -16,8 +16,11 @@
 
   <!-- Canonical sidebar — identical on every page (Figma Home frame 388:1275) -->
   <aside class="sidebar">
-    <div class="sidebar__mark--box" role="presentation"></div>
-    <p class="sidebar__title">Name of Site</p>
+    <div class="sidebar__brand">
+      <img class="sidebar__mark" src="assets/b/brand-rock.webp" alt="" width="40" height="37">
+      <p class="sidebar__title">Flightplan</p>
+      <p class="sidebar__tagline">DEGREE&nbsp;+&nbsp;CAREER</p>
+    </div>
     <nav class="sidebar__nav">
       <a class="sidebar__link" href="index.html">Home</a>
       <a class="sidebar__link" href="planner.html">Planner</a>
@@ -26,9 +29,20 @@
       <a class="sidebar__link" href="contacts.html">Contacts</a>
       <a class="sidebar__link is-active" href="visa.html" aria-current="page">Visa</a>
     </nav>
+    <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
+         js/sidebar.js repaints them from the store on load. -->
+    <div class="sidebar__term">
+      <p class="term__label">THIS TERM</p>
+      <p class="term__line"><span data-term-label>Spring 2026</span> · <span data-term-inprog>15</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
+      <div class="term__bar">
+        <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
+        <div class="term__bar-prog" data-term-bar-prog style="width:13%"></div>
+      </div>
+    </div>
     <div class="sidebar__foot">
-      <a class="sidebar__avatar" href="profile.html" aria-label="Your profile">
-        <img src="assets/pigeon-avatar.png" alt="">
+      <a class="sidebar__avatar avatar" href="profile.html" aria-label="Your profile">
+        <span class="avatar__initials" data-avatar-initials aria-hidden="true">JL</span>
       </a>
     </div>
   </aside>
@@ -38,9 +52,9 @@
 
       <!-- ================= header card (421:399) ================= -->
       <section class="panel vs-card vs-hero">
-        <div class="vs-hero__avatar" role="presentation"></div>
+        <div class="vs-hero__avatar avatar avatar--lg" data-avatar-initials aria-hidden="true">JL</div>
         <div class="vs-hero__id">
-          <h1 class="vs-hero__name">Oliver Gan</h1>
+          <h1 class="vs-hero__name">Jordan Lee</h1>
           <p class="vs-hero__meta">F-1 · Class of 2029 · Computer Science</p>
         </div>
         <p class="vs-hero__title">INTERNATIONAL STUDENT VISA</p>
@@ -440,7 +454,8 @@
   <img src="assets/pigeon.png" alt="">
 </div>
 
-<script type="module" src="js/app.js"></script>
-<script type="module" src="js/visa.js"></script>
+<script type="module" src="js/sidebar.js?v=0be5ec33"></script>
+<script type="module" src="js/app.js?v=fd350191"></script>
+<script type="module" src="js/visa.js?v=f699b2db"></script>
 </body>
 </html>

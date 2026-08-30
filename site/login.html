@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · Flightplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css?v=726c0a08">
+<link rel="stylesheet" href="css/login.css?v=3a1ffecd">
+</head>
+<body class="auth-page">
+
+<!-- Build B's full-viewport auth gate (spec §1.2). No sidebar, no app shell.
+
+     B posts these fields at a real backend. That backend was never delivered,
+     so this gate is a LOCAL prototype gate: nothing is sent anywhere, nothing
+     is verified, and the only thing that happens on submit is that the name /
+     email / program you typed are written to this browser's localStorage so
+     the rest of the site can greet you by name. Every affordance that was a
+     claim about a server has been dropped or relabelled — see the notice in
+     the card, the disabled password field, and js/login.js. -->
+
+<main class="auth" role="main">
+  <div class="auth__col">
+
+    <div class="auth__brand">
+      <img class="auth__rock" src="assets/b/brand-rock.webp" alt="" width="62" height="57">
+      <p class="auth__wordmark">Flightplan</p>
+      <p class="auth__tagline">DEGREE&nbsp;+&nbsp;CAREER</p>
+    </div>
+
+    <form class="auth__card" id="authForm" novalidate autocomplete="on">
+      <h1 class="auth__title" id="authTitle">Welcome back</h1>
+      <p class="auth__sub" id="authSub">Sign in to open your plan.</p>
+
+      <!-- Honesty notice. Uses build B's own "pending" box treatment
+           (spec §1.3.3) rather than a foreign style. -->
+      <p class="auth__notice">
+        <span class="auth__notice-tag">PROTOTYPE</span>
+        <span>No server, no account, nothing verified. What you type is kept in
+        this browser only, so the app can use your name.</span>
+      </p>
+
+      <!-- step: name (signup only) -->
+      <div class="auth__step" id="stepName" hidden>
+        <input class="auth__input auth__input--stacked" id="authFirst" type="text"
+               placeholder="First name" autocomplete="given-name" aria-label="First name">
+        <input class="auth__input" id="authLast" type="text"
+               placeholder="Last name" autocomplete="family-name" aria-label="Last name">
+      </div>
+
+      <!-- step: account -->
+      <div class="auth__step" id="stepAccount">
+        <input class="auth__input auth__input--stacked" id="authEmail" type="email"
+               placeholder="Username or email" autocomplete="email" aria-label="Username or email">
+
+        <!-- B's password field, kept in place so the composition is B's, but
+             visibly and actually inert: there is no server to check it against
+             and a client-side check would authenticate nothing. -->
+        <input class="auth__input auth__input--dead" id="authPassword" type="password"
+               placeholder="Password — disabled, there is nothing to verify against"
+               aria-label="Password (disabled in this prototype)" disabled>
+
+        <div id="programBlock" hidden>
+          <p class="auth__section">YOUR SCHOOL &amp; MAJOR</p>
+          <select class="auth__input auth__select" id="authProgram" aria-label="School and major">
+            <optgroup label="CMU">
+              <option value="cmu-cs">Computer Science</option>
+              <option value="cmu-ce">Civil Engineering</option>
+              <option value="cmu-cheme">Chemical Engineering</option>
+              <option value="cmu-me">Mechanical Engineering</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="auth__remember">
+          <button class="auth__box" id="authRemember" type="button"
+                  role="checkbox" aria-checked="true" aria-labelledby="authRememberLabel"></button>
+          <span class="auth__remember-label" id="authRememberLabel">Remember me on this device</span>
+        </div>
+      </div>
+
+      <button class="auth__submit" id="authSubmit" type="submit">Sign in</button>
+      <button class="auth__backstep" id="authBack" type="button" hidden>← Back</button>
+
+      <p class="auth__error" id="authError" role="alert" hidden></p>
+    </form>
+
+    <p class="auth__switch">
+      <button type="button" id="authSwitch">New here? Create an account</button>
+    </p>
+
+  </div>
+</main>
+
+<script type="module" src="js/login.js?v=5cf1e6dd"></script>
+</body>
+</html>

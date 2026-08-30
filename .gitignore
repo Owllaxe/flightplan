@@ -1,0 +1,18 @@
+# Reference drop for build B (see site/tools/buildB-spec.md).
+# Everything the merged site needs was copied into site/assets/b/ and site/;
+# the folder itself is 400 MB of video and Figma export zips, and the .zip
+# alone is 391 MB — well past GitHub's 100 MB per-file hard limit.
+design fixes/
+design fixes.zip
+
+# macOS archive cruft
+__MACOSX/
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Python (site/tools/*.py)
+__pycache__/
+*.pyc

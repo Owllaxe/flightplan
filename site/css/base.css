@@ -3,6 +3,21 @@
    Values taken from Figma "Stellic FrontEnd Design", Page 4.
    --------------------------------------------------------------------------- */
 
+/* Build B's two remaining Google faces: JetBrains Mono (all-caps micro labels)
+   and Newsreader (the initials circles + the "of the degree" figure).
+   Imported here rather than from each <head> so the brand lives in one file. */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap');
+
+/* The real "Pathfinder Hand" face, extracted from build B (assets/b/).
+   ONE weight only — no 600/700 file exists, so any bold is synthesised. */
+@font-face {
+  font-family: 'Pathfinder Hand';
+  src: url('../assets/b/PathfinderHand.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* surfaces */
   --bg:            #f6f2e9;
@@ -48,6 +63,9 @@
   --font-nav:   'Caveat', cursive;
   --font-body:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;
+  /* build B tokens */
+  --font-mono:      'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-newsreader:'Newsreader', Georgia, serif;
 
   /* elevation */
   --sh-1: 0 1px 4px rgba(0, 0, 0, .05);
@@ -111,30 +129,36 @@ img { display: block; }
   flex-direction: column;
 }
 
-.sidebar__mark { width: 69px; height: 69px; margin: 0 0 17px 34px; object-fit: contain; }
+/* --- brand lockup (build B §3.2) -------------------------------------------
+   Rock, wordmark and tagline, left-aligned on A's 34px sidebar inset.       */
+.sidebar__brand { padding: 0 34px 24px; }
 
-/* Placeholder logo mark — the crossed box drawn on the frame. */
-.sidebar__mark--box {
-  width: 69px; height: 69px; margin: 0 0 17px 34px;
-  border: 1px solid var(--ink-2); background: var(--panel);
-  position: relative;
+/* The brand rock. Native 600×554; drawn at B's sidebar size, 40×37, which is
+   the same 1.0830 ratio (600/554 = 1.0830, 40/37 = 1.0811). */
+.sidebar__mark {
+  display: block;
+  width: 40px; height: 37px;
+  margin: 0 0 12px;
+  object-fit: contain;
 }
-.sidebar__mark--box::before,
-.sidebar__mark--box::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(to top right, transparent calc(50% - .5px), var(--ink-2) 50%, transparent calc(50% + .5px));
-}
-.sidebar__mark--box::after { transform: scaleX(-1); }
-.sidebar__mark--blank { border: 1px solid var(--border); }
-.sidebar__mark--blank::before, .sidebar__mark--blank::after { content: none; }
 
 .sidebar__title {
-  font-family: var(--font-nav);
-  font-weight: 700;
-  font-size: 30px;
-  line-height: 34px;
+  font-family: var(--font-hand);
+  font-weight: 600;           /* synthetic — the face ships one weight */
+  font-size: 32px;
+  letter-spacing: .005em;
+  line-height: .95;
   color: var(--ink);
-  margin: 0 34px 42px;
+  margin: 0;
+}
+
+.sidebar__tagline {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  line-height: 1.4;
+  color: #8f8779;
+  margin: 6px 0 0;
 }
 
 .sidebar__nav {
@@ -162,21 +186,143 @@ img { display: block; }
 .sidebar__link:hover { background: color-mix(in srgb, var(--accent-tint) 45%, transparent); }
 .sidebar__link.is-active { background: var(--accent-tint); color: var(--accent); }
 
-.sidebar__foot { margin-top: auto; padding: 0 0 60px 50px; }
-.sidebar__avatar {
-  display: block;
-  width: 89px; height: 89px; border-radius: 50%;
-  background: var(--placeholder); overflow: hidden;
-  border: 4px solid var(--panel);
-  box-shadow: 0 0 0 1px var(--border);
+/* --- THIS TERM (build B §3.4) ----------------------------------------------
+   Sits immediately after the nav. B reads doneCr/totalCr/inProgCr/pct from its
+   coursemap API; A has no backend, so js/sidebar.js paints these from the
+   `term` bucket in js/store.js (seeded to match Home and Profile).           */
+.sidebar__term { margin-top: 26px; padding: 0 34px; }
+
+.term__label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .14em;
+  line-height: 1.4;
+  color: #b4ac9c;
+  margin: 0 0 10px;
 }
-.sidebar__avatar img { width: 100%; height: 100%; object-fit: cover; }
-.sidebar__avatar:hover { box-shadow: 0 0 0 1px var(--accent-line); }
+.term__line {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #5c554a;
+  margin: 0;
+}
+.term__pct {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 12px 0 0;
+  flex-wrap: nowrap;
+}
+.term__pct-num {
+  font-family: 'Pathfinder Hand', 'Newsreader', Georgia, serif;
+  font-size: 19px;
+  line-height: 1;
+  flex: none;
+}
+.term__pct-cap { font-size: 11px; color: #8f8779; white-space: nowrap; }
+
+.term__bar {
+  height: 6px;
+  border-radius: 3px;
+  background: #ede7da;
+  margin-top: 8px;
+  overflow: hidden;
+  display: flex;
+  gap: 1px;
+}
+.term__bar-done { background: #5a7355; }
+.term__bar-prog { background: #a2593a; opacity: .45; }
+
+/* --- profile circle (build B §6) -------------------------------------------
+   B ships no avatar image: the circle is the student's own upload or an
+   initials fallback. This is the fallback treatment — #F1E3D8 on a #DFC2AC
+   hairline, initials in Newsreader at #7E3F22. B registers 32px/14px and
+   74px/26px; A's slots are bigger, so the 26/74 = .351 ratio is carried over
+   (89px → 31px, 128px → 45px).                                              */
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f1e3d8;
+  border: 1px solid #dfc2ac;
+  color: #7e3f22;
+  font-family: var(--font-newsreader);
+  font-weight: 400;
+  line-height: 1;
+  overflow: hidden;
+  user-select: none;
+}
+/* Doubled class so it beats the page stylesheets that load after base.css
+   (home.css / profile.css / career.css each set their own size + fill). */
+.avatar.avatar--lg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 128px; height: 128px; flex: 0 0 128px;
+  font-size: 45px;
+  background: #f1e3d8;
+  border: 1px solid #dfc2ac;
+  border-radius: 50%;
+  color: #7e3f22;
+}
+
+.sidebar__foot { margin-top: auto; padding: 0 0 60px 50px; }
+
+/* --- short windows ----------------------------------------------------------
+   The rail's own content is 819px tall at its drawn spacing (32 top pad + 122
+   brand + 350 nav + 26 + 103 THIS TERM + 89 avatar + 37 SIGN OUT + 60 bottom
+   pad), so anything shorter than an 819px window clipped the avatar and the
+   sign-out control off the bottom — a 1280x800 laptop lost 19px of it and a
+   1280x700 window lost 119px. Nothing here changes above 845px; below that the
+   rail tightens the four spacing values that carry the most slack, and below
+   760px the nav pill shrinks from 50px to 42px as well (the 26px label still
+   clears its 34px line box). That brings the content to 666px, so the whole
+   rail fits a 700px window with room to spare. `overflow-y: auto` is only the
+   last-resort net below that. */
+@media (max-height: 845px) {
+  .sidebar { padding-top: 24px; }
+  .sidebar__brand { padding-bottom: 16px; }
+  .sidebar__nav { gap: 6px; }
+  .sidebar__term { margin-top: 18px; }
+  .sidebar__foot { padding-bottom: 42px; }
+}
+
+@media (max-height: 760px) {
+  .sidebar { padding-top: 16px; }
+  .sidebar__brand { padding-bottom: 10px; }
+  .sidebar__nav { gap: 5px; }
+  .sidebar__link { height: 42px; }
+  .sidebar__term { margin-top: 12px; }
+  .sidebar__foot { padding-bottom: 24px; }
+}
+
+.sidebar { overflow-y: auto; scrollbar-width: thin; }
+/* 89px was A's Figma slot, but that is 41% of the 217px rail and dwarfs the
+   40px brand mark above it. 56px sits between build B's own 32px sidebar
+   avatar and A's slot: clearly a secondary control, 1.4x the mark, and it
+   gives 33px back to the vertical budget on short windows. Initials keep the
+   .351 cap-height ratio the other sizes use. */
+.sidebar__avatar {
+  width: 56px; height: 56px; flex: 0 0 56px;
+  font-size: 20px;
+  box-shadow: none;
+}
+.sidebar__avatar:hover { box-shadow: 0 0 0 3px var(--accent-line); }
 /* The avatar is the link to the student's own profile, so it carries the
    current-page state on profile.html (no nav item points there). */
 .sidebar__avatar[aria-current] { box-shadow: 0 0 0 2px var(--accent); }
 
-.main { flex: 1 1 auto; min-width: 0; padding: 14px 60px 40px 39px; }
+/* One canonical content gutter, identical on every document page.
+   Each Figma frame had its own content origin (39/37/38/20px from the sidebar,
+   60/29/21/40px from the right edge), so every page used to sit at a different
+   distance from the rail. 40px is the single value now: it is the median of the
+   drawn left insets, it is already the site's spacing step (8 x 5), and making
+   left and right equal frames the content symmetrically in the content area
+   however wide it gets. No page overrides this — the only exceptions are the
+   three full-bleed boards (plan / goals / planner), which set `padding: 0`
+   because they are whiteboards that fill the viewport. */
+.main { flex: 1 1 auto; min-width: 0; padding: 20px 40px 40px; }
 
 /* --- primitives ------------------------------------------------------------ */
 
