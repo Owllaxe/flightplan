@@ -10,7 +10,18 @@ import hashlib, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent          # site/
-PAT = re.compile(r'(?P<attr>href|src)="(?P<path>(?:css|js)/[A-Za-z0-9._/-]+\.(?:css|js))(?:\?v=[0-9a-f]+)?"')
+# CSS only — deliberately NOT js.
+#
+# A browser keys an ES module by its full resolved URL, query string included.
+# Stamping a <script src="js/app.js?v=..."> while js/home.js still imports the
+# bare "./app.js" makes those two different keys, so app.js is instantiated
+# TWICE and its module body runs twice — which opened two onboarding quizzes
+# on index.html and double-bound every handler init() installs.
+#
+# Stylesheets have no import graph and cannot duplicate this way, so they keep
+# their stamps. JS freshness comes from the server instead: tools/serve.py
+# sends no-store locally, and GitHub Pages revalidates via ETag.
+PAT = re.compile(r'(?P<attr>href|src)="(?P<path>css/[A-Za-z0-9._/-]+\.css)(?:\?v=[0-9a-f]+)?"')
 
 def stamp(p: Path) -> str:
     return hashlib.md5(p.read_bytes()).hexdigest()[:8]

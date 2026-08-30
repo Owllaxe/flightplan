@@ -504,7 +504,12 @@ function buildQuiz() {
 /* Spec §2.6: openQuiz pre-fills from the saved answers, so a new-term re-run is
    an edit rather than a blank slate, and pads the goal list to five. */
 export function openQuiz() {
-  if (qov) return;
+  /* `qov` is module state, so it is per-INSTANCE. If app.js is ever resolved
+     under two URLs at once (a stamped <script src> plus a bare "./app.js"
+     import, say), each instance gets its own `qov` and neither can see the
+     other's overlay — which is how two onboarding quizzes once opened at the
+     same time. The DOM is the only thing the instances share, so check it. */
+  if (qov || document.querySelector('[data-quiz]')) return;
   const saved = savedQuiz() || {};
   qi = 0;
   qErr = '';
@@ -714,7 +719,11 @@ export function init(root = document) {
   initSignOut(root);
 }
 
-if (!gateRedirecting && !isLoginPage()) {
+/* Belt and braces against the same duplicate-instance hazard: booting twice
+   would double-bind every handler init() installs, quiz or no quiz. `window`
+   is shared by all instances in a way module scope is not. */
+if (!gateRedirecting && !isLoginPage() && !window.__flightplanBooted) {
+  window.__flightplanBooted = true;
   supersedeIntake();          /* must run before js/home.js's module body */
   injectQuizStyles();
 

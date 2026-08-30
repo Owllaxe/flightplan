@@ -136,7 +136,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   left: 0; top: 0;
   --board-w: 1400px;
   width: var(--board-w);
-  padding: 30px 30px 130px;        /* B: 130px clears the floating toolbar */
+  padding: 96px 30px 130px;        /* top clears the pinned .fp-banner, 130px the toolbar */
   z-index: 1;
   font-family: var(--font-body);
 }
@@ -145,13 +145,38 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
    Board content, exactly as in B: it pans and zooms with the modules and sits
    at the top of the column, so the board "starts" with it. */
 
+/* Anchored to the viewport, not to board space — the same treatment .wb-chrome
+   gets, and pinned to the same left rail so the two line up. The board pans and
+   zooms underneath it.
+
+   pointer-events: none matters. This bar spans the full width of the canvas,
+   and without it the top strip of the whiteboard would refuse to pan or draw.
+   Nothing in the bar is interactive, so nothing is lost by letting clicks fall
+   through to the board. */
 .fp-banner {
+  position: fixed;
+  left: calc(var(--sidebar-w) + 21px);
+  right: 21px;
+  top: 18px;
+  z-index: 20;
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  margin-bottom: 22px;
+  pointer-events: none;
+}
+
+/* The title used to sit directly on the dot grid, which is what made it hard to
+   read. Its own panel — same fill, border and shadow as the chrome pills — lifts
+   it off the background. */
+.fp-banner__id {
+  display: flex; align-items: baseline; gap: 12px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 9px 18px;
+  box-shadow: 0 4px 14px rgba(27, 25, 22, .08);
 }
 .fp-banner__title {
   font-family: var(--font-hand); font-weight: 600;
-  font-size: 38px; line-height: 1; color: var(--ink);
+  font-size: 30px; line-height: 1.05; color: var(--ink);
 }
 .fp-banner__date { font-size: 13px; color: var(--fp-ink3); }
 .fp-banner__stat {
@@ -161,11 +186,20 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   border: 1px solid var(--fp-rule);
   border-radius: 20px;
   padding: 8px 16px;
+  box-shadow: 0 4px 14px rgba(27, 25, 22, .08);
   font-size: 12.5px; color: var(--ink-2);
   white-space: nowrap;
 }
 .fp-banner__stars { color: var(--fp-star); }
 .fp-banner__letter { color: var(--ink-4); }
+
+/* Narrow viewports: let the stat pill drop under the title rather than collide
+   with it, and pull the board's top padding in to match. */
+@media (max-width: 1000px) {
+  .fp-banner { gap: 10px; }
+  .fp-banner__stat { margin-left: 0; }
+  .fp-banner__title { font-size: 25px; }
+}
 
 /* --- B §5.7 the two grid rows ---------------------------------------------- */
 
