@@ -354,6 +354,7 @@
 }
 .vs-step__title { font-size: 14px; font-weight: 500; color: var(--vs-ink); }
 .vs-step__sub { margin-top: 3px; font-size: 11.5px; color: var(--vs-ink-2); }
+.vs-step__cta { margin-top: 6px; display: inline-block; font-size: 11.5px; }
 
 /* --- right rail: Pigeon checks your plan ----------------------------------- */
 

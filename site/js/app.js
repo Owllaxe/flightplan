@@ -69,8 +69,27 @@ export function isSignedIn() {
   }
 }
 
+/* Buckets that belong to whoever is signed in. Everything else in the store is
+   either the gate record itself or seeded product data. */
+const USER_BUCKETS = ['bookmarks', 'checks', 'fields', 'lists', 'dismissed'];
+
+/* The audit hit this on a shared machine: sign out, sign up as someone else,
+   and you land in the previous student's plan with onboarding already done.
+   A different email means a different person, so their work starts empty. */
+function resetUserData() {
+  const blank = {};
+  USER_BUCKETS.forEach((b) => { blank[b] = {}; });
+  blank.onboarding = undefined;
+  blank.flightplan = undefined;
+  blank.identity = undefined;
+  store.replace(blank);
+}
+
 export function signIn(record) {
   const at = String(Date.now());
+  const prev = store.all().auth || {};
+  const sameUser = prev.email && record.email && prev.email === record.email;
+  if (prev.email && !sameUser) resetUserData();
   const auth = { ...record, signedIn: true, at };
   store.replace({ auth });
   try {
@@ -195,7 +214,7 @@ const QINTL = [
 
 const GOAL_NOTE = 'These pin to your home page — the pigeon will check in on them all semester.';
 const GOAL_ERR = 'Pick at least three goals — the pigeon checks in on these all semester.';
-const SPEC_NOTE = 'Add as many as you want — you can change these later in Settings.';
+const SPEC_NOTE = 'Add as many as you want — you can retake this any time from the pigeon.';
 const SPEC_PLACEHOLDER = 'e.g. UX design, machine learning, immigration law — press Enter to add';
 const INTL_NOTE = 'Answering yes keeps the Visa tab front and centre — CPT/OPT timeline, documents and deadlines.';
 
@@ -544,34 +563,6 @@ function quizKeys(e) {
   if (e.key === 'Escape') closeQuiz(true);
 }
 
-/* ===========================================================================
-   § A's ORIGINAL INTAKE MODAL
-   index.html still carries the four-question intake from js/home.js. B's quiz
-   supersedes it, and js/home.js is not mine to edit, so it is neutralised from
-   here — in both of the two ways it can appear:
-
-     1. auto-open on first visit. js/home.js schedules that only when
-        `onboarding.seen` and `onboarding.done` are both falsy, and it reads
-        that at the bottom of its module body. app.js is loaded BEFORE home.js
-        on every page that has both, so stamping `seen` here (below) runs first
-        and the timer is never scheduled. Nothing is lost: `seen` is exactly
-        the flag home.js writes the moment it shows the modal.
-
-     2. the pigeon's speech bubble. home.js binds that click to
-        `openModal('intake')` — imported from THIS module. openModal now routes
-        the id `intake` to B's quiz, so the bubble still opens a quiz, just B's.
-
-   The `#intake` markup stays in index.html, unopened and unreachable.
-   =========================================================================== */
-
-const SUPERSEDED_MODAL = 'intake';
-
-function supersedeIntake() {
-  const ob = store.all().onboarding || {};
-  if (ob.seen) return;
-  store.replace({ onboarding: { ...ob, seen: true, supersededBy: 'flightplan-quiz' } });
-}
-
 /* --- bookmarks ------------------------------------------------------------- */
 
 function paintBookmark(el2, on) {
@@ -644,8 +635,6 @@ function initDismiss(root) {
 let lastFocus = null;
 
 export function openModal(id) {
-  /* B's onboarding quiz replaces A's intake — see § A's ORIGINAL INTAKE MODAL */
-  if (id === SUPERSEDED_MODAL) { openQuiz(); return; }
   const node = document.getElementById(id);
   if (!node) return;
   lastFocus = document.activeElement;
@@ -724,7 +713,6 @@ export function init(root = document) {
    is shared by all instances in a way module scope is not. */
 if (!gateRedirecting && !isLoginPage() && !window.__flightplanBooted) {
   window.__flightplanBooted = true;
-  supersedeIntake();          /* must run before js/home.js's module body */
   injectQuizStyles();
 
   document.addEventListener('DOMContentLoaded', () => {

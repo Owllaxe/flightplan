@@ -7,9 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=726c0a08">
+<link rel="stylesheet" href="css/base.css?v=4a2f42fc">
 <link rel="stylesheet" href="css/schedule.css?v=38156141">
-<link rel="stylesheet" href="css/profile.css?v=aae74b0c">
+<link rel="stylesheet" href="css/profile.css?v=b1c5ab53">
 </head>
 <body class="page-profile">
 
@@ -27,14 +27,13 @@
       <a class="sidebar__link" href="planner.html">Planner</a>
       <a class="sidebar__link" href="plan.html">Goals</a>
       <a class="sidebar__link" href="career.html">Career</a>
-      <a class="sidebar__link" href="contacts.html">Contacts</a>
       <a class="sidebar__link" href="visa.html">Visa</a>
     </nav>
     <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
          js/sidebar.js repaints them from the store on load. -->
     <div class="sidebar__term">
       <p class="term__label">THIS TERM</p>
-      <p class="term__line"><span data-term-label>Spring 2026</span> · <span data-term-inprog>15</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__line"><span data-term-label>Fall 2026</span> · <span data-term-inprog>18</span> <span data-term-unit>credits</span> in progress</p>
       <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
       <div class="term__bar">
         <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
@@ -55,16 +54,45 @@
         <div class="pf-header__top">
           <div class="pf-header__avatar avatar avatar--lg" data-avatar-initials aria-hidden="true">JL</div>
           <div>
-            <h1 class="pf-header__name">Student Name</h1>
+            <h1 class="pf-header__name" data-identity-name>Jordan Lee</h1>
             <p class="pf-header__meta">Sophomore · Computer Science · Class of 2029</p>
           </div>
           <a class="btn pf-header__cta" href="resume.html">Resume →</a>
         </div>
 
         <div class="pf-header__body">
-          <div class="pf-ident">
-            <p>ID: 21297374</p>
-            <p>Mailing address<br>phone number<br>email</p>
+          <div class="pf-ident" id="pfIdent">
+            <div class="pf-ident__head">
+              <p class="eyebrow">Student details</p>
+              <button class="pf-ident__edit" id="identEdit" type="button" aria-expanded="false">Edit</button>
+            </div>
+            <dl class="pf-ident__list">
+              <div class="pf-ident__row">
+                <dt class="pf-ident__label">STUDENT ID</dt>
+                <dd class="pf-ident__value">21297374</dd>
+              </div>
+              <div class="pf-ident__row">
+                <dt class="pf-ident__label">MAILING ADDRESS</dt>
+                <dd class="pf-ident__value">
+                  <span class="pf-ident__text" data-ident-view="address">5032 Forbes Ave, SMC 4821, Pittsburgh, PA 15289</span>
+                  <input class="pf-input pf-ident__input" data-ident-input="address" type="text" aria-label="Mailing address" hidden>
+                </dd>
+              </div>
+              <div class="pf-ident__row">
+                <dt class="pf-ident__label">PHONE</dt>
+                <dd class="pf-ident__value">
+                  <a class="link pf-ident__text" data-ident-view="phone" href="tel:+14125550148">(412) 555-0148</a>
+                  <input class="pf-input pf-ident__input" data-ident-input="phone" type="tel" aria-label="Phone number" hidden>
+                </dd>
+              </div>
+              <div class="pf-ident__row">
+                <dt class="pf-ident__label">EMAIL</dt>
+                <dd class="pf-ident__value">
+                  <a class="link pf-ident__text" data-ident-view="email" href="mailto:jordanlee@andrew.cmu.edu">jordanlee@andrew.cmu.edu</a>
+                  <input class="pf-input pf-ident__input" data-ident-input="email" type="email" aria-label="Email address" hidden>
+                </dd>
+              </div>
+            </dl>
           </div>
 
           <div class="pf-stats">
@@ -81,7 +109,7 @@
                 <span class="pf-stat__num">35%</span>
                 <span class="pf-stat__label">MAJOR PROGRESS</span>
               </div>
-              <p class="pf-stat__sub">Computer Science B.S. &amp; Applied Physics B.S.</p>
+              <p class="pf-stat__sub">Computer Science B.S.</p>
               <div class="pf-bar"><div class="pf-bar__fill" style="width:35%"></div></div>
             </div>
           </div>
@@ -90,52 +118,77 @@
 
       <div class="pf-goals">
         <h2 class="pf-goals__title">Goals:</h2>
+        <ol class="pf-goals__list" id="pfGoals">
+          <li class="pf-goals__item"><span class="pf-goals__rank">1</span><span class="pf-goals__text">find an on-campus job</span></li>
+          <li class="pf-goals__item"><span class="pf-goals__rank">2</span><span class="pf-goals__text">GPA 4.0</span></li>
+          <li class="pf-goals__item"><span class="pf-goals__rank">3</span><span class="pf-goals__text">apply to 3 internships</span></li>
+          <li class="pf-goals__item"><span class="pf-goals__rank">4</span><span class="pf-goals__text">talk to one professor about research</span></li>
+        </ol>
+        <a class="link pf-goals__link" href="plan.html">Open the Goals board →</a>
       </div>
     </section>
 
     <section class="pf-row2">
       <article class="advisor">
         <div class="advisor__left">
-          <p class="eyebrow" style="font-size:12px;letter-spacing:.96px">Academic advisor</p>
-          <div class="advisor__avatar"></div>
-          <h3 class="advisor__name">Advisor Name</h3>
+          <p class="eyebrow advisor__eyebrow">Academic advisor</p>
+          <div class="advisor__avatar" aria-hidden="true">AR</div>
+          <h3 class="advisor__name">Dr. Alicia Reyes</h3>
         </div>
         <div class="advisor__fields">
           <p class="advisor__label">EMAIL</p>
-          <p class="advisor__value">advisor@university.edu</p>
+          <p class="advisor__value"><a class="link" href="mailto:areyes@andrew.cmu.edu">areyes@andrew.cmu.edu</a></p>
           <p class="advisor__label">PHONE</p>
-          <p class="advisor__value">(555) 012-3456</p>
+          <p class="advisor__value"><a href="tel:+14122688525">(412) 268-8525</a></p>
           <p class="advisor__label">OFFICE</p>
-          <p class="advisor__value">Some Building, Rm 214</p>
+          <p class="advisor__value">Gates Hillman Center, Rm 4113</p>
           <p class="advisor__label">OFFICE HOURS</p>
-          <p class="advisor__value">Tue &amp; Thu, 1:00–3:00 PM</p>
+          <p class="advisor__value">Mon &amp; Wed, 10:00 AM–12:00 PM</p>
         </div>
       </article>
 
       <article class="advisor">
         <div class="advisor__left">
-          <p class="eyebrow" style="font-size:12px;letter-spacing:.96px">Academic advisor</p>
-          <div class="advisor__avatar"></div>
+          <p class="eyebrow advisor__eyebrow">International student advising</p>
+          <div class="advisor__avatar" aria-hidden="true">OIE</div>
           <h3 class="advisor__name">Office of International Education</h3>
         </div>
         <div class="advisor__fields">
           <p class="advisor__label">EMAIL</p>
-          <p class="advisor__value">advisor@university.edu</p>
+          <p class="advisor__value"><a class="link" href="mailto:oie@andrew.cmu.edu">oie@andrew.cmu.edu</a></p>
           <p class="advisor__label">PHONE</p>
-          <p class="advisor__value">(555) 012-3456</p>
+          <p class="advisor__value"><a href="tel:+14122685231">(412) 268-5231</a></p>
           <p class="advisor__label">OFFICE</p>
-          <p class="advisor__value">Some Building, Rm 214</p>
-          <p class="advisor__label">OFFICE HOURS</p>
+          <p class="advisor__value">Warner Hall, 3rd Floor</p>
+          <p class="advisor__label">WALK-IN HOURS</p>
           <p class="advisor__value">Tue &amp; Thu, 1:00–3:00 PM</p>
         </div>
       </article>
 
-      <button class="advisor-add" id="addContact" aria-label="Add a contact">+</button>
+      <div class="advisor-add" id="addContactCard">
+        <button class="advisor-add__btn" id="addContact" type="button" aria-expanded="false" aria-controls="contactForm">
+          <span aria-hidden="true">+</span><span class="visually-hidden">Add a contact</span>
+        </button>
+        <form class="advisor-add__form" id="contactForm" hidden>
+          <p class="eyebrow advisor__eyebrow">New contact</p>
+          <div class="advisor-add__fields">
+            <input class="pf-input" name="name" type="text" placeholder="Name or office" aria-label="Name or office" required>
+            <input class="pf-input" name="role" type="text" placeholder="Role — e.g. Career advisor" aria-label="Role">
+            <input class="pf-input" name="email" type="email" placeholder="Email" aria-label="Email">
+            <input class="pf-input" name="phone" type="tel" placeholder="Phone" aria-label="Phone">
+            <input class="pf-input" name="office" type="text" placeholder="Office" aria-label="Office">
+          </div>
+          <div class="advisor-add__actions">
+            <button class="btn btn--sm" type="submit">Save contact</button>
+            <button class="btn btn--sm btn--ghost" type="button" data-cancel>Cancel</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="pf-row3">
       <div class="pf-saved">
-        <p class="eyebrow" style="font-size:12px;letter-spacing:.96px;margin-bottom:18px">Saved listings</p>
+        <p class="eyebrow pf-saved__eyebrow">Saved listings</p>
         <div class="pf-saved__item">
           <p class="pf-saved__title">Product Design Intern</p>
           <p class="pf-saved__sub">Fielding Studio · Remote</p>
@@ -146,39 +199,53 @@
         </div>
         <div class="pf-saved__item">
           <p class="pf-saved__title">Junior Data Analyst</p>
+          <p class="pf-saved__sub">Northlake Analytics · Pittsburgh, PA</p>
         </div>
       </div>
 
       <div class="pf-exp">
-        <p class="eyebrow pf-exp__eyebrow" style="font-size:12px;letter-spacing:.96px">Current experiences and skills</p>
+        <p class="eyebrow pf-exp__eyebrow">Current experiences and skills</p>
 
         <div class="pf-exp__left">
           <div class="pf-exp__list" id="expList">
             <div class="pf-exp__item">
               <h3 class="pf-exp__role">Software Engineering Intern</h3>
-              <p class="pf-exp__meta">TechNova Inc.&nbsp; ·&nbsp; Since Jun 2026</p>
+              <p class="pf-exp__meta">TechNova Inc.&nbsp; ·&nbsp; Jun – Aug 2026</p>
             </div>
             <div class="pf-exp__item">
-              <h3 class="pf-exp__role">Club Leader</h3>
-              <p class="pf-exp__meta">Doom Scrolling Club&nbsp; ·&nbsp; Since Aug 2026</p>
+              <h3 class="pf-exp__role">Course Assistant</h3>
+              <p class="pf-exp__meta">15-112 Fundamentals of Programming&nbsp; ·&nbsp; Since Aug 2026</p>
             </div>
           </div>
-          <button class="pf-exp__add" id="addExperience" style="margin-top:auto;align-self:flex-start">+ Add an experience</button>
+          <div class="pf-exp__foot">
+            <button class="pf-exp__add" id="addExperience" type="button" aria-expanded="false" aria-controls="expForm">+ Add an experience</button>
+            <form class="pf-addform" id="expForm" hidden>
+              <input class="pf-input" name="role" type="text" placeholder="Role or title" aria-label="Role or title" required>
+              <input class="pf-input" name="meta" type="text" placeholder="Organisation · start date" aria-label="Organisation and start date">
+              <div class="pf-addform__actions">
+                <button class="btn btn--sm" type="submit">Add</button>
+                <button class="btn btn--sm btn--ghost" type="button" data-cancel>Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
 
         <div class="pf-exp__right">
           <div class="skills" id="skills">
-            <span class="skill">3D Modelling</span>
-            <span class="skill">Drawing</span>
-            <span class="skill">Skill</span>
-            <span class="skill">Skill</span>
-            <span class="skill">Skill</span>
-            <span class="skill">Something</span>
-            <span class="skill">Skill</span>
-            <span class="skill">Skill</span>
-            <span class="skill">Skill</span>
+            <span class="skill">Python</span>
+            <span class="skill">Java</span>
+            <span class="skill">C</span>
+            <span class="skill">Git</span>
+            <span class="skill">SQL</span>
+            <span class="skill">React</span>
+            <span class="skill">Data Structures</span>
+            <span class="skill">Figma</span>
+            <span class="skill">Technical Writing</span>
           </div>
-          <button class="skills__add" id="addSkill">+ Add a skill</button>
+          <div class="skills__foot">
+            <button class="skills__add" id="addSkill" type="button" aria-expanded="false" aria-controls="skillInput">+ Add a skill</button>
+            <input class="pf-input" id="skillInput" type="text" placeholder="Skill name — press Enter" aria-label="New skill" hidden>
+          </div>
         </div>
       </div>
     </section>

@@ -24,8 +24,9 @@
    mascot sit OUTSIDE the stage and are `fixed`, so they are pinned and
    unscaled — B pins the same set.
 
-   This file is shared with goals.html (the Brain Dump board), which uses the
-   whiteboard shell, the .cal__* calendar, the tool rail and the mascot. */
+   This file dresses plan.html, the product's one goals surface. The whiteboard
+   shell, the .cal__* calendar, the tool rail and the mascot are written as
+   generic pieces, but nothing else consumes them today. */
 
 /* --- tokens ----------------------------------------------------------------
    A's base.css already matches most of B's palette exactly (--panel-alt is
@@ -459,9 +460,30 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   background: #fff; border: 1px solid var(--border); border-radius: 8px;
   padding: 7px 10px; font-size: 12.5px; color: var(--ink);
 }
+/* The seal button no longer stands alone — it shares a row with `cancel`, so
+   the gap above it belongs to the row, not to the button. */
+.fp-letter__actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .fp-letter__seal {
-  margin-top: 10px; background: var(--accent); color: var(--panel-alt);
+  background: var(--accent); color: var(--panel-alt);
   border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 600;
+}
+/* Quiet next to the seal: leaving the editor is the escape hatch, not the
+   thing the card is asking you to do. */
+.fp-letter__cancel { font-size: 12px; color: var(--ink-4); }
+.fp-letter__cancel:hover { color: var(--accent); }
+/* Centred under the caption so it reads as part of the delivered letter rather
+   than a control competing with the envelope. */
+.fp-letter__edit {
+  display: block; margin: 8px auto 0;
+  font-size: 12px; color: var(--ink-4);
+}
+.fp-letter__edit:hover { color: var(--accent); text-decoration: underline; }
+/* No error colour exists in the palette — this is --accent walked toward
+   brick, so it reads as a complaint without leaving the warm ground. Visibility
+   is the `hidden` property alone, which base.css enforces with !important. */
+.fp-letter__err {
+  --fp-err: #9c3b2c;
+  font-size: 12px; margin-top: 8px; line-height: 1.4; color: var(--fp-err);
 }
 .fp-letter__stack {
   position: relative; width: 340px; max-width: 100%; height: 352px;
@@ -549,7 +571,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 }
 .fp-tip.is-on { opacity: 1; }
 
-/* --- calendar shared with goals.html (Figma 388:571) --------------------------- */
+/* --- generic .cal__* calendar (Figma 388:571) ---------------------------------- */
 
 .cal__month { font-family: var(--font-hand); font-size: 17px; line-height: 25px; color: var(--ink-2); }
 .cal__grid {
@@ -656,6 +678,20 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   font-family: var(--font-mono); font-size: 9px; color: var(--fp-ink3);
 }
 .wb-zoom__level:hover { background: var(--pl-clay); color: var(--accent); }
+
+/* erase-all sits in the same pill family as the tools and the zoom stepper;
+   .wb-chrome > * already supplies its pill, and the global [hidden] rule is
+   what shows and hides the wrapper. */
+.wb-clear__btn {
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; color: var(--ink-2);
+}
+.wb-clear__btn:hover { background: var(--pl-clay); }
+/* armed = one more tap wipes every stroke, so it stops looking like a label */
+.wb-clear__btn.is-armed {
+  background: var(--fp-tint);
+  color: var(--accent); font-weight: 600;
+}
 
 /* --- the + tool's popover: A's panel templates, then B's module menu ------------ */
 

@@ -60,7 +60,11 @@
 
   /* type */
   --font-hand:  'Pathfinder Hand', 'Patrick Hand', 'Caveat', cursive;
-  --font-nav:   'Caveat', cursive;
+  /* Build B's nav is 'Pathfinder Hand' (spec §navStyle). A shipped Caveat as a
+     stand-in before the real face was extracted; the woff2 is now in
+     assets/b/, so the nav uses the genuine article and Caveat is only a
+     fallback for a failed font load. */
+  --font-nav:   'Pathfinder Hand', 'Caveat', cursive;
   --font-body:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;
   /* build B tokens */
@@ -324,6 +328,13 @@ img { display: block; }
    because they are whiteboards that fill the viewport. */
 .main { flex: 1 1 auto; min-width: 0; padding: 20px 40px 40px; }
 
+/* The audit found `.visa { display: flex }` silently beating the UA sheet's
+   `[hidden] { display: none }`, so a "Don't show again" button wrote its flag
+   to localStorage and was then ignored forever. Any author `display` on an
+   element that also gets toggled with [hidden] reintroduces that bug, so the
+   rule is settled once, globally. */
+[hidden] { display: none !important; }
+
 /* --- primitives ------------------------------------------------------------ */
 
 .panel {
@@ -406,6 +417,25 @@ img { display: block; }
 .scroll::-webkit-scrollbar { width: 6px; }
 .scroll::-webkit-scrollbar-track { background: var(--scroll-track); border-radius: 3px; }
 .scroll::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
+
+/* Printing. The only page anyone prints is the resume, whose Export button calls
+   window.print() on the live page — so without this the exported PDF carries the
+   sidebar, the mascot and the floating toolbar down the side of the document a
+   student is sending to an employer. Screen chrome is not part of the paper. */
+@media print {
+  .sidebar,
+  .mascot,
+  .wb-chrome,
+  .fp-banner { display: none !important; }
+
+  .app  { display: block; }
+  .main { padding: 0; }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}
 
 /* --- mascot ---------------------------------------------------------------- */
 

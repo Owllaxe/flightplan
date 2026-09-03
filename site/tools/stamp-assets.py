@@ -21,7 +21,13 @@ ROOT = Path(__file__).resolve().parent.parent          # site/
 # Stylesheets have no import graph and cannot duplicate this way, so they keep
 # their stamps. JS freshness comes from the server instead: tools/serve.py
 # sends no-store locally, and GitHub Pages revalidates via ETag.
-PAT = re.compile(r'(?P<attr>href|src)="(?P<path>css/[A-Za-z0-9._/-]+\.css)(?:\?v=[0-9a-f]+)?"')
+# The existing-token group is deliberately `[^"]*` rather than `[0-9a-f]+`.
+# With the strict version, a hand-written token like `?v=career2` matched
+# nothing, so the whole ref was skipped -- and the script still reported
+# success, leaving a stale stylesheet pinned forever behind a token that
+# never changes. Accepting any token means anything already there is
+# replaced by the real hash.
+PAT = re.compile(r'(?P<attr>href|src)="(?P<path>css/[A-Za-z0-9._/-]+\.css)(?:\?v=[^"]*)?"')
 
 def stamp(p: Path) -> str:
     return hashlib.md5(p.read_bytes()).hexdigest()[:8]

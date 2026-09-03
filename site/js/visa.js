@@ -8,6 +8,7 @@
      · the "N of 7 done" line and the roadmap progress bar
      · the "Continue: …" link, which points at the first unfinished lesson
      · the OIE mail link, built from whichever question chips are lit
+     · the SSN step-2 letter link, an OIE mail naming the signed-in student
      · "Show me how", which jumps to the gap-semester lesson
 
    NOTE ON ORDER: this module's body runs before app.js's DOMContentLoaded
@@ -16,6 +17,7 @@
    seeded into the store here, so initChecks picks them up. */
 
 import { store } from './store.js';
+import { readIdentity } from './sidebar.js';
 
 /* --- one-time seed: the frame ships with the first two lessons done -------- */
 
@@ -35,8 +37,17 @@ const bar      = document.getElementById('roadmapBar');
 const cont     = document.getElementById('roadmapContinue');
 const chips    = [...document.querySelectorAll('#quickQuestions input[data-check]')];
 const send     = document.getElementById('sendQuestion');
+const letter   = document.getElementById('requestLetter');
 const timeOff  = document.getElementById('lessonTimeOff');
 const howBtn   = document.getElementById('showMeHow');
+
+/* Every OIE mail on this page is composed here, so the address lives once.
+   A body-less call keeps the plain `mailto:…?subject=…` the chips have always
+   produced — the audit liked that link exactly as it is. */
+function oieMailto(subject, body) {
+  const qs = `subject=${encodeURIComponent(subject)}`;
+  return `mailto:${OIE}?${body ? `${qs}&body=${encodeURIComponent(body)}` : qs}`;
+}
 
 function titleOf(input) {
   return input.closest('.vs-lesson').querySelector('.vs-lesson__title').textContent;
@@ -58,7 +69,20 @@ function paintQuestion() {
     .filter((el) => el.checked)
     .map((el) => el.closest('.vs-chip').textContent.trim());
   const subject = picked.length ? picked.join(', ') : 'Question about my F-1 status';
-  send.href = `mailto:${OIE}?subject=${encodeURIComponent(subject)}`;
+  send.href = oieMailto(subject);
+}
+
+/* Step 2 of "Getting your SSN" promises one click, so the link ships a working
+   plain mailto in the markup and is upgraded here with the student's name. */
+function paintLetter() {
+  const { name } = readIdentity();
+  const body =
+    `Hello OIE,\n\n` +
+    `My name is ${name}. I have accepted a job offer and would like to request ` +
+    `an enrolment / SSN support letter so that I can apply for a Social Security ` +
+    `number.\n\nPlease let me know if you need anything else from me.\n\n` +
+    `Thank you,\n${name}`;
+  letter?.setAttribute('href', oieMailto(`SSN support letter request — ${name}`, body));
 }
 
 /* app.js restores the stored values on DOMContentLoaded; this listener is
@@ -66,6 +90,7 @@ function paintQuestion() {
 document.addEventListener('DOMContentLoaded', () => {
   paintRoadmap();
   paintQuestion();
+  paintLetter();
 });
 
 lessons.forEach((el) => el.addEventListener('change', paintRoadmap));

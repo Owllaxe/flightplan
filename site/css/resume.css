@@ -51,9 +51,17 @@
   border-radius: 18px;
   box-shadow: var(--sh-2);
   padding: 17px;
+  /* drag feedback (see "drag to reorder" below) rides on these two. */
+  transition: border-color .15s ease, opacity .12s ease;
 }
 .rz-card__head { display: flex; align-items: center; gap: 8px; }
-.rz-grip { color: var(--ink-3); font-size: 16px; cursor: grab; letter-spacing: -2px; flex: 0 0 auto; }
+.rz-grip {
+  color: var(--ink-3); font-size: 16px; cursor: grab; letter-spacing: -2px;
+  flex: 0 0 auto;
+  touch-action: none;   /* the grip starts a drag; don't let it scroll the page */
+}
+.rz-grip:hover { color: var(--ink-2); }
+.rz-grip:active { cursor: grabbing; }
 .rz-card__title {
   font-family: var(--font-serif); font-size: 19px; margin-left: 22px;
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -66,9 +74,21 @@
   font-size: 10px; font-weight: 600; letter-spacing: .5px;
   display: grid; place-items: center;
 }
-.rz-card__menu, .rz-card__collapse { color: var(--ink-2); width: 24px; flex: 0 0 24px; text-align: center; }
-.rz-card__menu { font-size: 20px; margin-left: 18px; }
-.rz-card__collapse { font-size: 18px; margin-left: 12px; }
+.rz-card__collapse {
+  color: var(--ink-2); width: 24px; flex: 0 0 24px; text-align: center;
+  font-size: 18px; margin-left: 12px;
+}
+/* The ⋮ button is now wrapped so its popover has a positioning context. The
+   wrapper takes over the button's old flex slot (24px, 18px in from the badge)
+   and the button simply fills it, so the head is laid out exactly as before. */
+.rz-card__menu-wrap {
+  position: relative;
+  display: flex;
+  width: 24px; flex: 0 0 24px;
+  margin-left: 18px;
+}
+.rz-card__menu { width: 100%; color: var(--ink-2); text-align: center; font-size: 20px; }
+.rz-card__menu[aria-expanded="true"] { color: var(--accent); }
 .rz-card__head + .divider { margin: 16px 0; }
 .rz-card.is-collapsed .rz-card__body { display: none; }
 .rz-card.is-collapsed .rz-card__head + .divider { display: none; }
@@ -111,6 +131,9 @@
 
 .rz-add { align-self: flex-start; font-size: 14px; font-weight: 500; color: var(--accent); }
 .rz-add:hover { text-decoration: underline; }
+/* Replaces the inline `style="margin-top:…"` the "+ Add skill" and certs
+   "+ Add entry" buttons used to carry; both now sit at the same 14px. */
+.rz-add--spaced { margin-top: 14px; }
 
 /* --- skills chips ---------------------------------------------------------- */
 
@@ -129,11 +152,25 @@
 
 .cert-row { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
 .cert-row__grip { font-size: 13px; color: var(--ink-3); letter-spacing: -2px; flex: 0 0 auto; }
-/* Name takes the slack, date keeps its frame width. */
+/* Name takes the slack, date keeps its frame width.
+   :last-of-type is per element type, so the trailing <button> added below does
+   not steal the match from the second <input> — the date field still gets it. */
 .cert-row .rz-input:first-of-type { flex: 1 1 auto; width: auto; min-width: 0; }
 .cert-row .rz-input:last-of-type { flex: 0 0 140px; width: 140px; }
+/* Same read as .rz-entry__remove, but sized for the flex row instead of
+   being absolutely positioned in a card corner. */
+.cert-row__remove {
+  flex: 0 0 20px;
+  width: 20px; height: 20px;
+  font-size: 16px; line-height: 1;
+  color: var(--ink-3);
+}
+.cert-row__remove:hover { color: var(--accent); }
 
 /* --- add category ---------------------------------------------------------- */
+
+/* Wrapper so the button can be swapped for the inline input in place. */
+.rz-addcat { width: 100%; }
 
 .rz-add-category {
   height: 56px;
@@ -146,6 +183,118 @@
   transition: background .15s ease;
 }
 .rz-add-category:hover { background: var(--accent-tint); }
+
+/* --- section options menu -------------------------------------------------- */
+
+/* Popover hung below-right of the ⋮ button, inside .rz-card__menu-wrap.
+   Absolute so opening it never reflows the card head. Closed state is the
+   `hidden` attribute, handled globally in base.css. */
+.rz-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 190px;
+  padding: 6px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--sh-4);
+  text-align: left;          /* the head centres its buttons; items are flush left */
+}
+
+.rz-menu__item {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+.rz-menu__item:hover,
+.rz-menu__item:focus-visible { background: var(--accent-tint); color: var(--accent); }
+
+/* e.g. "Move up" on the topmost card — inert, and it should look it. */
+.rz-menu__item[disabled] { opacity: .4; cursor: default; }
+.rz-menu__item[disabled]:hover,
+.rz-menu__item[disabled]:focus-visible { background: transparent; color: var(--ink-2); }
+
+.rz-menu__item--danger { color: var(--accent); }
+.rz-menu__item--danger:hover,
+.rz-menu__item--danger:focus-visible { background: var(--accent); color: #fff; }
+
+/* Delete, after the first click ("Click again to delete"). */
+.rz-menu__item--armed,
+.rz-menu__item--armed:hover,
+.rz-menu__item--armed:focus-visible { background: var(--accent); color: #fff; }
+
+.rz-menu__sep {
+  height: 1px;
+  margin: 5px 4px;
+  border: 0;
+  background: var(--border-soft);
+}
+
+/* Keyboard focus uses the one global ring from base.css
+   (`:focus-visible { outline: 2px solid var(--accent) }`) — no second
+   treatment here. Menu items only pull the ring inside the 6px popover
+   padding so it is not clipped by the rounded edge. */
+.rz-menu__item:focus-visible { outline-offset: -2px; }
+
+/* --- inline text input ----------------------------------------------------- */
+
+/* Stands in for the removed prompt() dialogs on "+ Add Category" and
+   "+ Add skill": the trigger button is swapped for this row in place. */
+.rz-inline {
+  display: flex;
+  flex-wrap: wrap;          /* allowed to wrap rather than crush the field */
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+/* Beats .rz-input's width: 100% on specificity, not on !important. */
+.rz-inline .rz-inline__input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  height: 36px;
+}
+.rz-inline .btn { flex: 0 0 auto; }
+
+/* Used inside .rz-addcat, where it replaces the 56px dashed button — the
+   matching min-height keeps the column from jumping on the swap. */
+.rz-inline--cat { min-height: 56px; align-items: center; }
+
+/* --- section rename -------------------------------------------------------- */
+
+/* Sits where <h2 class="rz-card__title"> was, which JS hides with [hidden]. */
+.rz-card__title-input {
+  margin-left: 22px;
+  flex: 1 1 auto;
+  width: auto;              /* over .rz-input's 100% */
+  min-width: 0;
+  max-width: 280px;
+  height: 30px;             /* over .rz-input's 32px */
+  font-family: var(--font-serif);
+  font-size: 16px;
+}
+
+/* --- drag to reorder ------------------------------------------------------- */
+
+.rz-card.is-dragging { opacity: .5; cursor: grabbing; }
+/* Brief highlight on the card that just landed. */
+.rz-card.is-drop-target { border-color: var(--accent-line); }
+/* Outline, not border, so marking the receiving column shifts nothing. */
+.rz-col.is-drop-zone {
+  border-radius: 16px;
+  outline: 2px dashed var(--accent-line);
+  outline-offset: 8px;
+}
 
 /* --- preview mode ---------------------------------------------------------- */
 
@@ -188,4 +337,14 @@
   .rz-top { flex-wrap: wrap; }
   .rz-actions { margin-left: 0; }
   .rz-fields { grid-template-columns: minmax(0, 1fr); }
+  /* The menu is right-anchored so it grows leftwards and can never spill off
+     the right edge; this only stops it running past the left one. */
+  .rz-menu { min-width: 0; max-width: calc(100vw - 40px); }
+  .rz-menu__item { white-space: normal; }
+}
+
+/* --- print ----------------------------------------------------------------- */
+
+@media print {
+  .rz-menu { display: none !important; }
 }

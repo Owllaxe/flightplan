@@ -9,7 +9,7 @@ const DEFAULTS = {
   checks: {},           // id -> true
   fields: {},           // id -> string
   lists: {},            // id -> array
-  onboarding: null,     // answers from the Home intake modal
+  onboarding: null,     // legacy; the onboarding quiz writes `flightplan.quiz`
   dismissed: {},        // banner id -> true
 
   /* Who the sidebar's profile circle stands for. A has no accounts, so the
@@ -22,13 +22,13 @@ const DEFAULTS = {
 
   /* Sidebar THIS TERM block. Build B fetches these from its coursemap API;
      A seeds them here so they agree with what its own screens claim:
-       Home    — "Spring 2026, 15 credits in progress"
+       Home    — the five course cards, which total 18 credits
        Profile — 42 credits earned of 120 required, 35% major progress       */
   term: {
-    label:     'Spring 2026',
+    label:     'Fall 2026',
     doneCr:    42,
     totalCr:   120,
-    inProgCr:  15,
+    inProgCr:  18,
     pct:       35,
     unitLabel: 'credits',
   },

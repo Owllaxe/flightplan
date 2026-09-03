@@ -1,7 +1,9 @@
 /* Goals — build B's Personal-goals board (tools/buildB-spec.md §5) on build A's
    whiteboard engine.
 
-   The engine below is A's, unchanged in substance and shared with goals.html.
+   The engine below is A's, unchanged in substance. It is still written as a
+   generic, exported whiteboard, but this page is now its only consumer — the
+   product has one goals surface, and this is it.
    The board it carries is now B's: the §5.2 banner and the ten §5.8 modules,
    laid out on B's grid, dragged the way B drags them (a translate offset from
    the grid slot), persisted the way B persists them — but through A's store.
@@ -29,13 +31,25 @@
       opacity 0. Not ported: every star is simply drawn.
    6. B's dead `fp-dotted` / `fp-grow` classes have no CSS anywhere. Not ported.
    7. B's stat capsule hardcodes "· letter sealed ✉" whether or not a letter
-      exists. Here it reflects the letter module's actual state.
+      exists. Here it reflects the letter module's actual state. Every one of
+      those states also has a way out, which B has for none of them: the sealed
+      envelope and the delivered letter both re-open the editor, the editor can
+      be left again without saving, and the delivery date cannot be set in the
+      past — so no letter is ever locked into a state by a mistyped year.
    8. B's goals card advertises "Drag badges to re-rank", which B never
       implemented. The copy says only what the card does.
-   9. B's module menu lists the goals card as hideable even though the card
-      cannot be deleted. Here that row is inert and always shown.        */
+   9. B's module menu lists the goals card but the row does nothing. Here it
+      shows and hides the goals card like every other row. The card still has no
+      ✕ of its own — it is the page's anchor, so removing it should take the
+      deliberate trip through the + menu — but a menu row that silently does
+      nothing is worse than one that works, and the menu is then the card's one
+      way back.
+  10. The goal list is not private to this page. It is `flightplan.quiz.goals`,
+      the same array the onboarding quiz writes and Home reads, so a goal added
+      or renamed here shows up there. B kept the board's edits to itself.   */
 
 import { store } from './store.js';
+import { readIdentity, readTerm } from './sidebar.js';
 
 /* ===========================================================================
    Whiteboard — pan, zoom, draw, erase, drag a panel, add a panel.
@@ -134,7 +148,7 @@ const TEMPLATES = {
   },
 };
 
-export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom, picker, key }) {
+export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom, picker, clear, clearBtn, key }) {
   const view = { x: 0, y: 0, k: 1 };
   const strokes = [];            // { w, pts: [[x, y], …], el }
   let notes = [];                // { id, tpl, rot, el }
@@ -295,7 +309,13 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
 
   function setTool(name) {
     tools.forEach((b) => b.classList.toggle('is-on', b.dataset.tool === name));
+    /* the add button is a popover trigger, not a toggle: it already carries
+       aria-haspopup + an aria-expanded that setPicker keeps in sync, and a
+       second conflicting state on it would only mislead a reader. */
+    tools.forEach((b) => { if (b.dataset.tool !== 'add') b.setAttribute('aria-pressed', String(b.dataset.tool === name)); });
     canvas.dataset.tool = name || '';
+    disarmClear();
+    paintClear();
   }
 
   function setPicker(open) {
@@ -342,6 +362,7 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
     ink.append(el);
     s.el = el;
     strokes.push(s);
+    paintClear();
     return s;
   }
 
@@ -369,6 +390,7 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
         hit = true;
       }
     }
+    if (hit) paintClear();                       // the last stroke going takes the button with it
     return hit;
   }
 
@@ -376,6 +398,57 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
     eraseAt(e.clientX, e.clientY);
     drag((ev) => eraseAt(ev.clientX, ev.clientY), saveInk);
   }
+
+  /* --- erase all ----------------------------------------------------------
+     Optional chrome: the engine is generic, so every hook below no-ops when the
+     host page has no clear control. */
+
+  const CLEAR_IDLE = 'erase all doodles';
+  const CLEAR_ARMED = 'erase all? tap again';
+  let armTimer = 0;
+
+  function clearInk() {
+    strokes.forEach((s) => s.el?.remove());
+    strokes.length = 0;                          // same array, so nothing else goes stale
+    saveInk();
+  }
+
+  /* label, class and aria name move together, so the button can never say one
+     thing and mean another */
+  function armClear() {
+    if (!clearBtn) return;
+    clearTimeout(armTimer);
+    clearBtn.textContent = CLEAR_ARMED;
+    clearBtn.classList.add('is-armed');
+    clearBtn.setAttribute('aria-label', 'Confirm — erase every doodle on the board');
+    // wiping the ink cannot be undone, so an unanswered confirm expires itself
+    armTimer = setTimeout(disarmClear, 4000);
+  }
+
+  function disarmClear() {
+    if (!clearBtn) return;
+    clearTimeout(armTimer);
+    armTimer = 0;
+    clearBtn.textContent = CLEAR_IDLE;
+    clearBtn.classList.remove('is-armed');
+    clearBtn.setAttribute('aria-label', 'Erase all doodles on the board');
+  }
+
+  const isArmed = () => !!clearBtn?.classList.contains('is-armed');
+
+  function paintClear() {
+    if (!clear) return;
+    const show = tool() === 'erase' && strokes.length > 0;
+    clear.hidden = !show;
+    if (!show) disarmClear();                    // a hidden button must not stay armed
+  }
+
+  clearBtn?.addEventListener('click', () => {
+    if (!isArmed()) { armClear(); return; }
+    clearInk();
+    disarmClear();
+    paintClear();
+  });
 
   /* --- added panels ------------------------------------------------------- */
 
@@ -584,6 +657,7 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
 
   (store.get('lists', `${key}-ink`, []) || [])
     .forEach((s) => { if (s?.pts?.length) addStroke({ w: s.w || STROKE_W, pts: s.pts }); });
+  paintClear();
 
   (store.get('lists', `${key}-notes`, []) || [])
     .forEach((n) => { if (n) makeNote({ ...n, tpl: n.tpl || 'note', rot: n.rot ?? -1 }); });
@@ -624,24 +698,22 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
 
   return {
     view, strokes, notes, home, zoomAt, zoomCentre, zoomNudge, toBoard, addPanel,
-    setTool, tool, setPicker,
+    setTool, tool, setPicker, clearInk,
     templates: Object.keys(TEMPLATES),
     limits: { min: MIN_K, max: MAX_K, step: ZOOM_STEP },
   };
 }
 
 /* ===========================================================================
-   Build B's Personal-goals board. Only runs on plan.html — goals.js imports the
-   engine above from this module.
+   Build B's Personal-goals board — the product's single goals surface. The
+   engine above stays exported and generic, but this boot is the only caller.
 
    Everything B kept in `flightplan.*` localStorage keys is kept here in A's one
    JSON blob, under the existing `lists` bucket:
 
      lists['plan-pos']          {id: {x, y}}       module drag offsets
      lists['plan-hidden']       [id, …]            hidden modules
-     lists['plan-goal-rename']  {original: new}    goal renames (B's goalRename)
-     lists['plan-goal-meta']    {original: {where, how}}
-     lists['plan-goal-extra']   [text, …]          goals added with "+ add a goal"
+     lists['plan-goal-meta']    {goal text: {where, how}}
      lists['plan-habits']       {habit: [0|1, …]}  star-jar ticks (B never saved these)
      lists['plan-skills']       [{n, wks, p}]      skill bars
      lists['plan-letter']       {text, deliver}    the letter
@@ -652,6 +724,12 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
 
    plus the engine's own lists['plan-view' | 'plan-ink' | 'plan-notes'] and the
    goal checkboxes in the shared `checks` bucket. No new store bucket was added.
+
+   The goal list itself is NOT one of these. It lives in `flightplan.quiz.goals`
+   as a flat array of strings — the array the onboarding quiz writes and Home
+   reads — so the board and Home cannot disagree about what the goals are. The
+   two keys that used to hold this page's private edits, lists['plan-goal-rename']
+   and lists['plan-goal-extra'], are migrated into it once at boot and deleted.
    =========================================================================== */
 
 const MODULES = [
@@ -681,11 +759,14 @@ const TIPS = {
   skill:  'skills you’re learning — click anywhere on a bar to set progress, + adds a skill, ✕ removes one',
 };
 
+/* The display-only fallback list, until the user's first goal edit. B's per-goal
+   `rank` is gone: the list is a flat array of strings now, so a goal's rank is
+   simply where it sits in it. */
 const GOAL_SEED = [
-  { rank: 1, t: 'find an on-campus job', where: 'LinkedIn & Handshake', how: 'apply to 3+ jobs, see who answers back' },
-  { rank: 2, t: 'GPA 4.0', where: 'ace calc midterms ✓', how: 'A on english essay' },
-  { rank: 3, t: 'apply to 3 internships', where: 'Career Match list', how: '1 per week' },
-  { rank: null, t: 'talk to one professor about research', where: '', how: '' },
+  { t: 'find an on-campus job', where: 'LinkedIn & Handshake', how: 'apply to 3+ jobs, see who answers back' },
+  { t: 'GPA 4.0', where: 'ace calc midterms ✓', how: 'A on english essay' },
+  { t: 'apply to 3 internships', where: 'Career Match list', how: '1 per week' },
+  { t: 'talk to one professor about research', where: '', how: '' },
 ];
 
 const HABIT_SEED = [
@@ -757,11 +838,14 @@ const setList = (id, v) => store.set('lists', id, v && (Array.isArray(v) ? v.len
 function bootPlanBoard() {
   /* --- banner (§5.2) ------------------------------------------------------ */
 
-  const identity = store.all().identity || {};
-  const term = store.all().term || {};
-  const firstName = String(identity.name || '').trim().split(/\s+/)[0] || 'Your';
-  $('fpTitle').textContent = `${firstName}’s career plan`;
-  $('fpDate').textContent = term.label || '';
+  /* the same helpers the sidebar hydrates from, so the name and the term here
+     can never disagree with the aside next to them */
+  const firstName = String(readIdentity().name || '').trim().split(/\s+/)[0] || 'Your';
+  const termLabel = String(readTerm().label || '').trim();
+  /* the nav calls this page Goals, so the heading does too; the board's
+     career-plan identity moves down into the subtitle rather than being lost */
+  $('fpTitle').textContent = `${firstName}’s goals`;
+  $('fpDate').textContent = termLabel ? `${termLabel} · career plan board` : 'career plan board';
 
   function refreshBanner() {
     const n = $('fpGoalList').querySelectorAll('.fp-goal').length;
@@ -770,7 +854,7 @@ function bootPlanBoard() {
 
   /* --- module show / hide (§5.5, §5.3) ------------------------------------ */
 
-  let hidden = getList('plan-hidden', []).filter((id) => id !== 'goals');
+  let hidden = getList('plan-hidden', []);
   const menu = $('wbModules');
 
   function paintModules() {
@@ -787,18 +871,14 @@ function bootPlanBoard() {
     row.type = 'button';
     row.dataset.mod = id;
     row.append(el('span', 'wb-picker__dot'), el('span', null, label));
-    if (id === 'goals') {
-      // B lists the goals card here even though it cannot be removed; inert.
-      row.disabled = true;
-      row.title = 'The goals card can’t be removed';
-      row.style.cursor = 'default';
-    } else {
-      row.addEventListener('click', () => {
-        hidden = hidden.includes(id) ? hidden.filter((h) => h !== id) : [...hidden, id];
-        setList('plan-hidden', hidden);
-        paintModules();
-      });
-    }
+    /* every row toggles its card, goals included — the goals card has no ✕ of
+       its own because it is the page's anchor, which makes this menu its only
+       control rather than a reason to leave the row dead. */
+    row.addEventListener('click', () => {
+      hidden = hidden.includes(id) ? hidden.filter((h) => h !== id) : [...hidden, id];
+      setList('plan-hidden', hidden);
+      paintModules();
+    });
     menu.append(row);
   });
 
@@ -814,35 +894,106 @@ function bootPlanBoard() {
   /* --- 1. semester goals (§5.8) ------------------------------------------- */
 
   const goalList = $('fpGoalList');
-  const renames = getMap('plan-goal-rename');
   const metas = getMap('plan-goal-meta');
-  let extra = getList('plan-goal-extra', []);
 
-  /* B line 3028: goals from the pigeon quiz replace the seed entirely, ranked
-     1..n with empty where/how. The quiz lives in js/app.js in this build and
-     files its answers under the store's `flightplan` key. */
-  function baseGoals() {
-    const fromQuiz = store.all().flightplan?.quiz?.goals;
-    if (Array.isArray(fromQuiz) && fromQuiz.length) {
-      return fromQuiz.map((t, i) => ({ rank: i + 1, t, where: '', how: '' }));
+  /* the seed's where/how has to survive the list becoming flat strings, so it is
+     looked up by goal text like every other per-goal detail. */
+  const SEED_META = Object.fromEntries(
+    GOAL_SEED.map((g) => [g.t, { where: g.where, how: g.how }]));
+
+  /* the checkbox key is derived from the text rather than stored, which is why a
+     rename has to carry the tick across by hand (see renameGoal). */
+  const goalKey = (text) =>
+    `pl-goal-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+
+  /* B line 3028: goals from the pigeon quiz replace the seed entirely. That quiz
+     lives in js/app.js here and files its answers under the store's `flightplan`
+     key — and Home reads the same array, so this board writes back to it instead
+     of keeping its edits private. app.js's flightplan()/patchFlightplan() are not
+     exported, so the same spread is repeated locally. */
+  function readSharedGoals() {
+    const raw = store.all().flightplan?.quiz?.goals;
+    if (!Array.isArray(raw)) return null;
+    const clean = raw.map((t) => String(t).trim()).filter(Boolean);
+    return clean.length ? clean : null;
+  }
+
+  function writeSharedGoals() {
+    const fp = store.all().flightplan || {};
+    store.replace({ flightplan: { ...fp, quiz: { ...(fp.quiz || {}), goals: [...goals] } } });
+  }
+
+  /* one-time migration. The list used to be assembled at render time from three
+     places: the shared array (or the seed), lists['plan-goal-rename'] and
+     lists['plan-goal-extra']. Returning users have real work in those last two,
+     so it is folded in once and the keys are cleared — without this a renamed or
+     added goal would silently disappear the first time this build loads, and
+     leaving them in place would let the two copies drift apart again. */
+  function mergeLegacy(base) {
+    const renames = getMap('plan-goal-rename');
+    const extra = getList('plan-goal-extra', []);
+    const merged = [];
+    const push = (t) => { if (t && !merged.includes(t)) merged.push(t); };
+    // duplicates are dropped: two identical strings would share one check key
+    base.forEach((t) => {
+      const next = renames[t] ? String(renames[t]).trim() : t;
+      /* the where/how map and the tick are keyed by text, and the old build kept
+         keying them by the ORIGINAL text while showing the rename — so both have
+         to be carried over here or a renamed goal arrives stripped of its detail */
+      if (next && next !== t) {
+        if (metas[t] && !metas[next]) { metas[next] = metas[t]; delete metas[t]; }
+        const oldKey = goalKey(t);
+        const newKey = goalKey(next);
+        if (oldKey !== newKey && store.get('checks', oldKey, false)) {
+          store.set('checks', newKey, true);
+          store.set('checks', oldKey, undefined);
+        }
+      }
+      push(next);
+    });
+    extra.forEach((t) => push(String(t).trim()));
+    const had = Object.keys(renames).length > 0 || extra.length > 0;
+    if (had) setList('plan-goal-meta', metas);
+    return { merged, had };
+  }
+
+  const sharedGoals = readSharedGoals();
+  const legacy = mergeLegacy(sharedGoals || GOAL_SEED.map((g) => g.t));
+  let goals = legacy.merged;
+
+  /* the bare seed stays a display-only fallback — writing it to the shared array
+     would tell Home the user had chosen goals they never chose. Only a real edit
+     (or a migration) materialises the whole list, seed texts included. */
+  if (sharedGoals || legacy.had) writeSharedGoals();
+  if (legacy.had) {
+    store.set('lists', 'plan-goal-rename', undefined);
+    store.set('lists', 'plan-goal-extra', undefined);
+  }
+
+  function renameGoal(i, oldText, newText) {
+    // the where/how map and the check are both keyed by text, so both move with
+    // the rename or the row silently loses them
+    if (metas[oldText]) {
+      metas[newText] = metas[oldText];
+      delete metas[oldText];
+      setList('plan-goal-meta', metas);
     }
-    return GOAL_SEED.map((g) => ({ ...g }));
+    const oldKey = goalKey(oldText);
+    const newKey = goalKey(newText);
+    if (oldKey !== newKey) {
+      store.set('checks', newKey, store.get('checks', oldKey, false) || undefined);
+      store.set('checks', oldKey, undefined);
+    }
+    goals[i] = newText;
+    writeSharedGoals();
+    renderGoals();
   }
 
-  function goalRows() {
-    const base = baseGoals();
-    return [
-      ...base,
-      ...extra.map((t, i) => ({ rank: base.length + i + 1, t, where: '', how: '' })),
-    ];
-  }
-
-  function makeGoal(g, i) {
-    const orig = g.t;
-    const key = `pl-goal-${orig.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
-    const meta = metas[orig] || { where: g.where, how: g.how };
+  function makeGoal(text, i) {
+    const key = goalKey(text);
+    const meta = metas[text] || SEED_META[text] || { where: '', how: '' };
     const row = el('article', 'fp-goal');
-    row.dataset.goal = orig;
+    row.dataset.goal = text;
 
     const badge = el('span', 'fp-goal__badge');
     const card = el('div', 'fp-goal__card');
@@ -852,12 +1003,14 @@ function bootPlanBoard() {
     box.type = 'checkbox';
     box.className = 'fp-check';
     box.checked = store.get('checks', key, false);
+    // the row's only text is a button next to it, not a label, so the control
+    // would otherwise reach a screen reader unnamed
+    box.setAttribute('aria-label', `Mark "${text}" as done`);
 
-    const name = el('button', 'fp-goal__name', renames[orig] || orig);
+    const name = el('button', 'fp-goal__name', text);
     name.type = 'button';
 
-    const rank = el('span', 'fp-goal__rank', g.rank == null ? '' : String(g.rank));
-    if (g.rank == null) rank.style.visibility = 'hidden';
+    const rank = el('span', 'fp-goal__rank', String(i + 1));
 
     line.append(box, name, rank);
     const summary = el('p', 'fp-goal__sum');
@@ -874,8 +1027,8 @@ function bootPlanBoard() {
       input.type = 'text';
       input.value = meta[k] || '';
       input.addEventListener('input', () => {
-        metas[orig] = { where: fields.where.value.trim(), how: fields.how.value.trim() };
-        if (!metas[orig].where && !metas[orig].how) delete metas[orig];
+        metas[text] = { where: fields.where.value.trim(), how: fields.how.value.trim() };
+        if (!metas[text].where && !metas[text].how) delete metas[text];
         setList('plan-goal-meta', metas);
         paintSummary();
       });
@@ -892,7 +1045,7 @@ function bootPlanBoard() {
     card.append(editor);
 
     function paintSummary() {
-      const m = metas[orig] || { where: '', how: '' };
+      const m = metas[text] || { where: '', how: '' };
       const bits = [m.where, m.how].filter(Boolean);
       summary.textContent = bits.join(' · ');
       summary.hidden = bits.length === 0 || !editor.hidden;
@@ -933,13 +1086,18 @@ function bootPlanBoard() {
       name.replaceWith(input);
       input.focus();
       input.select();
+      /* committing re-renders the list, which detaches this input and fires its
+         own blur — so the commit runs once and only once. */
+      let settled = false;
       const finish = (commit) => {
+        if (settled) return;
+        settled = true;
         const next = input.value.trim();
-        if (commit && next && next !== orig) renames[orig] = next;
-        else if (commit && (!next || next === orig)) delete renames[orig];
-        setList('plan-goal-rename', renames);
-        name.textContent = renames[orig] || orig;
         input.replaceWith(name);
+        if (!commit || !next || next === text) return;
+        // a duplicate would give two rows one check key; the old name stands
+        if (goals.some((other, j) => j !== i && other === next)) return;
+        renameGoal(i, text, next);
       };
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); finish(true); }
@@ -955,7 +1113,7 @@ function bootPlanBoard() {
 
   function renderGoals() {
     goalList.textContent = '';
-    goalRows().forEach((g, i) => goalList.append(makeGoal(g, i)));
+    goals.forEach((t, i) => goalList.append(makeGoal(t, i)));
     refreshBanner();
   }
 
@@ -969,8 +1127,11 @@ function bootPlanBoard() {
     if (e.key !== 'Enter') return;
     const v = goalInput.value.trim();
     if (!v) return;
-    extra = [...extra, v];
-    setList('plan-goal-extra', extra);
+    // a duplicate would share the existing row's check key, so the typed text is
+    // left in the field to be edited rather than added a second time
+    if (goals.includes(v)) return;
+    goals = [...goals, v];
+    writeSharedGoals();
     goalInput.value = '';
     renderGoals();
   });
@@ -1197,17 +1358,61 @@ function bootPlanBoard() {
       const date = el('input', 'fp-letter__date');
       date.type = 'date';
       date.value = letter?.deliver || '';
+      /* A past date would make letterState() jump straight to 'ready', so the
+         floor is set on the control itself — the picker greys out the days that
+         would seal a letter into a state it was never meant to start in. The
+         seal handler re-checks it, because a typed date ignores `min`. */
+      date.min = today();
+
+      /* One line, spoken by the live region rather than swallowed: B's seal
+         button just re-focused the textarea and left the reader guessing why
+         nothing happened. */
+      const err = el('p', 'fp-letter__err');
+      err.setAttribute('role', 'status');
+      err.setAttribute('aria-live', 'polite');
+      err.hidden = true;
+      const fail = (msg, field) => {
+        err.textContent = msg;
+        err.hidden = false;
+        field.focus();
+      };
+      const clearErr = () => {
+        if (err.hidden) return;
+        err.textContent = '';
+        err.hidden = true;
+      };
+      /* The complaint is about the value as it stood, so any edit retires it. */
+      ta.addEventListener('input', clearErr);
+      date.addEventListener('input', clearErr);
+
       const seal = el('button', 'fp-letter__seal', 'Seal it ✉');
       seal.type = 'button';
       seal.addEventListener('click', () => {
         const text = ta.value.trim();
-        if (!text) { ta.focus(); return; }
-        letter = { text, deliver: date.value || '' };
+        const deliver = date.value;
+        if (!text) { fail('write something first — the pigeon needs words to carry.', ta); return; }
+        if (!deliver) { fail('pick a delivery date so the pigeon knows when to fly.', date); return; }
+        if (deliver < today()) { fail('that date has already passed — pick a day in the future.', date); return; }
+        clearErr();
+        letter = { text, deliver };
         store.set('lists', 'plan-letter', letter);
         letterMode = null;
         renderLetter();
       });
-      letterHost.append(ta, when, date, seal);
+
+      const actions = el('div', 'fp-letter__actions');
+      actions.append(seal);
+      /* Only when there is something to go back TO: with no saved letter the
+         editor is the module's resting state and cancelling would strand it. */
+      if (letter && letter.text) {
+        const cancel = el('button', 'fp-letter__cancel', 'cancel');
+        cancel.type = 'button';
+        cancel.setAttribute('aria-label', 'Discard these edits and keep the letter as it was');
+        cancel.addEventListener('click', () => { letterMode = null; renderLetter(); });
+        actions.append(cancel);
+      }
+
+      letterHost.append(ta, when, date, err, actions);
       ta.focus();
     } else {
       const stack = el('div', 'fp-letter__stack' + (letterOpen ? ' is-open' : ''));
@@ -1229,7 +1434,14 @@ function bootPlanBoard() {
       const cap = el('p', 'fp-letter__cap', letterOpen
         ? 'click to tuck it back in'
         : 'your letter has arrived — click to open');
-      letterHost.append(stack, cap);
+      /* Sits outside the stack, whose own click toggles the envelope open and
+         shut: this is the only exit from 'ready', and arriving is not the same
+         as being finished with it. */
+      const edit = el('button', 'fp-letter__edit', 'rewrite this letter ✎');
+      edit.type = 'button';
+      edit.setAttribute('aria-label', 'Rewrite this letter and choose a new delivery date');
+      edit.addEventListener('click', () => { letterMode = 'editing'; renderLetter(); });
+      letterHost.append(stack, cap, edit);
     }
 
     const label = { none: '· no letter yet ✉', editing: '· writing a letter ✉', sealed: '· letter sealed ✉', ready: '· letter delivered ✉' };
@@ -1410,7 +1622,10 @@ function bootPlanBoard() {
     board:  document.getElementById('board'),
     zoom:   document.getElementById('wbZoom'),
     picker: document.getElementById('wbPicker'),
-    tools:  [...document.querySelectorAll('.pl-tools button')],
+    clear:  document.getElementById('wbClear'),
+    clearBtn: document.getElementById('wbClearBtn'),
+    // [data-tool] so a future sibling button in the rail is never taken for a tool
+    tools:  [...document.querySelectorAll('.pl-tools button[data-tool]')],
     key:    'plan',
   });
 }

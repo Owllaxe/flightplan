@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=726c0a08">
-<link rel="stylesheet" href="css/resume.css?v=630f28c3">
+<link rel="stylesheet" href="css/base.css?v=4a2f42fc">
+<link rel="stylesheet" href="css/resume.css?v=33fe92bc">
 </head>
 <body class="page-resume">
 
@@ -26,18 +26,17 @@
       <a class="sidebar__link" href="planner.html">Planner</a>
       <a class="sidebar__link" href="plan.html">Goals</a>
       <a class="sidebar__link" href="career.html">Career</a>
-      <a class="sidebar__link" href="contacts.html">Contacts</a>
       <a class="sidebar__link" href="visa.html">Visa</a>
     </nav>
     <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
          js/sidebar.js repaints them from the store on load. -->
     <div class="sidebar__term">
       <p class="term__label">THIS TERM</p>
-      <p class="term__line"><span data-term-label>Spring 2026</span> · <span data-term-inprog>15</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__line"><span data-term-label>Fall 2026</span> · <span data-term-inprog>18</span> <span data-term-unit>credits</span> in progress</p>
       <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
       <div class="term__bar">
         <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
-        <div class="term__bar-prog" data-term-bar-prog style="width:13%"></div>
+        <div class="term__bar-prog" data-term-bar-prog style="width:15%"></div>
       </div>
     </div>
     <div class="sidebar__foot">
@@ -52,13 +51,13 @@
     <a class="rz-back" href="profile.html">← Back to Profile</a>
 
     <div class="rz-top">
-      <h1 class="rz-title">Jordan Lee — Resume</h1>
+      <h1 class="rz-title"><span data-identity-name>Jordan Lee</span> — Resume</h1>
       <div class="rz-actions">
         <div class="segmented" id="rzMode" role="tablist">
-          <button class="is-on" data-mode="editor" role="tab" aria-selected="true">Editor</button>
-          <button data-mode="preview" role="tab" aria-selected="false">Preview</button>
+          <button class="is-on" data-mode="editor" type="button" role="tab" aria-selected="true">Editor</button>
+          <button data-mode="preview" type="button" role="tab" aria-selected="false">Preview</button>
         </div>
-        <button class="btn rz-export" id="rzExport">Export PDF ↓</button>
+        <button class="btn rz-export" id="rzExport" type="button">Export PDF ↓</button>
       </div>
     </div>
 
@@ -69,138 +68,155 @@
       <div class="rz-col">
 
         <!-- Summary -->
-        <section class="rz-card" data-card>
+        <section class="rz-card" data-card data-section="summary">
           <div class="rz-card__head">
-            <span class="rz-grip">⋮⋮</span>
-            <h2 class="rz-card__title">Summary</h2>
+            <span class="rz-grip" data-grip aria-hidden="true">⋮⋮</span>
+            <h2 class="rz-card__title" data-card-title>Summary</h2>
             <span class="rz-card__badge">TEXT</span>
-            <button class="rz-card__menu" aria-label="Section options">⋮</button>
-            <button class="rz-card__collapse" data-collapse aria-label="Collapse section">⌄</button>
+            <span class="rz-card__menu-wrap">
+              <button class="rz-card__menu" data-menu type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Options for Summary section">⋮</button>
+            </span>
+            <button class="rz-card__collapse" data-collapse type="button" aria-label="Collapse Summary section">⌄</button>
           </div>
           <hr class="divider">
           <div class="rz-card__body">
-            <textarea class="rz-textarea rz-textarea--tall" data-field="rz-summary" data-autosize
+            <textarea class="rz-textarea rz-textarea--tall" data-rz-field="rz-summary" data-autosize
+              aria-label="Professional summary"
               placeholder="Write a 2–3 sentence summary of who you are and what you're looking for..."></textarea>
           </div>
         </section>
 
         <!-- Experience -->
-        <section class="rz-card" data-card>
+        <section class="rz-card" data-card data-section="experience">
           <div class="rz-card__head">
-            <span class="rz-grip">⋮⋮</span>
-            <h2 class="rz-card__title">Experience</h2>
+            <span class="rz-grip" data-grip aria-hidden="true">⋮⋮</span>
+            <h2 class="rz-card__title" data-card-title>Experience</h2>
             <span class="rz-card__badge">TIMELINE</span>
-            <button class="rz-card__menu" aria-label="Section options">⋮</button>
-            <button class="rz-card__collapse" data-collapse aria-label="Collapse section">⌄</button>
+            <span class="rz-card__menu-wrap">
+              <button class="rz-card__menu" data-menu type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Options for Experience section">⋮</button>
+            </span>
+            <button class="rz-card__collapse" data-collapse type="button" aria-label="Collapse Experience section">⌄</button>
           </div>
           <hr class="divider">
           <div class="rz-card__body">
             <div data-entries="experience">
-              <div class="rz-entry">
-                <span class="rz-entry__grip">⋮⋮</span>
-                <button class="rz-entry__remove" data-remove aria-label="Remove entry">×</button>
+              <div class="rz-entry" data-entry="exp1">
+                <span class="rz-entry__grip" aria-hidden="true">⋮⋮</span>
+                <button class="rz-entry__remove" data-remove type="button" aria-label="Remove entry">×</button>
                 <div class="rz-fields">
-                  <input class="rz-input" data-field="rz-exp1-title"   placeholder="Job title"     value="Software Engineering Intern">
-                  <input class="rz-input" data-field="rz-exp1-company" placeholder="Company name"  value="TechNova Inc.">
-                  <input class="rz-input" data-field="rz-exp1-place"   placeholder="City, State"   value="Remote">
-                  <input class="rz-input" data-field="rz-exp1-dates"   placeholder="Start – End"   value="Jun 2026 – Aug 2026">
-                  <textarea class="rz-textarea rz-span2" data-field="rz-exp1-bullets" placeholder="• Describe your impact — start with an action verb...">• Built and shipped 3 internal tools used by 40+ engineers
+                  <input class="rz-input" data-rz-field="rz-exp1-title"   placeholder="Job title"     aria-label="Experience 1 job title" value="Software Engineering Intern">
+                  <input class="rz-input" data-rz-field="rz-exp1-company" placeholder="Company name"  aria-label="Experience 1 company" value="TechNova Inc.">
+                  <input class="rz-input" data-rz-field="rz-exp1-place"   placeholder="City, State"   aria-label="Experience 1 location" value="Remote">
+                  <input class="rz-input" data-rz-field="rz-exp1-dates"   placeholder="Start – End"   aria-label="Experience 1 dates" value="Jun 2026 – Aug 2026">
+                  <textarea class="rz-textarea rz-span2" data-rz-field="rz-exp1-bullets" aria-label="Experience 1 accomplishments" placeholder="• Describe your impact — start with an action verb...">• Built and shipped 3 internal tools used by 40+ engineers
 • Reduced build time by 22% through caching improvements</textarea>
                 </div>
               </div>
 
-              <div class="rz-entry">
-                <span class="rz-entry__grip">⋮⋮</span>
-                <button class="rz-entry__remove" data-remove aria-label="Remove entry">×</button>
+              <div class="rz-entry" data-entry="exp2">
+                <span class="rz-entry__grip" aria-hidden="true">⋮⋮</span>
+                <button class="rz-entry__remove" data-remove type="button" aria-label="Remove entry">×</button>
                 <div class="rz-fields">
-                  <input class="rz-input" data-field="rz-exp2-title"   placeholder="Job title">
-                  <input class="rz-input" data-field="rz-exp2-company" placeholder="Company name">
-                  <input class="rz-input" data-field="rz-exp2-place"   placeholder="City, State">
-                  <input class="rz-input" data-field="rz-exp2-dates"   placeholder="Start – End">
-                  <textarea class="rz-textarea rz-span2" data-field="rz-exp2-bullets" placeholder="• Describe your impact — start with an action verb..."></textarea>
+                  <input class="rz-input" data-rz-field="rz-exp2-title"   placeholder="Job title"    aria-label="Experience 2 job title">
+                  <input class="rz-input" data-rz-field="rz-exp2-company" placeholder="Company name" aria-label="Experience 2 company">
+                  <input class="rz-input" data-rz-field="rz-exp2-place"   placeholder="City, State"  aria-label="Experience 2 location">
+                  <input class="rz-input" data-rz-field="rz-exp2-dates"   placeholder="Start – End"  aria-label="Experience 2 dates">
+                  <textarea class="rz-textarea rz-span2" data-rz-field="rz-exp2-bullets" aria-label="Experience 2 accomplishments" placeholder="• Describe your impact — start with an action verb..."></textarea>
                 </div>
               </div>
             </div>
-            <button class="rz-add" data-add-entry="experience">+ Add entry</button>
+            <button class="rz-add" data-add-entry="experience" type="button">+ Add entry</button>
           </div>
         </section>
 
         <!-- Education -->
-        <section class="rz-card" data-card>
+        <section class="rz-card" data-card data-section="education">
           <div class="rz-card__head">
-            <span class="rz-grip">⋮⋮</span>
-            <h2 class="rz-card__title">Education</h2>
+            <span class="rz-grip" data-grip aria-hidden="true">⋮⋮</span>
+            <h2 class="rz-card__title" data-card-title>Education</h2>
             <span class="rz-card__badge">TIMELINE</span>
-            <button class="rz-card__menu" aria-label="Section options">⋮</button>
-            <button class="rz-card__collapse" data-collapse aria-label="Collapse section">⌄</button>
+            <span class="rz-card__menu-wrap">
+              <button class="rz-card__menu" data-menu type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Options for Education section">⋮</button>
+            </span>
+            <button class="rz-card__collapse" data-collapse type="button" aria-label="Collapse Education section">⌄</button>
           </div>
           <hr class="divider">
           <div class="rz-card__body">
             <div data-entries="education">
-              <div class="rz-entry">
-                <span class="rz-entry__grip">⋮⋮</span>
-                <button class="rz-entry__remove" data-remove aria-label="Remove entry">×</button>
+              <div class="rz-entry" data-entry="edu1">
+                <span class="rz-entry__grip" aria-hidden="true">⋮⋮</span>
+                <button class="rz-entry__remove" data-remove type="button" aria-label="Remove entry">×</button>
                 <div class="rz-fields">
-                  <input class="rz-input rz-span2" data-field="rz-edu1-school" placeholder="University name" value="University Name">
-                  <input class="rz-input" data-field="rz-edu1-degree" placeholder="Degree" value="B.S. Computer Science">
-                  <input class="rz-input" data-field="rz-edu1-dates"  placeholder="Expected" value="Expected May 2029">
-                  <input class="rz-input rz-span2" data-field="rz-edu1-notes" placeholder="Honours, GPA, activities" value="GPA: 3.6  ·  Dean's List (2 semesters)">
+                  <input class="rz-input rz-span2" data-rz-field="rz-edu1-school" placeholder="University name" aria-label="Education 1 school" value="Carnegie Mellon University">
+                  <input class="rz-input" data-rz-field="rz-edu1-degree" placeholder="Degree" aria-label="Education 1 degree" value="B.S. Computer Science">
+                  <input class="rz-input" data-rz-field="rz-edu1-dates"  placeholder="Expected" aria-label="Education 1 dates" value="Expected May 2029">
+                  <input class="rz-input rz-span2" data-rz-field="rz-edu1-notes" placeholder="Honours, GPA, activities" aria-label="Education 1 honours, GPA and activities" value="GPA: 3.6  ·  Dean's List (2 semesters)">
                 </div>
               </div>
             </div>
-            <button class="rz-add" data-add-entry="education">+ Add entry</button>
+            <button class="rz-add" data-add-entry="education" type="button">+ Add entry</button>
           </div>
         </section>
 
-        <button class="rz-add-category" data-add-category="left">+ Add Category</button>
+        <div class="rz-addcat" data-addcat="left">
+          <button class="rz-add-category" data-add-category="left" type="button" aria-label="Add a section to the left column">+ Add Category</button>
+        </div>
       </div>
 
       <div class="rz-col">
 
         <!-- Skills -->
-        <section class="rz-card" data-card>
+        <section class="rz-card" data-card data-section="skills">
           <div class="rz-card__head">
-            <span class="rz-grip">⋮⋮</span>
-            <h2 class="rz-card__title">Skills</h2>
+            <span class="rz-grip" data-grip aria-hidden="true">⋮⋮</span>
+            <h2 class="rz-card__title" data-card-title>Skills</h2>
             <span class="rz-card__badge">TAGS</span>
-            <button class="rz-card__menu" aria-label="Section options">⋮</button>
-            <button class="rz-card__collapse" data-collapse aria-label="Collapse section">⌄</button>
+            <span class="rz-card__menu-wrap">
+              <button class="rz-card__menu" data-menu type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Options for Skills section">⋮</button>
+            </span>
+            <button class="rz-card__collapse" data-collapse type="button" aria-label="Collapse Skills section">⌄</button>
           </div>
           <hr class="divider">
           <div class="rz-card__body">
             <div class="chips" id="rzChips"></div>
-            <button class="rz-add" id="rzAddSkill" style="margin-top:14px">+ Add skill</button>
+            <button class="rz-add rz-add--spaced" id="rzAddSkill" type="button">+ Add skill</button>
           </div>
         </section>
 
         <!-- Certifications -->
-        <section class="rz-card" data-card>
+        <section class="rz-card" data-card data-section="certifications">
           <div class="rz-card__head">
-            <span class="rz-grip">⋮⋮</span>
-            <h2 class="rz-card__title">Certifications</h2>
+            <span class="rz-grip" data-grip aria-hidden="true">⋮⋮</span>
+            <h2 class="rz-card__title" data-card-title>Certifications</h2>
             <span class="rz-card__badge">LIST</span>
-            <button class="rz-card__menu" aria-label="Section options">⋮</button>
-            <button class="rz-card__collapse" data-collapse aria-label="Collapse section">⌄</button>
+            <span class="rz-card__menu-wrap">
+              <button class="rz-card__menu" data-menu type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Options for Certifications section">⋮</button>
+            </span>
+            <button class="rz-card__collapse" data-collapse type="button" aria-label="Collapse Certifications section">⌄</button>
           </div>
           <hr class="divider">
           <div class="rz-card__body">
             <div data-entries="certs">
-              <div class="cert-row">
-                <span class="cert-row__grip">⋮⋮</span>
-                <input class="rz-input" data-field="rz-cert1-name" placeholder="Certification name" value="Google UX Design Certificate">
-                <input class="rz-input" data-field="rz-cert1-date" placeholder="Date" value="Aug 2026">
+              <div class="cert-row" data-entry="cert1">
+                <span class="cert-row__grip" aria-hidden="true">⋮⋮</span>
+                <input class="rz-input" data-rz-field="rz-cert1-name" placeholder="Certification name" aria-label="Certification 1 name" value="Google UX Design Certificate">
+                <input class="rz-input" data-rz-field="rz-cert1-date" placeholder="Date" aria-label="Certification 1 date" value="Aug 2026">
+                <button class="cert-row__remove" data-remove type="button" aria-label="Remove certification">×</button>
               </div>
-              <div class="cert-row">
-                <span class="cert-row__grip">⋮⋮</span>
-                <input class="rz-input" data-field="rz-cert2-name" placeholder="Certification name">
-                <input class="rz-input" data-field="rz-cert2-date" placeholder="Date">
+              <div class="cert-row" data-entry="cert2">
+                <span class="cert-row__grip" aria-hidden="true">⋮⋮</span>
+                <input class="rz-input" data-rz-field="rz-cert2-name" placeholder="Certification name" aria-label="Certification 2 name">
+                <input class="rz-input" data-rz-field="rz-cert2-date" placeholder="Date" aria-label="Certification 2 date">
+                <button class="cert-row__remove" data-remove type="button" aria-label="Remove certification">×</button>
               </div>
             </div>
-            <button class="rz-add" data-add-entry="certs" style="margin-top:6px">+ Add entry</button>
+            <button class="rz-add rz-add--spaced" data-add-entry="certs" type="button">+ Add entry</button>
           </div>
         </section>
 
-        <button class="rz-add-category" data-add-category="right">+ Add Category</button>
+        <div class="rz-addcat" data-addcat="right">
+          <button class="rz-add-category" data-add-category="right" type="button" aria-label="Add a section to the right column">+ Add Category</button>
+        </div>
       </div>
     </div>
 

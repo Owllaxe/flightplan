@@ -1,6 +1,6 @@
-/* Home — Figma 388:1275 (dashboard) and 388:1454 (intake modal over it) */
-
-/* The content gutter is the canonical one in base.css — no page override. */
+/* Home — Figma 388:1275 (dashboard).
+   The 388:1454 intake modal that used to be styled here is gone: js/app.js's
+   build-B onboarding quiz replaced it and injects its own styles. */
 
 /* --- semester card --------------------------------------------------------- */
 
@@ -98,7 +98,29 @@
 .goal-row .check:checked { background: var(--green); }
 .goal-row.is-done .goal-row__label { color: var(--ink-3); text-decoration: line-through; }
 .goal-row__label { font-size: 14px; }
-.goals-panel__add { display: inline-block; margin-top: 16px; font-size: 14px; font-weight: 500; color: var(--accent); }
+
+/* The panel's two closing actions share one line and wrap as a pair, so the
+   16px that used to sit on `.goals-panel__add` is now the flex parent's. */
+.goals-panel__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin-top: 16px;
+}
+.goals-panel__add { display: inline-block; margin-top: 0; font-size: 14px; font-weight: 500; color: var(--accent); }
+/* Secondary to "+ Add a goal": same row, quieter ink, underlined so it still
+   reads as a control, and it warms to the accent on hover/focus. */
+.goals-panel__quiz {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color .15s ease;
+}
+.goals-panel__quiz:hover,
+.goals-panel__quiz:focus-visible { color: var(--accent); }
 
 /* --- visa panel ------------------------------------------------------------ */
 
@@ -129,35 +151,58 @@
   .goals-panel { min-height: 0; }
 }
 
-/* --- intake modal (388:1454) ----------------------------------------------- */
+/* --- mascot gutter ---------------------------------------------------------
+   The pigeon is `position: fixed`, so at 1440x900 it sat on top of the goals
+   panel: it covered the right ~193px of "GOALS THIS SEMESTER" and its bubble
+   clipped the heading's top edge. Overlap fixes that depend on scroll position
+   only move the collision, so the pigeon gets a reserved column at the right
+   edge instead and the content simply stops short of it.
 
-.intake { width: 776px; padding: 34px 42px 40px; }
-.intake__dots { display: flex; justify-content: center; gap: 10px; }
-.intake__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
-.intake__dot.is-on { background: var(--accent); }
-.intake__step { text-align: center; margin-top: 14px; font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--ink-3); }
-.intake__q { font-family: var(--font-serif); font-size: 30px; line-height: 1.25; margin: 26px 0 24px; max-width: 420px; }
-.intake__options { display: flex; flex-direction: column; gap: 14px; max-width: 460px; }
-.intake__option {
-  display: flex; align-items: center; gap: 14px;
-  height: 46px; padding: 0 18px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--panel-alt);
-  font-size: 14px;
+   base.css calls the 40px gutter canonical and unoverridden, and it stays that
+   way on the other six pages — Home is the one page with a permanently parked
+   mascot, so it is the one page that has to buy the space back. The 200px is
+   the mascot's 176px + the 8px it sits off the right edge + a 16px gap, so the
+   content's right edge always clears the bird visibly.
+
+   Everything here is scoped to the `.page-home` body class. */
+
+.page-home .main { padding-right: 200px; }
+
+.page-home .mascot { width: 176px; right: 8px; bottom: 0; }
+
+/* Bubble moves from beside the pigeon to directly above it, filling the same
+   176px column, so it never reaches into the content either. */
+.page-home .mascot__bubble {
+  right: 0;
+  left: auto;
+  bottom: calc(100% + 10px);
+  width: 100%;
+  min-height: 0;
+  /* It is a real <button data-open-quiz> now, and js/home.js no longer sets
+     these inline. `pointer-events` is inherited, so it has to be undone from
+     `.mascot`'s `none` or the quiz cannot be opened. base.css's `button`
+     reset is one type selector and `.mascot__bubble` is one class, so the
+     background / border / radius / padding / font-size / colour / shadow it
+     supplies already outrank the reset (and are declared later in the file
+     besides) — nothing there is lost. What is lost is the UA sheet's
+     `text-align: center`, which no author rule touches. */
+  pointer-events: auto;
+  cursor: pointer;
   text-align: left;
-  transition: border-color .12s ease, background .12s ease;
+  line-height: 1.35;
+  transition: border-color .15s ease, background .15s ease;
 }
-.intake__option:hover { border-color: var(--accent-line); }
-.intake__option.is-on { border-color: var(--accent); background: #fdefe8; }
-.intake__radio {
-  width: 18px; height: 18px; border-radius: 50%;
-  border: 1.5px solid var(--border); flex: 0 0 18px;
-  display: grid; place-items: center;
+.page-home .mascot__bubble:hover,
+.page-home .mascot__bubble:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
-.intake__option.is-on .intake__radio { border-color: var(--accent); }
-.intake__option.is-on .intake__radio::after {
-  content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+
+/* Below 1100px `.home-lower` is already one column, so there is no side-by-side
+   layout left to protect: give the gutter back to the content, shrink the bird,
+   and pad the bottom deep enough that the last row can always scroll clear of
+   it (132px of pigeon + the bubble stacked above it + breathing room). */
+@media (max-width: 1100px) {
+  .page-home .main { padding-right: 40px; padding-bottom: 230px; }
+  .page-home .mascot { width: 132px; }
 }
-.intake__nav { display: flex; align-items: center; gap: 18px; margin-top: 30px; }
-.intake__pigeon { position: absolute; right: 0; bottom: 0; width: 230px; pointer-events: none; }

@@ -6,16 +6,21 @@
 
    Build B drives THIS TERM from `GET /programs/{id}/coursemap`. A has no
    backend, so the numbers come from the `term` bucket in js/store.js, seeded to
-   match Home ("Spring 2026, 15 credits in progress") and Profile (42 of 120
-   credits earned, 35% major progress). */
+   match Home's own course cards (18 credits across five courses) and Profile
+   (42 of 120 credits earned, 35% major progress).
+
+   The term reads Fall 2026 because that is what the rest of the product already
+   assumes: the whiteboard's calendar renders the live month, and Home's content
+   talks about the Fall Career Fair and September deadlines. The seeded
+   "Spring 2026" was the only thing disagreeing. */
 
 import { store } from './store.js';
 
 const SEED_TERM = {
-  label: 'Spring 2026',
+  label: 'Fall 2026',
   doneCr: 42,
   totalCr: 120,
-  inProgCr: 15,
+  inProgCr: 18,
   pct: 35,
   unitLabel: 'credits',
 };
@@ -71,6 +76,26 @@ export function paintSidebar(root = document) {
   root.querySelectorAll('[data-avatar-initials]').forEach((el) => {
     el.textContent = id.initials;
   });
+
+  /* Every page that shows the student's name marks it up rather than hardcoding
+     one, so signing up as yourself relabels the whole product instead of just
+     the sidebar circle. `first` is for greetings ("Welcome back, Mei"), `name`
+     for headers and the printed resume. */
+  set('[data-identity-name]', id.name);
+  set('[data-identity-first]', id.name.trim().split(/\s+/)[0] || id.name);
+
+  /* Onboarding Q4 promises "answering yes keeps the Visa tab front and centre",
+     so answering *no* has to mean something. A domestic student loses the nav
+     entry; the page itself stays reachable by URL, and the entry is left alone
+     when it is the page you are currently on, so the item you navigated to
+     never vanishes under you. Absent or unanswered ⇒ shown, because the visa
+     track is the product's reason for existing. */
+  const quiz = (store.all().flightplan || {}).quiz;
+  if (quiz && quiz.intl === false) {
+    root.querySelectorAll('.sidebar__link[href="visa.html"]').forEach((el) => {
+      if (!el.classList.contains('is-active')) el.hidden = true;
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => paintSidebar());

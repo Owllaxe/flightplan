@@ -2,6 +2,27 @@
 
 /* The content gutter is the canonical one in base.css — no page override. */
 
+/* --- inline text entry ------------------------------------------------------
+   The page used to reach for prompt() to collect a value; every edit affordance
+   here now opens an input in place instead, the way the Career Plan board does.
+   plan.css owns `.fp-input`, but profile.html does not load plan.css, so this is
+   the local twin of it — same white fill, same 8px radius, same 1px --border
+   hairline — so the two pages read as one product rather than two.
+   `[hidden]` is settled globally in base.css, so nothing is needed for it here. */
+.pf-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink);
+}
+/* The global :focus-visible ring is the accent at full strength, which shouts on
+   a field that is already outlined; the soft accent line is enough to locate it. */
+.pf-input:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 1px; }
+
 /* --- row 1: identity + goals ---------------------------------------------- */
 
 /* Frame 388:964 drew 791px + 392px inside a 1440px frame; the same proportion
@@ -29,8 +50,46 @@
 .pf-header__cta { margin-left: auto; margin-top: 20px; }
 
 .pf-header__body { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 0; }
-.pf-ident { flex: 0 0 128px; font-size: 16px; color: var(--ink-2); }
-.pf-ident p + p { margin-top: 12px; }
+/* Figma drew this column at the avatar's 128px because it held three bare
+   labels. It now carries a real mailing address, which cannot live in 128px, so
+   the column flexes instead: it shares `.pf-header__body` with `.pf-stats`
+   (`flex: 1 1 260px`) on wide screens and drops below it once the row runs out
+   of room. `min-width: 0` lets the long values wrap rather than forcing the
+   flex line wider than the card. 16px was sized for standalone lines; a
+   label/value list reads better a notch down. */
+.pf-ident { flex: 1 1 230px; min-width: 0; font-size: 14px; color: var(--ink-2); }
+
+.pf-ident__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+/* Edit is a secondary affordance next to the eyebrow — text only, no chrome, so
+   it never competes with the "Career plan" button above it. */
+.pf-ident__edit { font-size: 12.5px; font-weight: 500; color: var(--accent); }
+.pf-ident__edit:hover { text-decoration: underline; }
+
+/* A <dl> carries UA margins and each <dd> a 40px inline start indent; both are
+   zeroed so the rows sit flush with the eyebrow. */
+.pf-ident__list { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.pf-ident__row { margin: 0; }
+/* Same numbers as .advisor__label below — the two key/value lists on this page
+   are the same object, so they get the same key treatment. */
+.pf-ident__label { font-size: 10px; font-weight: 600; letter-spacing: .6px; color: var(--ink-3); }
+/* `overflow-wrap: anywhere` is the load-bearing part: an unbroken email or a
+   long street line would otherwise widen the flex column past its basis. */
+.pf-ident__value {
+  font-size: 13.5px;
+  color: var(--ink);
+  margin: 2px 0 0;
+  margin-inline-start: 0;
+  overflow-wrap: anywhere;
+}
+/* The view text and its input share one <dd>; only one is ever visible, and the
+   input needs the same 2px gap from the label that the text has. */
+.pf-ident__input { margin-top: 2px; }
 
 .pf-stats {
   flex: 1 1 260px;
@@ -55,8 +114,45 @@
   box-shadow: var(--sh-2);
   min-height: 372px;
   padding: 22px 28px;
+  /* The 372px matches .pf-header across the row, and the panel was empty when
+     it was drawn. Now that it holds goals, the column keeps that height but
+     distributes it: the list grows from the top and the board link is pushed to
+     the bottom edge by its own `margin-top: auto`. */
+  display: flex;
+  flex-direction: column;
 }
 .pf-goals__title { font-family: var(--font-hand); font-size: 36px; font-weight: 400; }
+
+/* base.css resets `ul` only, so the <ol> still carries UA numbering, margins and
+   padding — the ranks are drawn as badges, so all three go. */
+.pf-goals__list {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pf-goals__item { display: flex; align-items: flex-start; gap: 10px; }
+/* The same 22px badge as plan.css's .fp-goal__badge, so a goal looks like the
+   same object on both pages. */
+.pf-goals__rank {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #b7afa3;
+}
+/* 2px of lead so the first line's cap height sits on the badge's centre. */
+.pf-goals__text { font-size: 14.5px; color: var(--ink); line-height: 1.35; padding-top: 2px; }
+/* `block` so the auto margin resolves against the flex column and pins the link
+   to the panel floor however few goals there are. */
+.pf-goals__link { display: block; margin-top: auto; padding-top: 18px; font-size: 13px; }
 
 /* --- row 2: advisors ------------------------------------------------------- */
 
@@ -79,28 +175,89 @@
   display: flex;
   gap: 20px;
 }
+/* Was an inline style on each eyebrow; the same two values appear on three
+   eyebrows in this page, so they live in a class now. */
+.advisor__eyebrow { font-size: 12px; letter-spacing: .96px; }
+
 .advisor__left { flex: 1 1 260px; min-width: 0; }
-.advisor__avatar { width: 74px; height: 72px; border-radius: 50%; background: var(--placeholder); margin-top: 14px; }
+/* Figma drew 74x72 — a rounding artefact that was invisible while the circle was
+   an empty grey disc but reads as an oval now that it holds initials, so it is
+   squared to 74. 22px keeps the three-character "OIE" inside the circle with
+   room to spare (three Inter caps at 22px measure ~44px against a 74px width). */
+.advisor__avatar {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: var(--placeholder);
+  margin-top: 14px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: .5px;
+  color: var(--ink-2);
+}
 .advisor__name { font-family: var(--font-serif); font-size: 21px; margin-top: 15px; max-width: 220px; line-height: 1.2; }
 .advisor__fields { flex: 1 1 190px; min-width: 0; }
 .advisor__label { font-size: 10px; font-weight: 600; letter-spacing: .6px; color: var(--ink-3); }
 .advisor__value { font-size: 14px; margin: 2px 0 14px; }
 .advisor__value:last-child { margin-bottom: 0; }
+/* The email is a `.link`, but the `tel:` is not, and an unclassed <a> would take
+   the UA blue underline. `:not(.link)` is deliberate: a plain `.advisor__value a`
+   is specificity 0,1,1 and would beat base.css's `.link` (0,1,0), killing the
+   accent on the email. */
+.advisor__value a:not(.link) { color: inherit; text-decoration: none; }
+.advisor__value a:hover { text-decoration: underline; }
 
+/* The "+" card: the card itself is now only the shell, because it has to hold a
+   five-field form once opened. `overflow: hidden` keeps the form's corners
+   inside the 20px radius. */
 .advisor-add {
   background: var(--panel);
   border-radius: 20px;
   box-shadow: var(--sh-2);
   height: 217px;
+  width: 100%;
+  overflow: hidden;
+}
+/* The "+" is the whole card's hit area, not a glyph sitting in the middle of it. */
+.advisor-add__btn {
+  width: 100%;
+  height: 100%;
   display: grid;
   place-items: center;
   font-size: 34px;
   font-weight: 300;
   color: var(--accent-line);
   transition: color .15s ease, background .15s ease;
-  width: 100%;
 }
-.advisor-add:hover { color: var(--accent); background: var(--panel-alt); }
+.advisor-add__btn:hover { color: var(--accent); background: var(--panel-alt); }
+
+/* Open, the card stops being the 146px third track and takes the whole row —
+   five fields cannot be crushed into 146px — and drops its drawn height so it
+   sizes to the form. */
+.advisor-add.is-open {
+  grid-column: 1 / -1;
+  height: auto;
+  padding: 18px 20px;
+}
+.advisor-add.is-open .advisor-add__btn { display: none; }
+/* auto-fit rather than a fixed count so the five fields reflow from one row to
+   two or three as the row narrows, instead of shrinking below usable width. */
+.advisor-add__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.advisor-add__actions { display: flex; gap: 10px; margin-top: 14px; }
+
+/* Contacts added at runtime are appended to .pf-row2, which would put them after
+   the "+" card in DOM order. Ordering the grid items keeps "+" last for good;
+   `order` applies to grid items exactly as it does to flex items. */
+.pf-row2 .advisor { order: 0; }
+.advisor-add { order: 1; }
 
 /* --- row 3: saved listings + experiences ----------------------------------- */
 
@@ -120,6 +277,9 @@
   min-height: 440px;
   padding: 22px 24px;
 }
+/* Lifted off an inline style, like the advisor eyebrows; the extra bottom margin
+   is this panel's own — it has no heading between the eyebrow and the list. */
+.pf-saved__eyebrow { font-size: 12px; letter-spacing: .96px; margin-bottom: 18px; }
 .pf-saved__item { padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
 .pf-saved__item:last-child { border-bottom: 0; }
 .pf-saved__title { font-size: 15px; font-weight: 500; }
@@ -137,27 +297,52 @@
   gap: 24px 60px;
   align-content: start;
 }
-.pf-exp__eyebrow { grid-column: 1 / -1; }
+.pf-exp__eyebrow { grid-column: 1 / -1; font-size: 12px; letter-spacing: .96px; }
 .pf-exp__list { align-self: start; }
 .pf-exp__item { padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 26px; }
 .pf-exp__role { font-family: var(--font-serif); font-size: 19px; }
 .pf-exp__meta { font-size: 14px; color: var(--ink-2); margin-top: 6px; }
-.pf-exp__add { display: inline-block; font-size: 14px; font-weight: 500; color: var(--accent); }
+/* The button used to carry `margin-top:auto; align-self:flex-start` inline; it is
+   wrapped now, so the wrapper does the pinning and the button just sits in it.
+   `align-self: stretch` gives the form inside the full column width. */
+.pf-exp__foot { margin-top: auto; align-self: stretch; padding-top: 16px; }
+/* block + left text so it stays at the left edge of the stretched foot, where
+   the old `align-self: flex-start` used to put it. */
+.pf-exp__add { display: block; text-align: left; font-size: 14px; font-weight: 500; color: var(--accent); }
+/* Both "+" affordances read as text links, so they behave like one on hover. */
+.pf-exp__add:hover, .skills__add:hover { text-decoration: underline; }
+
+.pf-addform { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.pf-addform__actions { display: flex; gap: 10px; }
 .pf-exp__left { display: flex; flex-direction: column; height: 100%; }
 .pf-exp__right { display: flex; flex-direction: column; height: 100%; }
 
 .skills { display: flex; flex-wrap: wrap; gap: 9px; align-content: flex-start; }
+/* #d9d9d9 was a raw Figma grey belonging to no token; it went cold against the
+   warm cream page. --sunken is the page's own recessed tone and the hairline
+   gives the chip an edge now that it is barely darker than the panel.
+   The fixed 33px clipped a two-word skill ("Data Structures") as soon as the
+   column narrowed, so the height is a floor and the padding carries the box. */
 .skill {
-  background: #d9d9d9;
+  background: var(--sunken);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  height: 33px;
-  padding: 0 10px;
+  min-height: 33px;
+  height: auto;
+  padding: 6px 10px;
   display: inline-flex;
   align-items: center;
   font-size: 14px;
   color: var(--ink-2);
 }
-.skills__add { align-self: flex-end; margin-top: auto; font-size: 14px; font-weight: 500; color: var(--accent); }
+/* The button's own `align-self: flex-end; margin-top: auto` stopped applying once
+   it was wrapped, so the foot took over both jobs; the right alignment is the
+   old flex-end. */
+.skills__foot { margin-top: auto; padding-top: 16px; align-self: stretch; text-align: right; }
+.skills__add { font-size: 14px; font-weight: 500; color: var(--accent); }
+/* The field inherits the foot's right alignment otherwise, which puts the
+   placeholder and the caret on the wrong edge of a full-width input. */
+.skills__foot .pf-input { text-align: left; margin-top: 8px; }
 
 /* --- row 4: schedule ------------------------------------------------------- */
 
@@ -190,6 +375,8 @@
 
   /* the "+" card keeps its drawn width instead of stretching across the row */
   .pf-row2 .advisor-add { width: 146px; }
+  /* …except once it opens, when it is a five-field form and needs the column. */
+  .pf-row2 .advisor-add.is-open { width: 100%; }
 
   .pf-exp { gap: 24px 32px; }
 }

@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=726c0a08">
-<link rel="stylesheet" href="css/plan.css?v=4ca6e561">
+<link rel="stylesheet" href="css/base.css?v=4a2f42fc">
+<link rel="stylesheet" href="css/plan.css?v=8aad4faa">
 </head>
 <body class="page-plan">
 
@@ -26,14 +26,13 @@
       <a class="sidebar__link" href="planner.html">Planner</a>
       <a class="sidebar__link is-active" href="plan.html" aria-current="page">Goals</a>
       <a class="sidebar__link" href="career.html">Career</a>
-      <a class="sidebar__link" href="contacts.html">Contacts</a>
       <a class="sidebar__link" href="visa.html">Visa</a>
     </nav>
     <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
          js/sidebar.js repaints them from the store on load. -->
     <div class="sidebar__term">
       <p class="term__label">THIS TERM</p>
-      <p class="term__line"><span data-term-label>Spring 2026</span> · <span data-term-inprog>15</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__line"><span data-term-label>Fall 2026</span> · <span data-term-inprog>18</span> <span data-term-unit>credits</span> in progress</p>
       <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
       <div class="term__bar">
         <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
@@ -67,7 +66,7 @@
       <!-- §5.7 row 1 — goals | (calendar, this week) | (to do, habits) -->
       <div class="fp-row fp-row--1">
 
-        <!-- 1. semester goals — the one module with no ✕ -->
+        <!-- 1. semester goals — the page's anchor, so no ✕; the + menu hides it -->
         <section class="fp-card fp-card--goals" data-panel="goals" data-drag="offset" data-fp-card="goals">
           <div class="fp-goals__head">
             <span class="fp-label">Semester goals</span>
@@ -76,7 +75,7 @@
           <div class="fp-goals__list" id="fpGoalList"></div>
           <button class="fp-add fp-goals__add" id="fpGoalAdd" type="button">+ add a goal</button>
           <input class="fp-input" id="fpGoalInput" type="text" placeholder="New goal — press Enter" hidden>
-          <p class="fp-goals__note">Goals card can’t be deleted — everything else can.</p>
+          <p class="fp-goals__note">nothing is deleted — the + menu shows and hides any card.</p>
         </section>
 
         <div class="fp-col">
@@ -211,8 +210,8 @@
          panel so it stays readable over the dot grid. -->
     <header class="fp-banner">
       <div class="fp-banner__id">
-        <h1 class="fp-banner__title" id="fpTitle">Jordan’s career plan</h1>
-        <p class="fp-banner__date" id="fpDate">Spring 2026</p>
+        <h1 class="fp-banner__title" id="fpTitle">Jordan’s goals</h1>
+        <p class="fp-banner__date" id="fpDate">Fall 2026 · career plan board</p>
       </div>
       <div class="fp-banner__stat">
         <span id="fpGoalCount">4 goals</span>
@@ -226,8 +225,12 @@
     <div class="wb-chrome">
       <div class="pl-tools">
         <button data-tool="add" aria-label="Add a panel or show/hide a module" aria-haspopup="true" aria-expanded="false"><img src="assets/tool-plus.svg" alt=""></button>
-        <button data-tool="draw" aria-label="Draw"><img src="assets/tool-pencil.svg" alt=""></button>
-        <button data-tool="erase" aria-label="Erase"><img src="assets/tool-eraser.svg" alt=""></button>
+        <button data-tool="draw" aria-label="Draw" aria-pressed="false"><img src="assets/tool-pencil.svg" alt=""></button>
+        <button data-tool="erase" aria-label="Erase" aria-pressed="false"><img src="assets/tool-eraser.svg" alt=""></button>
+      </div>
+      <!-- only offered while the eraser is out and there is ink to lose -->
+      <div class="wb-clear" id="wbClear" hidden>
+        <button class="wb-clear__btn" id="wbClearBtn" type="button">erase all doodles</button>
       </div>
       <div class="wb-zoom" id="wbZoom">
         <button class="wb-zoom__step" data-zoom="out" aria-label="Zoom out">−</button>

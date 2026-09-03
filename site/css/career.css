@@ -91,8 +91,26 @@
 }
 
 .saved-rail__list { margin-top: 15px; }
-.saved-rail__item { padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
-.saved-rail__item:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+/* Each row opens the listing it names, so it is a <button> now. A button is
+   inline-block and centre-aligned by default and the rows are full-width text,
+   so the three defaults have to be put back before the drawn spacing means
+   anything again. base.css already zeroes button padding, so `padding-bottom`
+   below is the only inset the row has. */
+.saved-rail__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+/* `:last-child` is element-agnostic, so it still finds the bottom row now that
+   the rows are buttons. `:last-of-type` is the belt to that braces: if anything
+   non-button ever ends up inside the list (an empty state, a JS sentinel) the
+   last row must still lose its rule rather than draw a line into thin air. */
+.saved-rail__item:last-child,
+.saved-rail__item:last-of-type { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
 
 /* Each saved title now sits on a tinted pill (402:71 peach, 402:73 sage).
    The drawn rect runs from 7px left of the text column to 33px short of its
@@ -106,9 +124,41 @@
   background: var(--accent-tint);
   font-size: 15px; font-weight: 500; line-height: 20px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: filter .15s ease, border-color .15s ease;
 }
 .saved-rail__item[data-tone="sage"] .saved-rail__title { background: var(--green-tint); }
-.saved-rail__sub { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+/* The pill is the only part of the row that is already a drawn object, so it is
+   the part that answers the pointer — it lightens and its hairline picks up the
+   accent. Nothing moves: the rail is a fixed-height box and a row that shifted
+   would push the ones under it. Focus mirrors hover so the keyboard sees the
+   same row highlighted that the global focus ring is already outlining. */
+.saved-rail__item:hover .saved-rail__title,
+.saved-rail__item:focus-visible .saved-rail__title {
+  filter: brightness(1.05);
+  border-color: var(--accent-line);
+}
+/* a <span> inside a button, so it needs the block it used to get for free */
+.saved-rail__sub { display: block; font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+
+/* The head's live tally of what is in the rail. Small enough to read as an
+   annotation on the eyebrow rather than a second label, and it has to cancel
+   the eyebrow's 1.2px tracking or the digits drift apart inside the pill. */
+.saved-rail__count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--border-soft);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+
+/* Shown by JS when the last bookmark comes off. Sits where the first row would
+   have been, so the panel does not read as broken — just empty. No `display`
+   here on purpose: it is toggled with [hidden]. */
+.saved-rail__empty { font-size: 13px; line-height: 1.5; color: var(--ink-3); margin-top: 16px; }
 
 /* --- toolbar --------------------------------------------------------------- */
 
@@ -139,6 +189,11 @@
 .is-expanded .expand-toggle .icon-collapse { display: block; }
 .is-expanded .expand-toggle .icon-expand { display: none; }
 
+/* base.css ships .tag--internship / --research / --oncampus; the fourth variant
+   lives here because NEW GRAD is a career-listing category and nothing else on
+   the site draws one. Same shape as the other three, only the pair swapped. */
+.tag--newgrad { background: var(--newgrad-tint); color: var(--newgrad); }
+
 .filters { display: flex; gap: 26px; }
 .filter {
   font-size: 10px; font-weight: 600; letter-spacing: .5px;
@@ -149,6 +204,7 @@
 .filter[data-cat="internship"] { color: var(--accent); }
 .filter[data-cat="research"]   { color: var(--green); }
 .filter[data-cat="oncampus"]   { color: var(--amber); }
+.filter[data-cat="newgrad"]    { color: var(--newgrad); }
 .filter.is-on { border-bottom-color: currentColor; }
 .filter:hover { border-bottom-color: color-mix(in srgb, currentColor 40%, transparent); }
 
@@ -176,6 +232,18 @@
   --fall-to:         22px;   /* how far below it drops on the way out         */
   --ease-out: cubic-bezier(.22, .9, .32, 1);
   --ease-in:  cubic-bezier(.45, 0, .85, .35);
+
+  /* NEW GRAD is the fourth listing category, and the only one base.css does not
+     ship a token pair for — the other three (accent / green / amber) are global
+     because other pages use them, this one is only ever a career listing. A
+     desaturated slate keeps it legible next to the three warm hues without
+     reading as a fourth "warning" colour.
+     Contrast checked against the three pairs it sits beside: #4a6572 on
+     #dbe4e8 is 4.79:1, between internship (5.12:1) and research (4.34:1) and
+     far clear of on-campus (2.51:1), so both hexes stand as drawn. As a filter
+     label on the page ground it is 5.54:1. */
+  --newgrad:      #4a6572;
+  --newgrad-tint: #dbe4e8;
 }
 
 .career-body {
@@ -190,6 +258,16 @@
 
 .career-body.is-detail { grid-template-columns: minmax(280px, 0.722fr) minmax(0, 1fr); }
 .career-body.is-detail .jobs:not(.is-held) { display: none; }
+
+/* A listing's detail is the mirror image of a start-up's: the pane takes the
+   RIGHT column and it is the start-ups panel that steps aside, so the grid the
+   student was just reading stays put on the left and they keep their place in
+   it. That is why this state holds the plain 50/50 split rather than the
+   detail state's 0.722 : 1 — neither side is subordinate here. `:not(.is-flying)`
+   for the same reason it is there on `.is-expanded`: the panel has to stay
+   painted while it flies out, and only then drop. */
+.career-body.is-job-detail { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.career-body.is-job-detail .startups:not(.is-flying) { display: none; }
 
 /* the start-ups panel taking the whole content width */
 .career-body.is-startups-wide { grid-template-columns: minmax(0, 1fr); }
@@ -249,9 +327,19 @@
   border-radius: 6px;
   box-shadow: var(--sh-3);
   overflow: hidden;
+  /* The card lifted on hover long before it did anything when clicked — the
+     audit's finding 2. It opens a detail pane now, so the lift is honest and
+     the pointer is allowed to say so. `tabindex="0"` on the article makes it a
+     keyboard target too, hence the focus ring. */
+  cursor: pointer;
   transition: transform .12s ease, box-shadow .12s ease;
 }
 .job:hover { transform: translateY(-2px); box-shadow: var(--sh-4); }
+.job:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Which card the open pane belongs to. Border + elevation only, never the
+   transform — a selected card must not sit permanently lifted or hovering it
+   would have nothing left to say. */
+.job.is-selected { border-color: var(--accent); box-shadow: var(--sh-4); }
 .job::before {
   content: '';
   position: absolute; left: 0; top: 0; bottom: 0;
@@ -260,6 +348,7 @@
 }
 .job[data-cat="research"]::before { background: var(--green); }
 .job[data-cat="oncampus"]::before { background: var(--amber); }
+.job[data-cat="newgrad"]::before  { background: var(--newgrad); }
 .job[data-cat="plain"]::before    { background: var(--accent); }
 
 .job__body { flex: 1 1 auto; padding: 16px 20px 0 22px; min-width: 0; }
@@ -379,7 +468,32 @@
               transform var(--card-ms) var(--ease-out);
 }
 .startup__row { display: flex; gap: 12px; align-items: flex-start; }
-.startup__logo { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 10px; background: var(--placeholder); }
+/* The logo was a bare grey square — a placeholder that shipped. None of these
+   companies has a mark, so the square becomes a monogram instead: the same
+   serif the card's name is set in, at the size a two-letter lockup wants, with
+   the half-pixel of tracking that stops the pair touching. `--placeholder` is
+   still the fallback fill for any start-up without a tint below. */
+.startup__logo {
+  flex: 0 0 48px;
+  width: 48px; height: 48px;
+  border-radius: 10px;
+  background: var(--placeholder);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  letter-spacing: .5px;
+  color: var(--ink-2);
+  user-select: none;
+}
+/* One tint each, drawn from the four category pairs this page already uses, so
+   the directory reads as four distinct records at a glance without introducing
+   a fifth palette. The tint is the fill and the full-strength hue is the ink —
+   the same relationship every `.tag` on the page has. */
+.startup[data-startup="nimbus"]   .startup__logo { background: var(--accent-tint);  color: var(--accent); }
+.startup[data-startup="fernweg"]  .startup__logo { background: var(--green-tint);   color: var(--green); }
+.startup[data-startup="loopline"] .startup__logo { background: var(--amber-tint);   color: var(--amber); }
+.startup[data-startup="verdant"]  .startup__logo { background: var(--newgrad-tint); color: var(--newgrad); }
 .startup__name { font-family: var(--font-serif); font-size: 17px; }
 .startup__meta { font-size: 12.5px; color: var(--ink-3); margin-top: 2px; }
 .startup__blurb { font-size: 13px; color: var(--ink-2); margin-top: 14px; }
@@ -457,8 +571,9 @@
 }
 
 /* --- start-ups: the swipe-over directory view ------------------------------
-   Placeholder records, drawn with the components this screen already has —
-   eyebrow, serif title, meta row, blurb, and the category tags. */
+   Drawn with the components this screen already has — eyebrow, serif title,
+   meta row, blurb, and the category tags — so a directory record and a job
+   card read as the same product. */
 
 .startups__wide {
   display: none;
@@ -489,6 +604,35 @@
   animation: jobFall var(--card-out-ms) var(--ease-in) both;
   animation-delay: calc(var(--i, 0) * var(--stagger-out-ms));
 }
+
+/* The record now opens on an identity row rather than a bare heading: the
+   monogram beside the name and meta line, so the card you clicked in the left
+   list and the record you land on carry the same mark. */
+.startups__wide-id {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+/* the title's own top margin was the gap under the eyebrow; the row owns that
+   spacing now, and leaving it would push the text block off the logo's centre */
+.startups__wide-id .startups__wide-title { margin-top: 0; }
+
+/* Same monogram as the list card (it keeps `.startup__logo`), scaled to the
+   record's heading. The radius grows with it so the corner keeps its share of
+   the square: 10/48 on the card, 12/56 here. The tint comes from a `data-tone`
+   JS sets when it swaps records, because the wide panel is one node reused for
+   all four — there is no `[data-startup]` ancestor to key off. */
+.startups__wide-logo {
+  flex: 0 0 56px;
+  width: 56px; height: 56px;
+  border-radius: 12px;
+  font-size: 22px;
+}
+.startups__wide-logo[data-tone="peach"] { background: var(--accent-tint);  color: var(--accent); }
+.startups__wide-logo[data-tone="sage"]  { background: var(--green-tint);   color: var(--green); }
+.startups__wide-logo[data-tone="amber"] { background: var(--amber-tint);   color: var(--amber); }
+.startups__wide-logo[data-tone="slate"] { background: var(--newgrad-tint); color: var(--newgrad); }
 
 .startups__wide-title { font-family: var(--font-serif); font-size: 26px; margin-top: 10px; }
 .startups__wide-meta { font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
@@ -529,27 +673,229 @@
 
 .is-detail .startups__title { font-size: 20px; }
 
+/* --- a listing's own detail pane -------------------------------------------
+   Same construction as `.startup-detail` — a panel that is simply not there
+   until its state class is on `.career-body`, and that arrives on the one
+   animation this screen uses for anything appearing (`jobRise`, `--card-ms`).
+   The difference is which side it lands on: this pane takes the RIGHT column
+   and the start-ups panel is the half that leaves, so the grid the student was
+   reading stays where it was. That is also why it carries the start-ups
+   panel's -29px: it occupies that panel's slot, and that slot starts level
+   with the toolbar row rather than with the listings grid. */
+.job-detail {
+  display: none;
+  margin-top: -29px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 26px 30px;
+  min-height: 0;
+}
+.is-job-detail .job-detail { display: block; }
+.job-detail.is-rising { animation: jobRise var(--card-ms) var(--ease-out) both; }
+
+.job-detail__head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 16px;
+}
+/* The same arrow the start-ups panel uses for "put this away", turned the same
+   way by the same transition — pointing right, back toward the column the pane
+   came out of. Sharing the treatment is the point: one gesture, one glyph. */
+.job-detail__close img {
+  transform: rotate(90deg);
+  transition: transform .28s var(--ease-out);
+}
+
+.job-detail__title { font-family: var(--font-serif); font-size: 24px; line-height: 1.25; }
+.job-detail__company { font-size: 13px; font-weight: 500; color: var(--ink-2); margin-top: 7px; }
+/* `.job__loc` one step up — this is the heading block of a pane, not the last
+   line of a 234px card, so the pin and the text can both afford a pixel. */
+.job-detail__loc {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--ink-2); margin-top: 6px;
+}
+.job-detail__loc img { width: 7px; height: 7px; }
+
+/* Term, pay and deadline: a label column and a value column, ruled off top and
+   bottom so the facts read as a block of data rather than more prose. The
+   labels borrow the eyebrow's 11px instead of the block's 12.5px so the left
+   column stays subordinate to the answers beside it. */
+.job-detail__facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 9px 18px;
+  margin: 20px 0 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.job-detail__facts dt {
+  font-size: 11px; font-weight: 600; letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-top: 1px;             /* pulls the smaller label onto the value's baseline */
+}
+.job-detail__facts dd { margin: 0; color: var(--ink); }
+
+.job-detail__body { margin-top: 18px; }
+.job-detail__body p { font-size: 13px; color: var(--ink-2); margin-bottom: 16px; }
+
+.job-detail__label { margin-top: 20px; }
+
+/* Deliberately NOT `.tag`: a tag on this page means a category, and a category
+   is a thing you can filter by. These are the skills the posting asks for and
+   nothing on the page keys off them, so they are outlined rather than filled —
+   present, countable, and clearly not one of the four coloured labels. */
+.job-detail__skills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.job-detail__skill {
+  display: inline-flex; align-items: center;
+  height: 24px; padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel-alt);
+  font-size: 11.5px; color: var(--ink-2);
+}
+
+/* The extra restriction on the four warn cards, spelled out. It reuses the visa
+   banner's own soft/line pair so the two notices are recognisably the same
+   voice, and it repeats the `!` dot the card carried so the student can see
+   which mark they just clicked through.
+   `display` is scoped to `:not([hidden])` on purpose — this element is toggled
+   with the attribute, and an unqualified `display:flex` here is exactly the
+   shape of the bug base.css's `[hidden]` rule exists to stop. */
+.job-detail__visa {
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: 12px;
+}
+.job-detail__visa:not([hidden]) { display: flex; }
+.job-detail__visa .job__warn { flex: 0 0 16px; margin-top: 1px; }
+.job-detail__visa p { font-size: 12.5px; color: var(--ink-2); }
+
+/* wraps, because the pane is half the content width and gets narrower still */
+.job-detail__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+
 /* --- visa banner ----------------------------------------------------------- */
 
 /* Stays the centred notice it is in the frame, but as a share of the content
    area (866 / 1124) so it scales with the page instead of stranding. */
 .visa {
-  margin: 16px auto 0;
-  max-width: 77%;
-  min-height: 84px;
+  margin: 16px 0 0;
   background: var(--accent-soft);
   border: 1px solid var(--accent-line);
-  border-radius: 20px;
-  padding: 15px 24px;
+  border-radius: 12px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   gap: 24px;
 }
-.visa__title { font-size: 19px; font-weight: 600; color: var(--accent); }
-.visa__text { font-size: 14px; margin-top: 6px; }
-.visa__actions { margin-left: auto; text-align: right; display: flex; flex-direction: column; gap: 12px; }
-.visa__actions a, .visa__actions button { font-size: 14px; font-weight: 500; color: var(--accent); }
-.visa__actions button:hover, .visa__actions a:hover { text-decoration: underline; }
+.visa__body { min-width: 0; }
+
+.visa__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .16em;
+  color: color-mix(in srgb, var(--accent) 62%, var(--panel));
+}
+.visa__title {
+  font-family: var(--font-hand);
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--accent);
+  margin: 7px 0 5px;
+}
+.visa__status { font-size: 12.5px; color: var(--ink-2); }
+
+/* Not `.btn`: this one is the strip's single action and reads at 13px beside a
+   23px heading, where .btn's 44px/18px would out-shout the heading itself. */
+.visa__cta {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: filter .15s ease;
+}
+.visa__cta:hover { filter: brightness(1.08); }
+
+@media (max-width: 780px) {
+  .visa { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .visa__cta { margin-left: 0; }
+}
+
+/* --- message a founder ------------------------------------------------------
+   The composer that replaces five dead "Message →" buttons and four dead
+   mailto: links. It is base.css's `.modal` with a width: 520px is about 62
+   characters at the textarea's 13px, which is the width a message this length
+   wants to be read at, and `width:100%` lets it give that up on a phone rather
+   than overflow the backdrop's 24px padding. */
+.modal.msg {
+  width: 100%;
+  max-width: 520px;
+  padding: 28px 30px 24px;
+}
+.msg__title { font-family: var(--font-hand); font-size: 28px; font-weight: 400; margin-top: 6px; }
+.msg__meta { font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
+
+/* a real <label>, so it carries the eyebrow's sizing rather than its class —
+   and it has to be block or the textarea would sit on the same line as it */
+.msg__label {
+  display: block;
+  margin-top: 18px;
+  font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* The draft is the point of the modal, so the field is sized like something you
+   are expected to write in: panel fill against the modal's lighter `--panel-alt`
+   so the box reads as sunken, and 1.6 line-height because the prefilled template
+   is six short paragraphs. Vertical resize only — horizontal would break the
+   modal's width. */
+.msg__body {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 13px; line-height: 1.6;
+  color: var(--ink);
+  resize: vertical;
+  transition: border-color .15s ease;
+}
+.msg__body:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.msg__note { font-size: 12px; color: var(--ink-3); margin-top: 10px; }
+
+.msg__actions {
+  display: flex; align-items: center; gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+/* Pushed to the far left of the action row by its own auto margin. It carries
+   NO `display` — it is toggled with [hidden], and an author display here is the
+   exact bug base.css's global `[hidden]` rule was added to end. */
+.msg__done { font-size: 12.5px; color: var(--green); margin-right: auto; }
 
 /* --- full-height page: one screen, no document scroll ----------------------
    On a normal desktop viewport the screen is a flex column that fills the
@@ -579,8 +925,9 @@
 
   .career-page .career-body { flex: 1 1 auto; min-height: 0; }
 
-  /* the banner keeps its centred 77% width now that it is a flex item */
-  .career-page .visa { flex: 0 0 auto; width: 77%; }
+  /* Build B's strip spans the content column rather than sitting centred at
+     77% — it reads as a status bar for the listings above it, not as a card. */
+  .career-page .visa { flex: 0 0 auto; width: 100%; }
 
   /* Two columns compact, four expanded — fixed counts so the card proportion
      stays sane however wide the screen gets. Rows share the height the body
@@ -594,11 +941,20 @@
     overflow: hidden auto;
   }
   .career-body.is-expanded .jobs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* An open listing takes the right-hand column, so the expanded grid has to
+     drop back from four columns to two while it is there — four across half the
+     content width is a row of slivers. Opening a detail therefore never has to
+     collapse the grid, which is what lets a saved item deep in the list (cards
+     9-16 only exist expanded) be opened straight from the rail. */
+  .career-body.is-expanded.is-job-detail .jobs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   /* the row, not the frame, sets the card height here */
   .job { min-height: 0; }
 
   .startup-detail { overflow: hidden auto; }
+  /* same contract as the other panes on this screen: the page never scrolls, so
+     a listing longer than the column scrolls inside its own box */
+  .job-detail { overflow: hidden auto; }
 }
 
 /* --- narrow: the two-column rows stack ------------------------------------- */
@@ -618,7 +974,14 @@
     --fall-to: 0px;
   }
   .startups__back img,
+  .job-detail__close img,
+  .saved-rail__title,
   .job { transition: none; }
+
+  /* the detail pane rises on `jobRise`, which the zeroed tokens above already
+     flatten — this only stops the animation being *scheduled* at all, so a pane
+     that is display:none until its state class lands never flickers on arrival */
+  .job-detail.is-rising { animation: none; }
 
   /* the start-up cards still reveal their contact row — just without the
      growth, and with no transition to carry it */
@@ -636,14 +999,18 @@
   .saved-rail { flex: 1 1 100%; }
 
   .career-body,
-  .career-body.is-detail { grid-template-columns: minmax(0, 1fr); }
+  .career-body.is-detail,
+  .career-body.is-job-detail { grid-template-columns: minmax(0, 1fr); }
 
   /* no left half to swipe over once everything is one column */
   .startups__body { flex-direction: column; }
   .is-startups-wide .startups__list { flex: 1 1 auto; }
 
-  /* nothing to sit level with once the panel is below the grid */
+  /* nothing to sit level with once the panel is below the grid — and the job
+     pane borrows that offset from the panel whose slot it takes, so it drops
+     the offset in the same breath */
   .startups { margin-top: 0; }
+  .job-detail { margin-top: 0; }
 
   .visa { max-width: 100%; }
 }

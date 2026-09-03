@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=726c0a08">
-<link rel="stylesheet" href="css/career.css?v=e51425e1">
+<link rel="stylesheet" href="css/base.css?v=4a2f42fc">
+<link rel="stylesheet" href="css/career.css?v=059baf19">
 </head>
 <body class="career-page">
 
@@ -26,18 +26,19 @@
       <a class="sidebar__link" href="planner.html">Planner</a>
       <a class="sidebar__link" href="plan.html">Goals</a>
       <a class="sidebar__link is-active" href="career.html" aria-current="page">Career</a>
-      <a class="sidebar__link" href="contacts.html">Contacts</a>
       <a class="sidebar__link" href="visa.html">Visa</a>
     </nav>
-    <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
-         js/sidebar.js repaints them from the store on load. -->
+    <!-- THIS TERM (build B §3.4). Seeded values are the canonical ones — Fall
+         2026, 18 credits in progress, 42 of 120 earned, so the bars read 35%
+         done and 15% in progress. js/sidebar.js repaints them from the store on
+         load; these are what the page shows with JavaScript off. -->
     <div class="sidebar__term">
       <p class="term__label">THIS TERM</p>
-      <p class="term__line"><span data-term-label>Spring 2026</span> · <span data-term-inprog>15</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__line"><span data-term-label>Fall 2026</span> · <span data-term-inprog>18</span> <span data-term-unit>credits</span> in progress</p>
       <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
       <div class="term__bar">
         <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
-        <div class="term__bar-prog" data-term-bar-prog style="width:13%"></div>
+        <div class="term__bar-prog" data-term-bar-prog style="width:15%"></div>
       </div>
     </div>
     <div class="sidebar__foot">
@@ -53,19 +54,29 @@
       <div class="profile-card">
         <div class="profile-card__avatar avatar avatar--lg" data-avatar-initials aria-hidden="true">JL</div>
         <div>
-          <h1 class="profile-card__name">Student Name</h1>
-          <p class="profile-card__meta"><span>Class of 2029</span><span>Credits - 42.0</span></p>
+          <!-- js/sidebar.js fills [data-identity-name] on every page; the text
+               inside is the seeded fallback for a no-JS load. -->
+          <h1 class="profile-card__name" data-identity-name>Jordan Lee</h1>
+          <p class="profile-card__meta">
+            <span>Carnegie Mellon University · Class of 2029</span>
+            <span data-career-credits>42 of 120 credits · 18 in progress</span>
+          </p>
         </div>
         <a class="btn profile-card__cta" href="resume.html">Resume →</a>
       </div>
 
       <!-- The rail keeps a fixed slot in the row; the panel itself fills that slot
            and drops down over the page when expanded, so opening the whole list
-           never reflows the grid below it. -->
+           never reflows the grid below it.
+
+           The list is rendered by js/career.js from the bookmarks in the store,
+           so saving a listing anywhere on this page lands here. The six items
+           seeded below are the same six career.js seeds on a first visit, which
+           is what a no-JS load shows. -->
       <div class="saved-rail-slot">
         <div class="saved-rail" id="savedRail">
           <div class="saved-rail__head">
-            <p class="eyebrow">SAVED LISTS</p>
+            <p class="eyebrow">SAVED LISTS <span class="saved-rail__count" data-saved-count>6</span></p>
             <button class="saved-rail__toggle" id="savedExpand" type="button"
                     aria-controls="savedList" aria-expanded="false"
                     aria-label="Show the whole saved list">
@@ -74,31 +85,32 @@
             </button>
           </div>
           <div class="saved-rail__list" id="savedList">
-            <div class="saved-rail__item" data-tone="peach">
-              <p class="saved-rail__title">Product Design Intern</p>
-              <p class="saved-rail__sub">Fielding Studio · Remote</p>
-            </div>
-            <div class="saved-rail__item" data-tone="sage">
-              <p class="saved-rail__title">Research Assistant, Bio Lab</p>
-              <p class="saved-rail__sub">Dept. of Biology · On-campus</p>
-            </div>
-            <div class="saved-rail__item" data-tone="peach">
-              <p class="saved-rail__title">Junior Data Analyst</p>
-              <p class="saved-rail__sub">Northwind Data · Hybrid</p>
-            </div>
-            <div class="saved-rail__item" data-tone="sage">
-              <p class="saved-rail__title">Lab Assistant, Chemistry</p>
-              <p class="saved-rail__sub">Dept. of Chemistry · On-campus</p>
-            </div>
-            <div class="saved-rail__item" data-tone="peach">
-              <p class="saved-rail__title">Product Design Intern</p>
-              <p class="saved-rail__sub">Meridian Studio · Remote</p>
-            </div>
-            <div class="saved-rail__item" data-tone="sage">
-              <p class="saved-rail__title">Teaching Assistant, CS 210</p>
-              <p class="saved-rail__sub">Courant · On-campus</p>
-            </div>
+            <button class="saved-rail__item" type="button" data-tone="peach" data-saved-ref="job-3">
+              <span class="saved-rail__title">Product Design Intern</span>
+              <span class="saved-rail__sub">Fielding Studio · Remote (US)</span>
+            </button>
+            <button class="saved-rail__item" type="button" data-tone="sage" data-saved-ref="job-2">
+              <span class="saved-rail__title">Undergraduate Research Assistant, Human-Robot Interaction</span>
+              <span class="saved-rail__sub">Robotics Institute, Carnegie Mellon · Newell-Simon Hall</span>
+            </button>
+            <button class="saved-rail__item" type="button" data-tone="peach" data-saved-ref="job-5">
+              <span class="saved-rail__title">Data Science Intern, Summer 2027</span>
+              <span class="saved-rail__sub">Northwind Data · Pittsburgh, PA</span>
+            </button>
+            <button class="saved-rail__item" type="button" data-tone="sage" data-saved-ref="job-4">
+              <span class="saved-rail__title">Teaching Assistant, 15-122</span>
+              <span class="saved-rail__sub">School of Computer Science · Gates Hillman Center</span>
+            </button>
+            <button class="saved-rail__item" type="button" data-tone="peach" data-saved-ref="job-7">
+              <span class="saved-rail__title">UX Research Intern</span>
+              <span class="saved-rail__sub">Meridian Studio · Remote</span>
+            </button>
+            <button class="saved-rail__item" type="button" data-tone="sage" data-saved-ref="startup-nimbus">
+              <span class="saved-rail__title">Nimbus Notes</span>
+              <span class="saved-rail__sub">EdTech · Pre-seed · 2 open roles</span>
+            </button>
           </div>
+          <p class="saved-rail__empty" id="savedEmpty" hidden>Nothing saved yet — tap the bookmark on any listing and it lands here.</p>
         </div>
       </div>
     </section>
@@ -111,17 +123,28 @@
         <img class="icon-collapse" src="assets/minimize.svg" alt="">
       </button>
       <div class="filters" id="filters">
-        <button class="filter" data-cat="internship">INTERNSHIP</button>
-        <button class="filter" data-cat="research">RESEARCH</button>
-        <button class="filter" data-cat="oncampus">ON-CAMPUS</button>
+        <button class="filter" type="button" data-cat="internship" aria-pressed="false">INTERNSHIP</button>
+        <button class="filter" type="button" data-cat="research" aria-pressed="false">RESEARCH</button>
+        <button class="filter" type="button" data-cat="oncampus" aria-pressed="false">ON-CAMPUS</button>
+        <button class="filter" type="button" data-cat="newgrad" aria-pressed="false">NEW GRAD</button>
       </div>
     </div>
 
     <div class="career-body" id="careerBody">
 
+      <!-- 16 listings; the first 8 show in the compact grid, all 16 when expanded.
+           Each card carries its own record in data-*: the face of the card is the
+           markup, the detail pane reads the rest. `data-detail` splits on a blank
+           line, the same convention the start-up cards below already use, and
+           `data-visa` is present only on the four listings that carry the ! flag. -->
       <div class="jobs scroll" id="jobs">
-        <!-- 16 listings; the first 8 show in the compact grid, all 16 when expanded -->
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-1"
+                 data-term="Summer 2027 · 12 weeks · Full-time"
+                 data-pay="$46 / hour + housing stipend"
+                 data-deadline="Applications close 14 November 2026"
+                 data-skills="C++|Python|ROS 2|Linux"
+                 data-visa="This employer lists the role as limited to US persons under export-control rules. Ask the Office of International Education before you spend time on the application."
+                 data-detail="Northgate builds the autonomy stack for warehouse robots — perception, planning, and the fleet software that keeps four hundred of them from arguing in an aisle.&#10;&#10;Interns own one scoped piece of the stack for the summer and demo it to the whole engineering team in August. Past projects include a replay tool for failed picks and the calibration routine now shipping on every unit.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -130,13 +153,19 @@
                 <button class="bookmark" data-bookmark="job-1" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Software Engineering Intern, Summer 2027</h3>
+            <p class="job__company">Northgate Robotics</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Pittsburgh, PA · On-site</p>
           </div>
         </article>
 
-        <article class="job" data-cat="research">
+        <article class="job" data-cat="research" tabindex="0" data-job="job-2"
+                 data-term="Fall 2026 · 10 hrs / week · Term-time"
+                 data-pay="$17.50 / hour, or 9 units of research credit"
+                 data-deadline="Rolling — the lab reviews applications every two weeks"
+                 data-skills="Python|Study design|Statistics|Technical writing"
+                 data-visa="On-campus research counts toward the 20 hours a week F-1 students may work during term. Take it for credit instead if you are already at the cap."
+                 data-detail="The lab studies how people hand tasks back and forth with robots that get things wrong. You would run participant sessions in the study room, code video, and help clean up the dataset behind two papers going out in the spring.&#10;&#10;No robotics background needed — the group has taken students from psychology, design and statistics. Two semesters is the usual commitment, and second-semester assistants are normally listed as authors.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--research">RESEARCH</span>
@@ -145,13 +174,18 @@
                 <button class="bookmark" data-bookmark="job-2" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Undergraduate Research Assistant, Human-Robot Interaction</h3>
+            <p class="job__company">Robotics Institute, Carnegie Mellon</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Newell-Simon Hall · On-campus</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-3"
+                 data-term="Summer 2027 · 10 weeks · Full-time"
+                 data-pay="$32 / hour"
+                 data-deadline="Applications close 5 December 2026"
+                 data-skills="Figma|Prototyping|User interviews|Design systems"
+                 data-detail="Fielding is an eleven-person product studio that works with municipal clients — transit apps, benefits portals, the kind of software people have to use rather than want to use.&#10;&#10;You would sit on one client team for the summer alongside a senior designer, from research through shipped screens. The studio runs a public critique every Thursday and interns present twice.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -159,13 +193,18 @@
                 <button class="bookmark" data-bookmark="job-3" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Product Design Intern</h3>
+            <p class="job__company">Fielding Studio</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Remote (US) · Eastern hours</p>
           </div>
         </article>
 
-        <article class="job" data-cat="oncampus">
+        <article class="job" data-cat="oncampus" tabindex="0" data-job="job-4"
+                 data-term="Spring 2027 · 8–10 hrs / week"
+                 data-pay="$16 / hour"
+                 data-deadline="Apply by 1 December 2026 for the spring roster"
+                 data-skills="C|Contracts and invariants|Small-group teaching"
+                 data-detail="Run one recitation section of about twenty students, hold two office hours a week, and grade written homework with the rest of the course staff.&#10;&#10;You need a B or better in the course and the coordinator's sign-off. TAs meet Monday afternoons to walk through the week's material before they teach it.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--oncampus">ON-CAMPUS</span>
@@ -173,13 +212,18 @@
                 <button class="bookmark" data-bookmark="job-4" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Teaching Assistant, 15-122 Principles of Imperative Computation</h3>
+            <p class="job__company">School of Computer Science</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Gates Hillman Center · On-campus</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-5"
+                 data-term="Summer 2027 · 12 weeks · Full-time"
+                 data-pay="$41 / hour"
+                 data-deadline="First-round interviews start 20 October 2026"
+                 data-skills="Python|SQL|pandas|Experiment design"
+                 data-detail="Northwind builds forecasting tools for regional utilities — how much power a county draws on the coldest morning of the year, and what happens when a substation goes down.&#10;&#10;The intern project each summer is a real model handed to a real customer team. You get a mentor, a dataset, and a demo slot at the end-of-summer review.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -187,27 +231,37 @@
                 <button class="bookmark" data-bookmark="job-5" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Data Science Intern, Summer 2027</h3>
+            <p class="job__company">Northwind Data</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Pittsburgh, PA · Hybrid, 3 days on-site</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="newgrad" tabindex="0" data-job="job-6"
+                 data-term="Full-time · Starts July 2027"
+                 data-pay="$158,000 base + equity"
+                 data-deadline="Applications close 30 September 2026"
+                 data-skills="Go|Distributed systems|Kubernetes|On-call"
+                 data-detail="Harborlight runs the inference platform a few hundred smaller AI products are built on. Engineering is forty people and the new-grad cohort is six.&#10;&#10;New grads spend six weeks rotating through platform, serving and reliability before picking a team. The company files H-1B petitions for the cohort and has sponsored every eligible hire since 2024.">
           <div class="job__body">
             <div class="job__top">
-              <span class="tag tag--internship">INTERNSHIP</span>
+              <span class="tag tag--newgrad">NEW GRAD</span>
               <div class="job__actions">
                 <button class="bookmark" data-bookmark="job-6" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Software Engineer, New Grad (2027 start)</h3>
+            <p class="job__company">Harborlight AI</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">San Francisco, CA · On-site</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-7"
+                 data-term="Summer 2027 · 10 weeks · 30 hrs / week"
+                 data-pay="$28 / hour"
+                 data-deadline="Rolling until filled"
+                 data-skills="Interviewing|Usability testing|Synthesis|Note discipline"
+                 data-detail="Meridian is a six-person research and strategy studio working mostly with health and education clients. Everything is remote and everything is written down.&#10;&#10;You would run interviews, keep the research repository honest, and write the summaries that go to clients. A good first research job — the studio expects to teach the method, not to receive it.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -215,13 +269,18 @@
                 <button class="bookmark" data-bookmark="job-7" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">UX Research Intern</h3>
+            <p class="job__company">Meridian Studio</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Remote · Flexible hours</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-8"
+                 data-term="Summer 2027 · 10 weeks · Full-time"
+                 data-pay="$62 / hour + housing"
+                 data-deadline="Applications close 3 October 2026"
+                 data-skills="Probability|Python|C++|Time-series"
+                 data-detail="A systematic trading desk of about ninety people. The internship is a single research question, assigned in week one and defended in week ten.&#10;&#10;Expect a probability-heavy loop: two technical phone screens, then a day on-site. The desk hires roughly a third of its interns back as new grads.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -229,13 +288,19 @@
                 <button class="bookmark" data-bookmark="job-8" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Quantitative Research Intern</h3>
+            <p class="job__company">Kettleman Capital</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">New York, NY · On-site</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-9"
+                 data-term="Summer 2027 · 12 weeks · Full-time"
+                 data-pay="$38 / hour"
+                 data-deadline="Applications close 21 November 2026"
+                 data-skills="Oscilloscopes|Python|Test automation|Soldering"
+                 data-visa="The posting requires US citizenship for ITAR-controlled work, so international students are not eligible. It is listed here so you can rule it out early rather than late."
+                 data-detail="Allegheny builds avionics test rigs for small satellite launchers. The validation team is the last set of eyes before a board flies.&#10;&#10;Interns write and run test plans against real flight hardware, in a lab with a strict badge policy and no personal devices.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -244,13 +309,19 @@
                 <button class="bookmark" data-bookmark="job-9" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Hardware Validation Intern</h3>
+            <p class="job__company">Allegheny Aerospace</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Pittsburgh, PA · On-site</p>
           </div>
         </article>
 
-        <article class="job" data-cat="research">
+        <article class="job" data-cat="research" tabindex="0" data-job="job-10"
+                 data-term="Spring 2027 · 15 hrs / week"
+                 data-pay="$24 / hour"
+                 data-deadline="Applications close 12 January 2027"
+                 data-skills="Python|R|Genomics|Snakemake"
+                 data-visa="Off-campus employment, so F-1 students need CPT approved before the first day. The request takes about two weeks through the Office of International Education — start it before you interview."
+                 data-detail="Sandcastle is a fourteen-person company reading tumour samples for regional hospitals. The research team sits between the wet lab and the clinicians.&#10;&#10;You would maintain the variant-calling pipeline and help write the methods sections. It is a common route into a computational biology PhD — three of the last four assistants went on to one.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--research">RESEARCH</span>
@@ -259,13 +330,18 @@
                 <button class="bookmark" data-bookmark="job-10" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Research Assistant, Computational Biology</h3>
+            <p class="job__company">Sandcastle Bio</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Pittsburgh, PA · Hybrid</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-11"
+                 data-term="Summer 2027 · 12 weeks · Full-time"
+                 data-pay="$36 / hour"
+                 data-deadline="Applications close 15 January 2027"
+                 data-skills="TypeScript|React|Accessibility|Testing"
+                 data-detail="Lantern builds the scheduling software community clinics use to book interpreters alongside appointments. Accessibility is not a nice-to-have here; it is the product.&#10;&#10;Interns ship to production in the first two weeks and pair daily. The team is eight engineers across four time zones and everything happens in pull requests.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -273,13 +349,18 @@
                 <button class="bookmark" data-bookmark="job-11" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Front-End Engineering Intern</h3>
+            <p class="job__company">Lantern Health</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Remote (US)</p>
           </div>
         </article>
 
-        <article class="job" data-cat="oncampus">
+        <article class="job" data-cat="oncampus" tabindex="0" data-job="job-12"
+                 data-term="Fall 2026 · 6–8 hrs / week"
+                 data-pay="$15.50 / hour"
+                 data-deadline="Rolling — training runs at the start of each month"
+                 data-skills="Introductory calculus or programming|Patience|Reliable scheduling"
+                 data-detail="One-to-one tutoring for first- and second-year courses, mostly calculus and introductory programming, booked in one-hour slots.&#10;&#10;Tutors do a six-hour training before their first session and are observed once a term. It is the easiest schedule on this list to fit around a heavy course load.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--oncampus">ON-CAMPUS</span>
@@ -287,27 +368,37 @@
                 <button class="bookmark" data-bookmark="job-12" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Peer Tutor, Academic Development</h3>
+            <p class="job__company">Student Academic Success Center</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Cyert Hall · On-campus</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="newgrad" tabindex="0" data-job="job-13"
+                 data-term="Full-time · Starts August 2027"
+                 data-pay="$132,000 base + bonus"
+                 data-deadline="Applications close 10 October 2026"
+                 data-skills="Written communication|SQL|Prioritisation|Customer interviews"
+                 data-detail="Trellis sells the back office behind about nine thousand independent online shops — inventory, returns, and the tax paperwork nobody wants to think about.&#10;&#10;The APM programme runs two years across three rotations, each on a different product line, with a written case study in place of a whiteboard interview. Cohort size is eight.">
           <div class="job__body">
             <div class="job__top">
-              <span class="tag tag--internship">INTERNSHIP</span>
+              <span class="tag tag--newgrad">NEW GRAD</span>
               <div class="job__actions">
                 <button class="bookmark" data-bookmark="job-13" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Associate Product Manager, 2027 Cohort</h3>
+            <p class="job__company">Trellis Commerce</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Seattle, WA · Hybrid</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="internship" tabindex="0" data-job="job-14"
+                 data-term="Summer 2027 · 12 weeks · Full-time"
+                 data-pay="$35 / hour"
+                 data-deadline="Applications close 6 February 2027"
+                 data-skills="C|RTOS|CAN bus|Git"
+                 data-detail="Iron City retrofits electric drivetrains into delivery vans. Twenty-two people, one workshop in Lawrenceville, and a lot of vehicles up on jacks.&#10;&#10;The intern owns firmware for one subsystem — last summer it was the battery-monitor board — and rides along on road tests. A driving licence helps but is not required.">
           <div class="job__body">
             <div class="job__top">
               <span class="tag tag--internship">INTERNSHIP</span>
@@ -315,37 +406,47 @@
                 <button class="bookmark" data-bookmark="job-14" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Embedded Systems Intern</h3>
+            <p class="job__company">Iron City Motion</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Pittsburgh, PA · On-site</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="research" tabindex="0" data-job="job-15"
+                 data-term="Fall 2026 · 12 hrs / week"
+                 data-pay="$18 / hour, or department research credit"
+                 data-deadline="Rolling — two positions open this term"
+                 data-skills="Lab safety training|Python|Electrochemistry|Careful notes"
+                 data-detail="The group tests solid electrolytes that do not catch fire. You would run cell assembly and cycling experiments and keep the data notebook the whole group works from.&#10;&#10;Training takes about three weeks before you are on the instruments alone. Students who stay a full year usually present at the spring undergraduate research symposium.">
           <div class="job__body">
             <div class="job__top">
-              <span class="tag tag--internship">INTERNSHIP</span>
+              <span class="tag tag--research">RESEARCH</span>
               <div class="job__actions">
                 <button class="bookmark" data-bookmark="job-15" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Undergraduate Researcher, Energy Storage Materials</h3>
+            <p class="job__company">Dept. of Materials Science &amp; Engineering</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Wean Hall · On-campus</p>
           </div>
         </article>
 
-        <article class="job" data-cat="internship">
+        <article class="job" data-cat="oncampus" tabindex="0" data-job="job-16"
+                 data-term="Fall 2026 · 8 hrs / week, evenings"
+                 data-pay="$15 / hour"
+                 data-deadline="Apply by 19 September 2026"
+                 data-skills="Shop safety certification|Laser cutter|3D printing|Helping strangers"
+                 data-detail="Keep the fabrication lab running through evening hours: sign people in, run the laser-cutter queue, and stop the printers being left in a state.&#10;&#10;You need the shop safety certification, which the college runs twice a term and pays you to attend. Good hours if your classes are all in the morning.">
           <div class="job__body">
             <div class="job__top">
-              <span class="tag tag--internship">INTERNSHIP</span>
+              <span class="tag tag--oncampus">ON-CAMPUS</span>
               <div class="job__actions">
                 <button class="bookmark" data-bookmark="job-16" aria-label="Save listing"><img src="assets/bookmark.svg" alt=""></button>
               </div>
             </div>
-            <h3 class="job__title">Job Title</h3>
-            <p class="job__company">Company Name</p>
-            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Location</p>
+            <h3 class="job__title">Studio Assistant, Fabrication Lab</h3>
+            <p class="job__company">College of Fine Arts</p>
+            <p class="job__loc"><img src="assets/location-dot.svg" alt="">Margaret Morrison · On-campus</p>
           </div>
         </article>
       </div>
@@ -365,7 +466,7 @@
           <article class="startup" tabindex="0" data-startup="nimbus"
                    data-detail="Nimbus Notes turns every lecture into a clean set of notes and a study guide, generated while the class is still fresh. Built by two CS juniors after a semester of unreadable handwriting.&#10;&#10;Currently hiring two students: one front-end engineer and one content lead. Both roles are remote, paid, and around ten hours a week.">
             <div class="startup__row">
-              <div class="startup__logo"></div>
+              <div class="startup__logo" aria-hidden="true">NN</div>
               <div style="flex:1 1 auto;min-width:0">
                 <h3 class="startup__name">Nimbus Notes</h3>
                 <p class="startup__meta">EdTech · Pre-seed · 2 open roles</p>
@@ -376,15 +477,15 @@
             <div class="startup__foot">
               <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
               <img src="assets/instagram.svg" alt="Instagram">
-              <a class="startup__mail" href="mailto:hello@nimbusnotes.example" aria-label="Email Nimbus Notes"><img src="assets/mail.svg" alt=""></a>
-              <button class="btn btn--sm">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="nimbus" aria-label="Message Nimbus Notes"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="nimbus">Message →</button>
             </div>
           </article>
 
           <article class="startup" tabindex="0" data-startup="fernweg"
                    data-detail="Fernweg is a trip-planning app built by students, for students — group itineraries, shared budgets, and real-time collaboration for spring break and study-abroad trips.&#10;&#10;The team is four people across two campuses. They are looking for a designer, an iOS engineer, and two campus ambassadors for the spring semester.">
             <div class="startup__row">
-              <div class="startup__logo"></div>
+              <div class="startup__logo" aria-hidden="true">FW</div>
               <div style="flex:1 1 auto;min-width:0">
                 <h3 class="startup__name">Fernweg</h3>
                 <p class="startup__meta">Travel Tech · Seed · 4 open roles</p>
@@ -395,15 +496,15 @@
             <div class="startup__foot">
               <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
               <img src="assets/instagram.svg" alt="Instagram">
-              <a class="startup__mail" href="mailto:hello@fernweg.example" aria-label="Email Fernweg"><img src="assets/mail.svg" alt=""></a>
-              <button class="btn btn--sm">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="fernweg" aria-label="Message Fernweg"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="fernweg">Message →</button>
             </div>
           </article>
 
           <article class="startup" tabindex="0" data-startup="loopline"
                    data-detail="Loopline settles up the group chat. Split rent, groceries, and club dues without three apps and a spreadsheet.&#10;&#10;One open role: a part-time backend engineer who has opinions about ledgers.">
             <div class="startup__row">
-              <div class="startup__logo"></div>
+              <div class="startup__logo" aria-hidden="true">LL</div>
               <div style="flex:1 1 auto;min-width:0">
                 <h3 class="startup__name">Loopline</h3>
                 <p class="startup__meta">Fintech · Pre-seed · 1 open role</p>
@@ -414,15 +515,15 @@
             <div class="startup__foot">
               <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
               <img src="assets/instagram.svg" alt="Instagram">
-              <a class="startup__mail" href="mailto:hello@loopline.example" aria-label="Email Loopline"><img src="assets/mail.svg" alt=""></a>
-              <button class="btn btn--sm">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="loopline" aria-label="Message Loopline"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="loopline">Message →</button>
             </div>
           </article>
 
           <article class="startup" tabindex="0" data-startup="verdant"
                    data-detail="Verdant Labs weighs what dining halls throw away and turns it into a number the kitchen can act on. Three pilot campuses so far.&#10;&#10;Three open roles: data, hardware, and one operations lead who does not mind a loading dock.">
             <div class="startup__row">
-              <div class="startup__logo"></div>
+              <div class="startup__logo" aria-hidden="true">VL</div>
               <div style="flex:1 1 auto;min-width:0">
                 <h3 class="startup__name">Verdant Labs</h3>
                 <p class="startup__meta">Sustainability · Seed · 3 open roles</p>
@@ -433,56 +534,57 @@
             <div class="startup__foot">
               <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
               <img src="assets/instagram.svg" alt="Instagram">
-              <a class="startup__mail" href="mailto:hello@verdantlabs.example" aria-label="Email Verdant Labs"><img src="assets/mail.svg" alt=""></a>
-              <button class="btn btn--sm">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="verdant" aria-label="Message Verdant Labs"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="verdant">Message →</button>
             </div>
           </article>
         </div>
 
-        <!-- The swipe-over directory view. Placeholder copy until the real
-             start-up records are wired up. -->
+        <!-- The swipe-over directory view. The skeleton below never changes
+             shape — the sweep staggers this block's top-level children, so
+             js/career.js refills the inner text and rows rather than rebuilding
+             them. Seeded with the Nimbus Notes record, which is the one a no-JS
+             load shows and the one selected when the directory opens cold. -->
         <div class="startups__wide scroll" id="startupsWide">
-          <p class="eyebrow">Placeholder — start-up directory</p>
+          <p class="eyebrow">DIRECTORY RECORD</p>
 
-          <h3 class="startups__wide-title">Start-up Name</h3>
-          <p class="startups__wide-meta">Category · Stage · 4 open roles · Founded 20XX · 4 people</p>
+          <div class="startups__wide-id">
+            <div class="startup__logo startups__wide-logo" id="wideLogo" data-tone="peach" aria-hidden="true">NN</div>
+            <div>
+              <h3 class="startups__wide-title" id="wideTitle">Nimbus Notes</h3>
+              <p class="startups__wide-meta" id="wideMeta">EdTech · Pre-seed · Founded 2025 · 4 people · Pittsburgh, PA</p>
+            </div>
+          </div>
 
-          <p class="startups__wide-blurb">Placeholder blurb. One or two sentences on what the
-            team is building, who it is for, and why they started it — the same copy the
-            compact card shows, with room to breathe.</p>
-          <p class="startups__wide-blurb">Placeholder blurb. A second paragraph for traction,
-            funding, or whatever the directory record turns out to carry.</p>
+          <div class="startups__wide-blurbs" id="wideBlurbs">
+            <p class="startups__wide-blurb">Nimbus Notes turns a lecture recording into a clean set of
+              notes and a study guide before the class has left the room. Two CS juniors built it
+              after a semester of unreadable handwriting.</p>
+            <p class="startups__wide-blurb">About two thousand students across nine campuses used it
+              through finals last spring. Founded by alumni of the School of Computer Science; the
+              team works out of the incubator space on Henry Street.</p>
+          </div>
 
-          <p class="eyebrow startups__wide-label">Open roles — placeholder</p>
-          <ul class="startups__roles">
+          <p class="eyebrow startups__wide-label">Open roles</p>
+          <ul class="startups__roles" id="wideRoles">
             <li class="startups__role">
               <span class="tag tag--internship">INTERNSHIP</span>
-              <span class="startups__role-name">Role Title</span>
+              <span class="startups__role-name">Front-End Engineer</span>
               <span class="startups__role-meta">Remote · 10 hrs / week · Paid</span>
             </li>
             <li class="startups__role">
-              <span class="tag tag--research">RESEARCH</span>
-              <span class="startups__role-name">Role Title</span>
-              <span class="startups__role-meta">Hybrid · 8 hrs / week · Paid</span>
-            </li>
-            <li class="startups__role">
-              <span class="tag tag--oncampus">ON-CAMPUS</span>
-              <span class="startups__role-name">Role Title</span>
-              <span class="startups__role-meta">On-campus · 6 hrs / week · Credit</span>
-            </li>
-            <li class="startups__role">
               <span class="tag tag--internship">INTERNSHIP</span>
-              <span class="startups__role-name">Role Title</span>
-              <span class="startups__role-meta">Remote · 12 hrs / week · Paid</span>
+              <span class="startups__role-name">Content Lead</span>
+              <span class="startups__role-meta">Remote · 8 hrs / week · Paid</span>
             </li>
           </ul>
 
-          <p class="eyebrow startups__wide-label">Contact — placeholder</p>
+          <p class="eyebrow startups__wide-label">Contact</p>
           <div class="startups__wide-foot">
             <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
             <img src="assets/instagram.svg" alt="Instagram">
-            <a class="startup__mail" href="mailto:hello@example.com" aria-label="Email this start-up"><img src="assets/mail.svg" alt=""></a>
-            <button class="btn btn--sm" type="button">Message →</button>
+            <button class="startup__mail" type="button" id="wideMail" data-modal="messageStartup" data-message="nimbus" aria-label="Message this start-up"><img src="assets/mail.svg" alt=""></button>
+            <button class="btn btn--sm" type="button" id="wideMsg" data-modal="messageStartup" data-message="nimbus">Message →</button>
           </div>
         </div>
         </div>
@@ -492,18 +594,73 @@
         <h2 class="startup-detail__title" id="startupDetailTitle">Fernweg</h2>
         <div class="startup-detail__body" id="startupDetailBody"></div>
       </section>
+
+      <!-- The listing detail. It takes the column the start-ups panel normally
+           holds, so the grid stays on screen and you can walk down it card by
+           card. js/career.js fills everything below the heading from the
+           clicked card's data-* record. -->
+      <section class="job-detail scroll" id="jobDetail" aria-labelledby="jobDetailTitle">
+        <div class="job-detail__head">
+          <span class="tag tag--internship" id="jobDetailTag">INTERNSHIP</span>
+          <button class="icon-btn job-detail__close" id="jobDetailClose" type="button" aria-label="Close the listing">
+            <img src="assets/arrow-up.svg" alt="">
+          </button>
+        </div>
+        <h2 class="job-detail__title" id="jobDetailTitle">Software Engineering Intern, Summer 2027</h2>
+        <p class="job-detail__company" id="jobDetailCompany">Northgate Robotics</p>
+        <p class="job-detail__loc" id="jobDetailLoc"><img src="assets/location-dot.svg" alt=""><span>Pittsburgh, PA · On-site</span></p>
+
+        <dl class="job-detail__facts" id="jobDetailFacts"></dl>
+
+        <div class="job-detail__body" id="jobDetailBody"></div>
+
+        <p class="eyebrow job-detail__label">What they ask for</p>
+        <ul class="job-detail__skills" id="jobDetailSkills"></ul>
+
+        <div class="job-detail__visa" id="jobDetailVisa" hidden>
+          <span class="job__warn" aria-hidden="true">!</span>
+          <p id="jobDetailVisaText"></p>
+        </div>
+
+        <div class="job-detail__actions">
+          <button class="btn btn--sm" type="button" id="jobDetailSave">Save listing</button>
+          <a class="btn btn--sm btn--ghost" href="visa.html">Check visa rules →</a>
+        </div>
+      </section>
     </div>
 
-    <aside class="visa" data-dismiss-target>
-      <div>
-        <p class="visa__title">Visa</p>
-        <p class="visa__text">TextTextTextTextTextTextTextTextTextTextTextTextTextTextTextTextTextTextTextText</p>
+    <!-- Build B's slim visa strip: a status line, not an explainer. The long
+         paragraph it replaces repeated what visa.html already says at length,
+         and pushed the listings down the page. -->
+    <aside class="visa">
+      <div class="visa__body">
+        <p class="visa__eyebrow">FOR INTERNATIONAL STUDENTS</p>
+        <h2 class="visa__title">Every listing here is checked against your visa</h2>
+        <p class="visa__status">F-1 · CPT not yet authorized · on-campus eligible — up to 20 hrs/week</p>
       </div>
-      <div class="visa__actions">
-        <a href="visa.html">More info on work and visa →</a>
-        <button type="button" data-dismiss="visa-banner">Don’t show again</button>
-      </div>
+      <a class="visa__cta" href="visa.html">See your full visa picture →</a>
     </aside>
+
+    <!-- The Message → composer. js/app.js opens and closes it from the
+         [data-modal] attributes; js/career.js fills it for whichever start-up
+         was clicked and persists the draft per start-up. -->
+    <div class="modal-backdrop" id="messageStartup">
+      <div class="modal msg" role="dialog" aria-modal="true" aria-labelledby="msgTitle">
+        <button class="modal__close" data-modal-close aria-label="Close">×</button>
+        <p class="eyebrow">MESSAGE A FOUNDER</p>
+        <h2 class="msg__title" id="msgTitle">Nimbus Notes</h2>
+        <p class="msg__meta" id="msgMeta">EdTech · Pre-seed · 2 open roles</p>
+        <label class="msg__label" for="msgBody">Your message</label>
+        <textarea class="msg__body" id="msgBody" rows="9" spellcheck="true"></textarea>
+        <p class="msg__note">Flightplan has no outbox yet, so nothing is sent from here. Saving keeps
+          the draft on this device; copy it into your Andrew email when you are ready.</p>
+        <div class="msg__actions">
+          <span class="msg__done" id="msgDone" role="status" hidden>Draft saved.</span>
+          <button class="btn btn--sm btn--ghost" type="button" id="msgCopy">Copy message</button>
+          <button class="btn btn--sm" type="button" id="msgSave">Save draft</button>
+        </div>
+      </div>
+    </div>
 
   </main>
 </div>

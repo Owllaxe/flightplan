@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=726c0a08">
+<link rel="stylesheet" href="css/base.css?v=4a2f42fc">
 <link rel="stylesheet" href="css/planner.css?v=570786a0">
 </head>
 <body class="page-planner">
@@ -26,14 +26,13 @@
       <a class="sidebar__link is-active" href="planner.html" aria-current="page">Planner</a>
       <a class="sidebar__link" href="plan.html">Goals</a>
       <a class="sidebar__link" href="career.html">Career</a>
-      <a class="sidebar__link" href="contacts.html">Contacts</a>
       <a class="sidebar__link" href="visa.html">Visa</a>
     </nav>
     <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
          js/sidebar.js repaints them from the store on load. -->
     <div class="sidebar__term">
       <p class="term__label">THIS TERM</p>
-      <p class="term__line"><span data-term-label>Spring 2026</span> · <span data-term-inprog>15</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__line"><span data-term-label>Fall 2026</span> · <span data-term-inprog>18</span> <span data-term-unit>credits</span> in progress</p>
       <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
       <div class="term__bar">
         <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
@@ -61,10 +60,13 @@
     </div>
 
     <div class="planner-stage">
-      <!-- The Compass Planner app — same panels, same ⌘K search, same semester
-           blocks — with two changes to its board: it draws no connecting arrows
-           until a course is selected, and each block packs its courses on one
-           grid. Built from the untouched root bundle by tools/build-planner-new.py. -->
+      <!-- The Compass Planner app — same panels, same semester blocks. Built from
+           the untouched root bundle by tools/build-planner-new.py, which is where
+           every change to it lives: the board draws no connecting arrows until a
+           course is selected and packs each block's courses on one grid; the search
+           bar is a real input with ⌘K bound to it; the plan is Carnegie Mellon's,
+           nine terms to Spring 2029, agreeing with Home on the term in progress;
+           and what you select, apply and insert survives a reload. -->
       <iframe class="planner-frame" id="plannerApp" src="planner-new-app.html" title="Planner"></iframe>
     </div>
 
@@ -249,10 +251,20 @@ function correct() {
     }
 
     /* Reveal once the board has actually rendered with nothing selected — the prop
-       change re-renders asynchronously, so wait for the result, not a fixed delay. */
+       change re-renders asynchronously, so wait for the result, not a fixed delay.
+
+       Unless the app restored a selection of its own. The planner now remembers the
+       course you had open (tools/build-planner-new.py, "planner persistence"), and
+       a restored selection is the *right* thing to paint, not the seeded one this
+       wait exists to hide — so the app sets `__plannerRestoredSel` when, and only
+       when, it brings one back, and that is the case where a painted selection means
+       the corrections have landed rather than that they have not. Without it the
+       count could never reach zero and the planner would sit hidden for the whole
+       five-second failsafe. */
     const root = doc.getElementById('dc-root');
     const booted = !!(root && root.textContent.length > 200);
-    if (applied && booted && selectedCount(doc) === 0) return reveal();
+    const restored = (() => { try { return !!win.__plannerRestoredSel; } catch (e) { return false; } })();
+    if (applied && booted && (restored || selectedCount(doc) === 0)) return reveal();
 
     if (Date.now() > deadline) return reveal();
     setTimeout(step, 16);
