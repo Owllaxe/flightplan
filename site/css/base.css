@@ -439,17 +439,42 @@ img { display: block; }
 
 /* --- mascot ---------------------------------------------------------------- */
 
+/* The corner pigeon scales with the screen instead of sitting at a fixed pixel
+   width. A fixed 360px was 53% of the height on a 1280x720 laptop and 27% on a
+   2560x1440 monitor. Both sizes are pinned to the proportions approved at
+   1440x900 (42% and 29% of the viewport height), capped by width so a tall or
+   narrow screen cannot blow the bird up, and clamped at both ends.
+   The sprite frame is 280x297, so height = width x 1.061. */
+:root {
+  --mascot-lg: clamp(180px, min(39.6vh, 25vw), 480px);   /* profile, resume, visa */
+  --mascot-sm: clamp(150px, min(27.3vh, 17vw), 340px);   /* home, goals */
+}
+
 .mascot {
   position: fixed;
   right: 0; bottom: 0;
-  width: 260px;
+  width: var(--mascot-lg);
   pointer-events: none;
-  z-index: 5;
+  /* Over everything on the page, under the modal backdrop at 40 — a dialog
+     covering the bird is right, a card covering it is not. */
+  z-index: 30;
 }
-.mascot img { width: 100%; height: auto; }
+/* The corner mascot is the same 11 x 11 sheet the quiz pigeon uses. Only the
+   box is set here — js/pigeon.js writes background-size and background-position
+   from the element's own measured size, so the two pigeons can differ in scale
+   and still step in lockstep. The aspect ratio is one native frame, 280 x 297. */
+#pigeon-stage {
+  aspect-ratio: 280 / 297;
+  background-image: url('../assets/b/pigeon-stage.webp');
+  background-repeat: no-repeat;
+}
+/* Width is left to whichever mascot box holds it: the corner one fills its
+   260px container, the whiteboard's is pinned to 177px by css/plan.css. Setting
+   it on the id here would outrank both. */
+.mascot #pigeon-stage { width: 100%; }
 .mascot__bubble {
   position: absolute;
-  right: 190px; bottom: 148px;
+  right: calc(var(--mascot-lg) * .73); bottom: calc(var(--mascot-lg) * .57);
   width: 235px; min-height: 74px;
   background: var(--panel-alt);
   border: 2px solid var(--ink);

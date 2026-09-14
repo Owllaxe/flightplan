@@ -1,0 +1,420 @@
+/* Alumni — coffee chats.
+
+   Same card vocabulary as Home's build-B cards (panel fill, #e4ded0 hairline,
+   14px radius) so a person here and a listing on Career read as one product.
+   Layout: header, search + chip groups, then a grid of alumni beside a rail
+   holding the student's conversations and the prep notes. Opening a card swaps
+   the rail for that alum's detail, the way Career's detail pane works. */
+
+/* --- header ---------------------------------------------------------------- */
+
+.al-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.al-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: .13em;
+  color: var(--ink-3);
+}
+.al-head__title {
+  font-family: var(--font-hand);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--ink);
+  margin: 4px 0 6px;
+}
+.al-head__sub { font-size: 14px; color: var(--ink-2); }
+
+.al-stats { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; }
+.al-stats button { font-size: 12.5px; color: var(--ink-3); }
+.al-stats button b { color: var(--ink); font-weight: 600; }
+.al-stats button:hover { color: var(--accent); }
+
+.al-head__cta { margin-left: auto; }
+
+/* --- the shared card box ---------------------------------------------------- */
+
+.al-box {
+  background: var(--panel);
+  border: 1px solid #e4ded0;
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+/* --- search + filters ------------------------------------------------------- */
+
+.al-search { margin-bottom: 20px; }
+
+.al-search__row { display: flex; align-items: center; gap: 12px; }
+.al-search__input {
+  flex: 1;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-alt);
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+}
+.al-search__input::placeholder { color: var(--ink-3); }
+.al-search__input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.al-search__clear { font-size: 12.5px; font-weight: 500; color: var(--accent); white-space: nowrap; }
+.al-search__clear[disabled] { color: var(--ink-3); cursor: default; }
+
+/* Three labelled groups — MAJOR, FIELD, MY COURSES — so it is obvious they are
+   different axes and that they combine with AND. The two chips an
+   international student needs most sit in their own row above them. */
+.al-groups { display: grid; gap: 12px; margin-top: 14px; }
+.al-group { display: flex; align-items: baseline; gap: 12px; }
+.al-group__label {
+  flex: 0 0 92px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .13em;
+  color: var(--ink-3);
+}
+.al-group__chips { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.al-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel-alt);
+  font-size: 12px;
+  color: var(--ink-2);
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+.al-chip:hover { border-color: var(--accent-line); }
+.al-chip[aria-pressed="true"] {
+  background: var(--accent-tint);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.al-chip__count { font-family: var(--font-mono); font-size: 10px; color: var(--ink-3); }
+.al-chip--key { font-weight: 500; }
+
+.al-country {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-alt);
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.al-result { font-size: 12.5px; color: var(--ink-3); margin: 14px 0 0; }
+
+/* --- body: grid + rail ------------------------------------------------------ */
+
+.al-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.al-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 14px;
+}
+
+/* --- alumni card ------------------------------------------------------------ */
+
+.al-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  background: var(--panel);
+  border: 1px solid #e4ded0;
+  border-radius: 14px;
+  padding: 16px 16px 14px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.al-card:hover { transform: translateY(-2px); box-shadow: var(--sh-3); }
+.al-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.al-card.is-selected { border-color: var(--accent); }
+
+.al-card__top { display: flex; align-items: center; gap: 11px; }
+.al-avatar {
+  width: 40px; height: 40px; flex: 0 0 40px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 600;
+}
+.al-card__name { font-size: 14.5px; font-weight: 600; color: var(--ink); line-height: 1.2; }
+.al-card__year { font-size: 11.5px; color: var(--ink-3); }
+
+.al-card__now { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
+.al-card__path { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+.al-card__path b { font-weight: 500; color: var(--ink-3); }
+
+.al-card__visa {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--sunken);
+  color: var(--ink-2);
+}
+
+.al-topics { display: flex; flex-wrap: wrap; gap: 5px; }
+.al-topic {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+}
+
+/* The shared-context ribbon: the single strongest reason a card gets opened. */
+.al-card__shared {
+  font-size: 11.5px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 7px;
+  padding: 5px 8px;
+}
+
+.al-card__reply { font-size: 11px; color: var(--ink-3); }
+.al-card__reply--slow { color: var(--amber); }
+
+.al-card__actions { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 4px; }
+.al-card__ask { flex: 1; }
+.al-bookmark {
+  width: 32px; height: 32px; flex: 0 0 32px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--ink-3);
+  font-size: 15px;
+}
+.al-bookmark[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+.al-state {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .08em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.al-state--draft     { background: var(--sunken); color: var(--ink-2); }
+.al-state--sent      { background: var(--accent-tint); color: var(--accent); }
+.al-state--replied   { background: var(--green-tint); color: var(--green); }
+.al-state--scheduled { background: var(--green-tint); color: var(--green); }
+.al-state--done      { background: var(--sunken); color: var(--ink-3); }
+
+/* --- empty state ------------------------------------------------------------ */
+
+.al-empty {
+  grid-column: 1 / -1;
+  padding: 34px 20px;
+  text-align: center;
+  color: var(--ink-2);
+  font-size: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+}
+.al-empty button { color: var(--accent); font-weight: 500; }
+
+/* --- rail ------------------------------------------------------------------- */
+
+.al-rail { display: flex; flex-direction: column; gap: 20px; }
+
+.al-rail__title {
+  font-family: var(--font-hand);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 2px 0 12px;
+}
+
+.al-convo-group + .al-convo-group { margin-top: 14px; }
+.al-convo-group__label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .13em;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.al-convo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border-soft);
+}
+.al-convo:first-of-type { border-top: 0; }
+.al-convo__who { flex: 1; min-width: 0; }
+.al-convo__name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.al-convo__meta { font-size: 11.5px; color: var(--ink-3); }
+.al-convo__next { font-size: 12px; font-weight: 500; color: var(--accent); white-space: nowrap; }
+.al-convo__nudge { color: var(--amber); }
+
+.al-convo-empty { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+
+/* prep checklist + question bank */
+.al-prep__item { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: var(--ink); padding: 5px 0; }
+.al-prep__item .check { margin-top: 1px; }
+.al-prep__item.is-done span { color: var(--ink-3); text-decoration: line-through; }
+.al-prep__rule { font-size: 12px; color: var(--ink-2); margin-top: 10px; line-height: 1.45; }
+.al-bank { margin-top: 14px; }
+.al-bank__label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .13em;
+  color: var(--ink-3);
+  margin: 10px 0 6px;
+}
+.al-bank__q {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  padding: 6px 9px;
+  border-radius: 8px;
+  line-height: 1.4;
+}
+.al-bank__q:hover { background: var(--sunken); color: var(--ink); }
+
+/* --- detail pane ------------------------------------------------------------ */
+
+.al-detail { position: relative; }
+.al-detail__close {
+  position: absolute; top: 12px; right: 12px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  color: var(--ink-3);
+  font-size: 18px;
+}
+.al-detail__close:hover { background: var(--sunken); color: var(--ink); }
+.al-detail__head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-right: 30px; }
+.al-detail__head .al-avatar { width: 52px; height: 52px; flex-basis: 52px; font-size: 19px; }
+.al-detail__name { font-family: var(--font-hand); font-size: 24px; font-weight: 600; line-height: 1.1; }
+.al-detail__now { font-size: 12.5px; color: var(--ink-2); }
+.al-detail__label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .13em;
+  color: var(--ink-3);
+  margin: 16px 0 7px;
+}
+/* :where() keeps this at element specificity. As `.al-detail p` it outranked
+   .al-detail__name and .al-detail__label (both <p>), forcing the name down to
+   13px and the mono labels up to it. */
+:where(.al-detail) p { font-size: 13px; color: var(--ink); line-height: 1.5; }
+.al-detail__avoid { color: var(--ink-2); }
+
+.al-timeline { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--border-soft); }
+.al-timeline li { position: relative; font-size: 12.5px; color: var(--ink); padding: 0 0 9px 4px; line-height: 1.4; }
+.al-timeline li::before {
+  content: '';
+  position: absolute; left: -20px; top: 5px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+}
+.al-timeline li span { display: block; font-size: 11px; color: var(--ink-3); }
+
+.al-shared-list { margin: 0; padding-left: 18px; font-size: 12.5px; color: var(--accent); line-height: 1.6; }
+
+.al-detail__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+/* state controls shown once a conversation exists */
+.al-flow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.al-flow button {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+}
+.al-flow button[aria-pressed="true"] { background: var(--green-tint); border-color: var(--green); color: var(--green); }
+.al-notes {
+  width: 100%;
+  min-height: 70px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel-alt);
+  font: inherit;
+  font-size: 12.5px;
+  resize: vertical;
+}
+
+/* --- request composer ------------------------------------------------------- */
+
+.modal.al-compose {
+  width: 100%;
+  max-width: 560px;
+  padding: 28px 30px 24px;
+}
+.al-compose__title { font-family: var(--font-hand); font-size: 28px; font-weight: 400; margin-top: 6px; }
+.al-compose__meta { font-size: 12.5px; color: var(--ink-3); margin-top: 3px; }
+.al-compose__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: .13em;
+  color: var(--ink-3);
+  margin: 16px 0 6px;
+}
+.al-purposes { display: flex; flex-wrap: wrap; gap: 6px; }
+.al-compose__body {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-alt);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.al-compose__body:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.al-suggest { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+.al-suggest button {
+  text-align: left;
+  font-size: 12px;
+  color: var(--ink-2);
+  padding: 4px 8px;
+  border-radius: 7px;
+}
+.al-suggest button:hover { background: var(--sunken); color: var(--ink); }
+.al-meter { font-size: 11.5px; margin-top: 6px; color: var(--green); }
+.al-meter.is-long { color: var(--amber); }
+.al-compose__note { font-size: 12px; color: var(--ink-3); margin-top: 10px; line-height: 1.45; }
+.al-compose__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.al-compose__done { font-size: 12.5px; color: var(--green); margin-right: auto; }
+
+/* --- narrow ----------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .al-body { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .al-group { flex-direction: column; gap: 6px; }
+  .al-group__label { flex-basis: auto; }
+}

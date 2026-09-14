@@ -757,9 +757,13 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 .pl-mascot, .gb-mascot {
   position: fixed;
   right: 28px; bottom: 92px;
-  width: 200px;
+  /* Goals gets its own, smaller bird: here it stands on a planet, so the stack
+     is roughly twice as tall as the bird alone and --mascot-sm read as too big.
+     ~72% of --mascot-sm, still scaling with the screen the same way. */
+  --goals-pigeon: clamp(110px, min(19.7vh, 12.2vw), 245px);
+  width: calc(var(--goals-pigeon) * 1.127);   /* pigeon, planet and overlap all scale off --goals-pigeon */
   pointer-events: none;
   z-index: 15;
 }
-.pl-mascot .pigeon, .gb-mascot .pigeon { width: 177px; }
-.pl-mascot .planet, .gb-mascot .planet { width: 170px; margin: -23px 0 0 -7px; }
+.pl-mascot .pigeon, .gb-mascot .pigeon { width: var(--goals-pigeon); }
+.pl-mascot .planet, .gb-mascot .planet { width: calc(var(--goals-pigeon) * .959); margin: calc(var(--goals-pigeon) * -.13) 0 0 calc(var(--goals-pigeon) * -.041); }

@@ -7,9 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=4a2f42fc">
+<link rel="stylesheet" href="css/base.css?v=2356b75b">
 <link rel="stylesheet" href="css/schedule.css?v=38156141">
-<link rel="stylesheet" href="css/home.css?v=26c822fa">
+<link rel="stylesheet" href="css/home.css?v=06473ba0">
 </head>
 <body class="page-home">
 
@@ -27,6 +27,7 @@
       <a class="sidebar__link" href="planner.html">Planner</a>
       <a class="sidebar__link" href="plan.html">Goals</a>
       <a class="sidebar__link" href="career.html">Career</a>
+      <a class="sidebar__link" href="alumni.html">Alumni</a>
       <a class="sidebar__link" href="visa.html">Visa</a>
     </nav>
     <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
@@ -140,71 +141,62 @@
 
     <div class="home-lower">
 
-      <section class="pipeline">
-        <p class="eyebrow" style="letter-spacing:.96px;font-size:12px">Career</p>
-        <h2 class="pipeline__title">Saved &amp; Applied</h2>
+      <!-- Build B's Saved &amp; Applied. Its stage rail is four flex:1 segments
+           spanning the card rather than four fixed 90px blocks, and the note
+           sits under the rail instead of beside it — which is what lets the
+           whole thing hold together once the pigeon's reserved column is gone. -->
+      <section class="pipeline" data-card-link="career.html">
+        <p class="pipeline__eyebrow">CAREER</p>
+        <h2 class="pipeline__title"><a href="career.html">Saved &amp; Applied</a></h2>
 
         <article class="appl">
           <div class="appl__head">
-            <div>
-              <p class="appl__title">Software Engineering Intern</p>
-              <p class="appl__meta">Google Inc.&nbsp; ·&nbsp; Remote&nbsp; ·&nbsp; Apply by Sep 15</p>
-            </div>
-            <span class="appl__badge appl__badge--interview">INTERVIEW</span>
+            <span class="appl__title">Software Engineering Intern</span>
+            <span class="appl__tag appl__tag--interview">INTERVIEW</span>
           </div>
-          <div class="stages-row">
-            <div class="stages">
-              <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">SAVED</span></div>
-              <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">APPLIED</span></div>
-              <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">INTERVIEW</span></div>
-              <div class="stage"><div class="stage__bar"></div><span class="stage__label">OFFER</span></div>
-            </div>
-            <p class="reminder reminder--alert"><span class="reminder__dot">!</span>Interview in 3 days — prep notes</p>
+          <p class="appl__meta">Google Inc. · Remote · Apply by Sep 15</p>
+          <div class="stages" data-stage="3">
+            <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">SAVED</span></div>
+            <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">APPLIED</span></div>
+            <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">INTERVIEW</span></div>
+            <div class="stage"><div class="stage__bar"></div><span class="stage__label">OFFER</span></div>
           </div>
+          <p class="appl__note appl__note--alert">Interview in 3 days — prep notes</p>
         </article>
 
         <article class="appl">
           <div class="appl__head">
-            <div>
-              <p class="appl__title">UX Research Assistant</p>
-              <p class="appl__meta">Startup&nbsp; ·&nbsp; On-site&nbsp; ·&nbsp; Apply by Sep 20</p>
-            </div>
-            <span class="appl__badge appl__badge--applied">APPLIED</span>
+            <span class="appl__title">UX Research Assistant</span>
+            <span class="appl__tag appl__tag--applied">APPLIED</span>
           </div>
-          <div class="stages-row">
-            <div class="stages">
-              <div class="stage is-warm"><div class="stage__bar"></div><span class="stage__label">SAVED</span></div>
-              <div class="stage is-warm"><div class="stage__bar"></div><span class="stage__label">APPLIED</span></div>
-              <div class="stage"><div class="stage__bar"></div><span class="stage__label">INTERVIEW</span></div>
-              <div class="stage"><div class="stage__bar"></div><span class="stage__label">OFFER</span></div>
-            </div>
-            <p class="reminder reminder--warn"><span class="reminder__dot">!</span>No response in 12 days</p>
+          <p class="appl__meta">Startup · On-site · Apply by Sep 20</p>
+          <div class="stages" data-stage="2">
+            <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">SAVED</span></div>
+            <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">APPLIED</span></div>
+            <div class="stage"><div class="stage__bar"></div><span class="stage__label">INTERVIEW</span></div>
+            <div class="stage"><div class="stage__bar"></div><span class="stage__label">OFFER</span></div>
           </div>
+          <p class="appl__note appl__note--warn">No response in 12 days</p>
         </article>
 
         <article class="appl">
           <div class="appl__head">
-            <div>
-              <p class="appl__title">Data Analyst, Summer Program</p>
-              <p class="appl__meta">Apple&nbsp; ·&nbsp; Hybrid&nbsp; ·&nbsp; Apply by Oct 1</p>
-            </div>
-            <span class="appl__badge appl__badge--saved">SAVED</span>
+            <span class="appl__title">Data Analyst, Summer Program</span>
+            <span class="appl__tag appl__tag--saved">SAVED</span>
           </div>
-          <div class="stages-row">
-            <div class="stages">
-              <div class="stage is-cool"><div class="stage__bar"></div><span class="stage__label">SAVED</span></div>
-              <div class="stage"><div class="stage__bar"></div><span class="stage__label">APPLIED</span></div>
-              <div class="stage"><div class="stage__bar"></div><span class="stage__label">INTERVIEW</span></div>
-              <div class="stage"><div class="stage__bar"></div><span class="stage__label">OFFER</span></div>
-            </div>
-            <!-- js/home.js fills [data-deadline-left] with " — N days left" from
-                 data-deadline; it stays empty with no JS, since "Apply by Oct 1"
-                 is true on its own and a hardcoded countdown would rot. -->
-            <p class="reminder reminder--alert" data-deadline="2026-10-01"><span class="reminder__dot">!</span>Apply by Oct 1<span data-deadline-left></span></p>
+          <p class="appl__meta">Apple · Hybrid · Apply by Oct 1</p>
+          <div class="stages" data-stage="1">
+            <div class="stage is-done"><div class="stage__bar"></div><span class="stage__label">SAVED</span></div>
+            <div class="stage"><div class="stage__bar"></div><span class="stage__label">APPLIED</span></div>
+            <div class="stage"><div class="stage__bar"></div><span class="stage__label">INTERVIEW</span></div>
+            <div class="stage"><div class="stage__bar"></div><span class="stage__label">OFFER</span></div>
           </div>
+          <!-- js/home.js fills this from data-deadline; empty without JS, since
+               "Apply by Oct 1" is already true and a baked countdown would rot. -->
+          <p class="appl__note" data-deadline="2026-10-01"><span data-deadline-left></span></p>
         </article>
 
-        <a class="link" href="career.html" style="display:inline-block;margin-top:20px;font-size:14px">View Career Match →</a>
+        <a class="pipeline__more" href="career.html">Browse jobs &amp; start-ups →</a>
       </section>
 
       <section class="goals-panel">
@@ -239,24 +231,38 @@
       </section>
     </div>
 
-    <section class="visa-panel">
-      <p class="eyebrow visa-panel__eyebrow">For international students</p>
-      <h2 class="visa-panel__title">Visa Status</h2>
+    <!-- Build B's home visa card. Two things it has that A's did not: the whole
+         card is a route into visa.html, and the five status shortcuts below the
+         link — the roadmap, documents, rules, CPT balance and SSN — which are
+         the reasons a student opens that page in the first place. -->
+    <section class="visa-panel" data-card-link="visa.html">
+      <p class="visa-panel__eyebrow">FOR INTERNATIONAL STUDENTS</p>
+      <h2 class="visa-panel__title"><a href="visa.html">Visa Status</a></h2>
+
       <div class="visa-cols">
         <div class="visa-col">
-          <div class="visa-col__head"><span class="visa-col__dot"></span><span class="visa-col__label">I-20 STATUS</span></div>
+          <div class="visa-col__head"><span class="visa-col__dot visa-col__dot--ok"></span><span class="visa-col__label">I-20 STATUS</span></div>
           <p class="visa-col__value">Active — valid through May 2027</p>
         </div>
         <div class="visa-col">
-          <div class="visa-col__head"><span class="visa-col__dot visa-col__dot--warn"></span><span class="visa-col__label">CPT / OPT</span></div>
+          <div class="visa-col__head"><span class="visa-col__dot visa-col__dot--alert"></span><span class="visa-col__label">CPT / OPT</span></div>
           <p class="visa-col__value">Not yet authorized</p>
         </div>
         <div class="visa-col">
-          <div class="visa-col__head"><span class="visa-col__dot"></span><span class="visa-col__label">ON-CAMPUS WORK</span></div>
+          <div class="visa-col__head"><span class="visa-col__dot visa-col__dot--warn"></span><span class="visa-col__label">ON-CAMPUS WORK</span></div>
           <p class="visa-col__value">Eligible — up to 20 hrs/week</p>
         </div>
       </div>
+
       <a class="visa-panel__link" href="visa.html">Contact International Student Services →</a>
+
+      <div class="visa-chips">
+        <a class="visa-chip" href="visa.html"><span class="visa-chip__dot visa-chip__dot--ok"></span>Visa Roadmap course · 2/7</a>
+        <a class="visa-chip" href="visa.html"><span class="visa-chip__dot visa-chip__dot--warn"></span>My documents · 1 renewal due</a>
+        <a class="visa-chip" href="visa.html"><span class="visa-chip__dot visa-chip__dot--rule"></span>Know the Rules</a>
+        <a class="visa-chip" href="visa.html"><span class="visa-chip__dot visa-chip__dot--warn"></span>CPT used · 4/12 mo</a>
+        <a class="visa-chip" href="visa.html"><span class="visa-chip__dot visa-chip__dot--ok"></span>SSN steps</a>
+      </div>
     </section>
 
   </main>
@@ -266,8 +272,8 @@
      onboarding quiz's re-entry point, so it is a real <button>: js/home.js
      binds every [data-open-quiz] to openQuiz() in js/app.js. -->
 <div class="mascot">
-  <button class="mascot__bubble" id="pigeonBubble" type="button" data-open-quiz>Tap me to set up your semester — the goals you pick land on this page.</button>
-  <img src="assets/pigeon.png" alt="">
+  <!-- Sprite sheet, not a still: js/pigeon.js steps background-position at 15fps. -->
+  <div id="pigeon-stage" role="img" aria-label="Your pigeon"></div>
 </div>
 
 <script type="module" src="js/sidebar.js"></script>

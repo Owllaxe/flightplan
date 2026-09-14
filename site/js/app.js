@@ -17,6 +17,7 @@
    None of the nine page files were edited to make those work. */
 
 import { store } from './store.js';
+import { reactPigeon } from './pigeon.js';
 
 /* ===========================================================================
    § AUTH — a LOCAL prototype gate, not authentication.
@@ -216,7 +217,7 @@ const GOAL_NOTE = 'These pin to your home page — the pigeon will check in on t
 const GOAL_ERR = 'Pick at least three goals — the pigeon checks in on these all semester.';
 const SPEC_NOTE = 'Add as many as you want — you can retake this any time from the pigeon.';
 const SPEC_PLACEHOLDER = 'e.g. UX design, machine learning, immigration law — press Enter to add';
-const INTL_NOTE = 'Answering yes keeps the Visa tab front and centre — CPT/OPT timeline, documents and deadlines.';
+const INTL_NOTE = 'Answering yes tailors the Visa tab to you — CPT/OPT timeline, documents and deadlines.';
 
 /* The term key. B derives it from the fetched coursemap; here it comes from the
    `term` bucket js/store.js already seeds and js/sidebar.js already paints, so
@@ -481,6 +482,7 @@ function saveQuiz() {
 
   /* B: PATCH /me/profile { pigeon: answers }. Here: one localStorage write. */
   patchFlightplan({ quiz: answers, quizTerm: currentTermKey() });
+  reactPigeon('positive');   /* B plays `excited` on a successful save */
 
   qBusy = false;
   reactExcited();

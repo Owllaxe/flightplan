@@ -84,18 +84,6 @@ export function paintSidebar(root = document) {
   set('[data-identity-name]', id.name);
   set('[data-identity-first]', id.name.trim().split(/\s+/)[0] || id.name);
 
-  /* Onboarding Q4 promises "answering yes keeps the Visa tab front and centre",
-     so answering *no* has to mean something. A domestic student loses the nav
-     entry; the page itself stays reachable by URL, and the entry is left alone
-     when it is the page you are currently on, so the item you navigated to
-     never vanishes under you. Absent or unanswered ⇒ shown, because the visa
-     track is the product's reason for existing. */
-  const quiz = (store.all().flightplan || {}).quiz;
-  if (quiz && quiz.intl === false) {
-    root.querySelectorAll('.sidebar__link[href="visa.html"]').forEach((el) => {
-      if (!el.classList.contains('is-active')) el.hidden = true;
-    });
-  }
 }
 
 document.addEventListener('DOMContentLoaded', () => paintSidebar());

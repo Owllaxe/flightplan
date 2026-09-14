@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=4a2f42fc">
+<link rel="stylesheet" href="css/base.css?v=2356b75b">
 <link rel="stylesheet" href="css/visa.css?v=64573060">
 </head>
 <body class="page-visa">
@@ -26,6 +26,7 @@
       <a class="sidebar__link" href="planner.html">Planner</a>
       <a class="sidebar__link" href="plan.html">Goals</a>
       <a class="sidebar__link" href="career.html">Career</a>
+      <a class="sidebar__link" href="alumni.html">Alumni</a>
       <a class="sidebar__link is-active" href="visa.html" aria-current="page">Visa</a>
     </nav>
     <!-- THIS TERM (build B §3.4). Seeded values match Home and Profile;
@@ -451,7 +452,8 @@
 
 <div class="mascot">
   <div class="mascot__bubble">Your travel signature expires before winter break. Ask OIE to sign the I-20 first.</div>
-  <img src="assets/pigeon.png" alt="">
+  <!-- Sprite sheet, not a still: js/pigeon.js steps background-position at 15fps. -->
+  <div id="pigeon-stage" role="img" aria-label="Your pigeon"></div>
 </div>
 
 <script type="module" src="js/sidebar.js"></script>

@@ -183,3 +183,19 @@ document.querySelectorAll('[data-open-quiz]').forEach((node) => {
 window.addEventListener('storage', () => {
   renderGoals();
 });
+
+/* Build B lets the whole visa card be a route into visa.html, not just its
+   link. The card is a <section>, not an <a>, because the real links inside it
+   are what carry keyboard focus — nesting them inside an anchor would be
+   invalid and unreachable. A click that already landed on a link is left alone
+   so the browser handles it normally.
+
+   The Career audit flagged cards that look clickable and are not; this is the
+   opposite case, and the pointer cursor in css/home.css is honest only because
+   of this handler. */
+document.querySelectorAll('[data-card-link]').forEach((card) => {
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) return;
+    window.location.href = card.dataset.cardLink;
+  });
+});

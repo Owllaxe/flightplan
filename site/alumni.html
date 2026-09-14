@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alumni · Flightplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css?v=2356b75b">
+<link rel="stylesheet" href="css/alumni.css?v=65f22d73">
+</head>
+<body class="alumni-page">
+
+<div class="app">
+
+  <!-- Canonical sidebar — identical on every page (Figma Home frame 388:1275) -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <img class="sidebar__mark" src="assets/b/brand-rock.webp" alt="" width="40" height="37">
+      <p class="sidebar__title">Flightplan</p>
+      <p class="sidebar__tagline">DEGREE&nbsp;+&nbsp;CAREER</p>
+    </div>
+    <nav class="sidebar__nav">
+      <a class="sidebar__link" href="index.html">Home</a>
+      <a class="sidebar__link" href="planner.html">Planner</a>
+      <a class="sidebar__link" href="plan.html">Goals</a>
+      <a class="sidebar__link" href="career.html">Career</a>
+      <a class="sidebar__link is-active" href="alumni.html" aria-current="page">Alumni</a>
+      <a class="sidebar__link" href="visa.html">Visa</a>
+    </nav>
+    <div class="sidebar__term">
+      <p class="term__label">THIS TERM</p>
+      <p class="term__line"><span data-term-label>Fall 2026</span> · <span data-term-inprog>18</span> <span data-term-unit>credits</span> in progress</p>
+      <p class="term__pct"><span class="term__pct-num" data-term-pct>35%</span><span class="term__pct-cap">of the degree</span></p>
+      <div class="term__bar">
+        <div class="term__bar-done" data-term-bar-done style="width:35%"></div>
+        <div class="term__bar-prog" data-term-bar-prog style="width:15%"></div>
+      </div>
+    </div>
+    <div class="sidebar__foot">
+      <a class="sidebar__avatar avatar" href="profile.html" aria-label="Your profile">
+        <span class="avatar__initials" data-avatar-initials aria-hidden="true">JL</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- 1 · header ---------------------------------------------------------->
+    <header class="al-head">
+      <div>
+        <p class="al-eyebrow">ALUMNI · COFFEE CHATS</p>
+        <h1 class="al-head__title">Coffee chats</h1>
+        <p class="al-head__sub">Fifteen minutes with someone who has already walked your path.</p>
+        <div class="al-stats" id="alStats" aria-live="polite"></div>
+      </div>
+      <button class="btn btn--sm al-head__cta" type="button" id="alFind">Find someone to talk to</button>
+    </header>
+
+    <!-- 2 · search + filters ------------------------------------------------>
+    <section class="al-box al-search" aria-label="Search alumni">
+      <div class="al-search__row">
+        <input class="al-search__input" id="alQ" type="search" autocomplete="off"
+               placeholder="Search by name, company, role, major, course or topic…"
+               aria-label="Search alumni">
+        <button class="al-search__clear" type="button" id="alClear">Clear all</button>
+      </div>
+
+      <div class="al-groups">
+        <div class="al-group">
+          <span class="al-group__label">START HERE</span>
+          <div class="al-group__chips">
+            <button class="al-chip al-chip--key" type="button" data-flag="visa" aria-pressed="false">Went through OPT / H-1B</button>
+            <button class="al-chip al-chip--key" type="button" data-flag="country" aria-pressed="false">From my country</button>
+            <select class="al-country" id="alCountry" aria-label="Your home country">
+              <option value="">Choose your country…</option>
+            </select>
+            <button class="al-chip" type="button" data-flag="open" aria-pressed="false">Open to chat now</button>
+          </div>
+        </div>
+        <div class="al-group">
+          <span class="al-group__label">MAJOR</span>
+          <div class="al-group__chips" id="alMajors"></div>
+        </div>
+        <div class="al-group">
+          <span class="al-group__label">FIELD</span>
+          <div class="al-group__chips" id="alFields"></div>
+        </div>
+        <div class="al-group">
+          <span class="al-group__label">MY COURSES</span>
+          <div class="al-group__chips" id="alCourses"></div>
+        </div>
+      </div>
+
+      <p class="al-result" id="alResult" aria-live="polite"></p>
+    </section>
+
+    <div class="al-body">
+
+      <!-- 3 · the alumni grid ----------------------------------------------->
+      <div class="al-grid" id="alGrid"></div>
+
+      <aside class="al-rail" id="alRail">
+
+        <!-- 4 · your conversations ------------------------------------------>
+        <section class="al-box" id="alConvos">
+          <h2 class="al-rail__title">Your conversations</h2>
+          <div id="alConvoList"></div>
+        </section>
+
+        <!-- 5 · before you ask ---------------------------------------------->
+        <section class="al-box" id="alPrep">
+          <h2 class="al-rail__title">Before you ask</h2>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-read"><span>Read their path first</span></label>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-three"><span>Write three specific questions</span></label>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-fifteen"><span>Ask for 15 minutes, and keep to it</span></label>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-thanks"><span>Send thanks within a day</span></label>
+          <p class="al-prep__rule">Ask for a referral on the second conversation, not the first.</p>
+          <div class="al-bank" id="alBank"></div>
+        </section>
+
+        <!-- 6 · alumni detail — takes the rail when a card opens ------------->
+        <section class="al-box al-detail" id="alDetail" hidden></section>
+
+      </aside>
+    </div>
+
+  </main>
+</div>
+
+<!-- 7 · request composer ----------------------------------------------------->
+<div class="modal-backdrop" id="alCompose">
+  <div class="modal al-compose" role="dialog" aria-modal="true" aria-labelledby="alComposeTitle">
+    <button class="modal__close" type="button" data-modal-close aria-label="Close">×</button>
+    <p class="eyebrow">ASK FOR A COFFEE CHAT</p>
+    <h2 class="al-compose__title" id="alComposeTitle">Alum</h2>
+    <p class="al-compose__meta" id="alComposeMeta"></p>
+
+    <span class="al-compose__label">WHAT IT'S ABOUT</span>
+    <div class="al-purposes" id="alPurposes"></div>
+
+    <label class="al-compose__label" for="alBody">YOUR MESSAGE</label>
+    <textarea class="al-compose__body" id="alBody" rows="10" spellcheck="true"></textarea>
+    <p class="al-meter" id="alMeter" aria-live="polite"></p>
+
+    <span class="al-compose__label">ADD A QUESTION</span>
+    <div class="al-suggest" id="alSuggest"></div>
+
+    <p class="al-compose__note" id="alComposeNote">Flightplan has no outbox, so nothing is sent from here. Copy the message or open it in your mail app, then mark it sent so it shows up in your conversations.</p>
+
+    <div class="al-compose__actions">
+      <span class="al-compose__done" id="alDone" role="status" hidden></span>
+      <button class="btn btn--sm btn--ghost" type="button" id="alSave">Save draft</button>
+      <button class="btn btn--sm btn--ghost" type="button" id="alCopy">Copy</button>
+      <a class="btn btn--sm btn--ghost" id="alMail" href="#">Open in mail</a>
+      <button class="btn btn--sm" type="button" id="alSend">Mark as sent</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/sidebar.js"></script>
+<script type="module" src="js/app.js"></script>
+<script type="module" src="js/alumni.js"></script>
+</body>
+</html>
