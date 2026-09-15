@@ -66,8 +66,8 @@
   display: flex;
   gap: 6px;
   padding: 4px;
-  background: #F6F2E9;
-  border: 1px solid #E5E0D7;
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: 999px;
 }
 .planner-toggle button {
@@ -78,15 +78,15 @@
   padding: 6px 12px;
   border: 1px solid transparent;
   background: transparent;
-  color: #8F8779;
+  color: var(--ink-b3);
   border-radius: 999px;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-.planner-toggle button:hover { color: #7E3F22; }
+.planner-toggle button:hover { color: var(--accent-deep); }
 .planner-toggle button.is-on {
-  border-color: #A2593A;
-  background: #F0D9C8;
-  color: #7E3F22;
+  border-color: var(--accent-b);
+  background: var(--accent-tint);
+  color: var(--accent-deep);
 }
 
 /* --- the stage ------------------------------------------------------------- */
@@ -98,7 +98,7 @@
   flex: 1 1 auto;
   position: relative;
   min-height: 0;
-  background: #F6F2E9;      /* the bundle's own page colour — no white flash */
+  background: var(--bg);      /* the bundle's own page colour — no white flash */
 }
 
 .planner-frame {

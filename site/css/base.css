@@ -79,6 +79,25 @@
   --sh-5: 0 18px 48px rgba(0, 0, 0, .18);
 
   --sidebar-w: 217px;
+
+  /* Colours that used to be written as literals, lifted into tokens so the NYU
+     theme can reach them. Each default equals the literal it replaced, so the
+     Flightplan theme renders exactly as before. */
+  --rule: #e4ded0; --ink-b3: #8f8779; --dim: #b4ac9c; --accent-b: #a2593a;
+  --accent-deep: #7e3f22; --accent-wash: #f1e3d8; --accent-wash-line: #dfc2ac;
+  --ink-warm: #3a362f; --visa-bg: #f7edea; --visa-line: #e9d6ce;
+  --dot-alert: #b4552f; --dot-warn: #96742e; --danger: #c0392b;
+  --placeholder-ink: #9e998f; --divider-warm: #ede5db; --chip-bg: #f1ede4;
+  --badge: #b7afa3; --title-ink: #000;
+  --sch-math: #dde2d5; --sch-phys: #eee0ba; --sch-engl: #f2d3d8; --sch-psy: #e6d0c4;
+  --sch-engl-ink: #994d66; --sch-phys-ink: #8c6b26; --sch-psy-ink: #805238;
+  --fp-habits-bg: #fbf3e7; --fp-habits-line: #ead9b6; --fp-wins-bg: #fdfaf0; --fp-wins-line: #ede3c9;
+  --fp-faint: #c3bba9; --fp-gold-ink: #7a5c1e; --fp-gold: #b49a5e; --fp-cream: #fffdf7;
+  --fp-cal-dark: #6b665e; --fp-sage-line: #d7e0d0; --fp-off: #d9cfbb;
+  --q-line: #e6cdb8; --q-box: #c9c0ae; --q-cream: #fffdf8; --q-x: #9a8f7d; --q-dot: #e2d9c9;
+  --q-ink2: #736657; --q-ink: #242019; --q-edge: #3a352d; --q-radio: #b7a998;
+  --q-dash: #c9bda9; --q-field: #cfc5b4;
+  --font-initials: 'Pathfinder Hand', 'Newsreader', Georgia, serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -161,7 +180,7 @@ img { display: block; }
   font-size: 9px;
   letter-spacing: .14em;
   line-height: 1.4;
-  color: #8f8779;
+  color: var(--ink-b3);
   margin: 6px 0 0;
 }
 
@@ -201,13 +220,13 @@ img { display: block; }
   font-size: 8.5px;
   letter-spacing: .14em;
   line-height: 1.4;
-  color: #b4ac9c;
+  color: var(--dim);
   margin: 0 0 10px;
 }
 .term__line {
   font-size: 12.5px;
   line-height: 1.45;
-  color: #5c554a;
+  color: var(--ink-2);
   margin: 0;
 }
 .term__pct {
@@ -218,24 +237,24 @@ img { display: block; }
   flex-wrap: nowrap;
 }
 .term__pct-num {
-  font-family: 'Pathfinder Hand', 'Newsreader', Georgia, serif;
+  font-family: var(--font-initials);
   font-size: 19px;
   line-height: 1;
   flex: none;
 }
-.term__pct-cap { font-size: 11px; color: #8f8779; white-space: nowrap; }
+.term__pct-cap { font-size: 11px; color: var(--ink-b3); white-space: nowrap; }
 
 .term__bar {
   height: 6px;
   border-radius: 3px;
-  background: #ede7da;
+  background: var(--border-soft);
   margin-top: 8px;
   overflow: hidden;
   display: flex;
   gap: 1px;
 }
-.term__bar-done { background: #5a7355; }
-.term__bar-prog { background: #a2593a; opacity: .45; }
+.term__bar-done { background: var(--green); }
+.term__bar-prog { background: var(--accent-b); opacity: .45; }
 
 /* --- profile circle (build B §6) -------------------------------------------
    B ships no avatar image: the circle is the student's own upload or an
@@ -248,9 +267,9 @@ img { display: block; }
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #f1e3d8;
-  border: 1px solid #dfc2ac;
-  color: #7e3f22;
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-wash-line);
+  color: var(--accent-deep);
   font-family: var(--font-newsreader);
   font-weight: 400;
   line-height: 1;
@@ -265,10 +284,10 @@ img { display: block; }
   justify-content: center;
   width: 128px; height: 128px; flex: 0 0 128px;
   font-size: 45px;
-  background: #f1e3d8;
-  border: 1px solid #dfc2ac;
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-wash-line);
   border-radius: 50%;
-  color: #7e3f22;
+  color: var(--accent-deep);
 }
 
 .sidebar__foot { margin-top: auto; padding: 0 0 60px 50px; }
@@ -518,3 +537,210 @@ img { display: block; }
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
+
+
+/* ===========================================================================
+   § NYU THEME — :root[data-brand="nyu"], switched from the sidebar.
+
+   From NYU's own brand guidelines:
+     · NYU Violet #57068C is the primary and appears in every version of the
+       palette; the violet scale runs #330662, #702B9D, #7B5AA6, #AB82C5 and
+       #EEE6F3 (10% violet).
+     · Neutrals are cool greys: #000, #404040, #6D6D6D, #B8B8B8, #D6D6D6,
+       #F2F2F2, #FFF. Accents: teal #00B8A2 / deep teal #00837C, blue #59B2D1 /
+       deep blue #4E7AA1, magenta #FB0F78 / deep magenta #E00E78, yellow #F4EC51.
+     · The typeface is NYU Perstare, which is licensed to NYU and not public.
+       The guidelines name Montserrat as its fallback, and Frank Ruhl Libre as a
+       serif to pair with it: headings in one, body in the other, never an
+       all-serif page. Here that is Frank Ruhl Libre headings, Montserrat for
+       everything else.
+
+   Where the palette has no step light or dark enough for a job (a tint behind
+   text, or a grey legible at 8px), the value is a tint or shade of a palette
+   colour rather than a new hue. No NYU logo is used: this is a colour and type
+   theme, not a claim of affiliation.
+   =========================================================================== */
+:root[data-brand="nyu"] {
+  --bg: #f2f2f2; --panel: #ffffff; --panel-alt: #ffffff; --sidebar: #ffffff; --sunken: #f2f2f2;
+  --border: #d6d6d6; --border-soft: #e6e6e6; --placeholder: #d6d6d6;
+  --ink: #000000; --ink-2: #404040; --ink-3: #6d6d6d; --ink-4: #767676;
+  --accent: #57068c; --accent-tint: #eee6f3; --accent-soft: #f6f1f9; --accent-line: #ab82c5;
+  --green: #00837c; --green-tint: #e0f2f0; --amber: #4e7aa1; --amber-tint: #e3ecf4; --star: #f4ec51;
+  --scroll-track: #e6e6e6; --scroll-thumb: #b8b8b8;
+  --c-cs: #eee6f3; --c-math: #e0f2f0; --c-phys: #fbf8d9; --c-engl: #fde7f1; --c-psy: #e3ecf4;
+
+  --rule: #d6d6d6; --ink-b3: #6d6d6d; --dim: #8a8a8a; --accent-b: #57068c;
+  --accent-deep: #330662; --accent-wash: #eee6f3; --accent-wash-line: #ab82c5;
+  --ink-warm: #404040; --visa-bg: #eee6f3; --visa-line: #ab82c5;
+  --dot-alert: #e00e78; --dot-warn: #4e7aa1; --danger: #e00e78;
+  --placeholder-ink: #6d6d6d; --divider-warm: #e6e6e6; --chip-bg: #f2f2f2;
+  --badge: #6d6d6d; --title-ink: #000000;
+  --sch-math: #e0f2f0; --sch-phys: #fbf8d9; --sch-engl: #fde7f1; --sch-psy: #e3ecf4;
+  --sch-engl-ink: #b00b5e; --sch-phys-ink: #5c5700; --sch-psy-ink: #355a7a;
+  --fp-habits-bg: #fbf8d9; --fp-habits-line: #e8e08a; --fp-wins-bg: #f7f7f7; --fp-wins-line: #e6e6e6;
+  --fp-faint: #b8b8b8; --fp-gold-ink: #5c5700; --fp-gold: #7a7200; --fp-cream: #ffffff;
+  --fp-cal-dark: #404040; --fp-sage-line: #cce6e4; --fp-off: #d6d6d6;
+  --q-line: #d9c7e6; --q-box: #b8b8b8; --q-cream: #ffffff; --q-x: #6d6d6d; --q-dot: #d6d6d6;
+  --q-ink2: #404040; --q-ink: #000000; --q-edge: #404040; --q-radio: #b8b8b8;
+  --q-dash: #b8b8b8; --q-field: #d6d6d6;
+
+  /* login.css declares its own tokens */
+  --b-accent: #57068c; --b-rule: #d6d6d6; --b-ink3: #6d6d6d; --b-dim: #8a8a8a;
+  --b-err-ink: #b00b5e; --b-err-bg: #fde7f1; --b-err-line: #f39ac4;
+  --b-pend-bg: #f6f1f9; --b-pend-ln: #ab82c5; --b-pend-ink: #330662;
+
+  --font-hand:       'Frank Ruhl Libre', Georgia, serif;
+  --font-serif:      'Frank Ruhl Libre', Georgia, serif;
+  --font-newsreader: 'Frank Ruhl Libre', Georgia, serif;
+  --font-nav:        'Montserrat', Verdana, sans-serif;
+  --font-body:       'Montserrat', Verdana, sans-serif;
+  --font-mono:       'Montserrat', Verdana, sans-serif;
+  --font-initials:   'Frank Ruhl Libre', Georgia, serif;
+}
+
+/* The Goals whiteboard declares its own palette on the page body. */
+:root[data-brand="nyu"] .page-plan,
+:root[data-brand="nyu"] .page-goals {
+  --pl-paper: #ffffff; --pl-stone: #eeeeee; --pl-sage: #e0f2f0; --pl-wheat: #fbf8d9;
+  --pl-clay: #eee6f3; --pl-shade: #d6d6d6; --pl-rule: #d6d6d6; --pl-cast: rgba(51, 6, 98, .14);
+  --fp-rule: #d6d6d6; --fp-hair: #eeeeee; --fp-ink3: #6d6d6d; --fp-dim: #8a8a8a;
+  --fp-accent: #57068c; --fp-deep: #330662; --fp-tint: #eee6f3; --fp-tint-line: #ab82c5;
+  --fp-star: #d4c11a; --fp-star-lit: #f4ec51; --fp-dot: #cfcfcf;
+}
+:root[data-brand="nyu"] .fp-letter__err { --fp-err: #b00b5e; }
+
+/* Sizes tuned for the handwritten face would shout in Montserrat and the serif:
+   the nav at 26px bold and the 42px wordmark are brought back to scale. */
+:root[data-brand="nyu"] .sidebar__link { font-size: 17px; font-weight: 600; letter-spacing: .01em; }
+:root[data-brand="nyu"] .sidebar__title { font-size: 30px; font-weight: 700; }
+
+/* --- the theme toggle (built by js/sidebar.js under THIS TERM) ------------ */
+.sidebar__theme { margin-top: 18px; padding: 0 34px; }
+.theme-toggle {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+  padding: 3px;
+  background: var(--sunken);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.theme-toggle button {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+  transition: background .15s ease, color .15s ease;
+}
+.theme-toggle button:hover { color: var(--ink); }
+.theme-toggle button[aria-pressed="true"] { background: var(--panel); color: var(--accent); box-shadow: var(--sh-1); }
+.theme-toggle__dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.theme-toggle__dot--fp  { background: #8c4535; }
+.theme-toggle__dot--nyu { background: #57068c; }
+
+/* ===========================================================================
+   § NYU — SOLID VIOLET. NYU's identity is the violet itself, used as a solid
+   block with white type, not a 10% tint behind violet text. So in this theme:
+   the sidebar is a solid NYU Violet rail; anything selected or labelled is
+   solid violet with white text; large highlighted panels drop the lavender
+   wash for a white card with a solid violet rule; headings take the violet.
+   White on #57068C is 10.3:1. No transparency anywhere on the violet.
+   =========================================================================== */
+
+/* the rail */
+:root[data-brand="nyu"] .sidebar { background: #57068c; border-right-color: #330662; }
+:root[data-brand="nyu"] .sidebar__title,
+:root[data-brand="nyu"] .term__line,
+:root[data-brand="nyu"] .term__pct-num { color: #ffffff; }
+:root[data-brand="nyu"] .sidebar__tagline,
+:root[data-brand="nyu"] .term__label,
+:root[data-brand="nyu"] .term__pct-cap { color: #d9c7e6; }
+:root[data-brand="nyu"] .sidebar__link { color: #ffffff; }
+:root[data-brand="nyu"] .sidebar__link:hover { background: #702b9d; }
+:root[data-brand="nyu"] .sidebar__link.is-active { background: #ffffff; color: #57068c; }
+:root[data-brand="nyu"] .term__bar { background: #330662; }
+:root[data-brand="nyu"] .term__bar-done { background: #ffffff; }
+:root[data-brand="nyu"] .term__bar-prog { background: #ab82c5; opacity: 1; }
+:root[data-brand="nyu"] .sidebar .avatar { background: #ffffff; border-color: #ffffff; color: #57068c; }
+:root[data-brand="nyu"] .sidebar__avatar:hover { box-shadow: 0 0 0 3px #ab82c5; }
+:root[data-brand="nyu"] .sidebar :is(.signout, .sidebar__signout) { color: #ffffff; border-color: #ab82c5; background: transparent; }
+:root[data-brand="nyu"] .theme-toggle { background: #330662; border-color: #330662; }
+:root[data-brand="nyu"] .theme-toggle button { color: #d9c7e6; }
+:root[data-brand="nyu"] .theme-toggle button:hover { color: #ffffff; }
+:root[data-brand="nyu"] .theme-toggle button[aria-pressed="true"] { background: #ffffff; color: #57068c; }
+
+/* selected / labelled: solid violet, white type */
+:root[data-brand="nyu"] :is(
+  .tag--internship, .appl__tag--applied, .al-state--sent, .rz-card__badge, .chip,
+  .al-chip[aria-pressed="true"], .al-bookmark[aria-pressed="true"], .al-avatar,
+  .planner-toggle button.is-on, .pl-tools button.is-on, .gb-tools button.is-on,
+  .fp-goal__rank, .vs-remind__when, .wb-clear__btn.is-armed,
+  .startup[data-startup="nimbus"] .startup__logo, .startups__wide-logo[data-tone="peach"]
+) { background: #57068c; color: #ffffff; border-color: #57068c; }
+:root[data-brand="nyu"] .pl-tools button.is-on img,
+:root[data-brand="nyu"] .gb-tools button.is-on img { filter: brightness(0) invert(1); }
+
+/* the CS course is the one violet subject in the schedule */
+:root[data-brand="nyu"] :is(.course--cs, .block--cs),
+:root[data-brand="nyu"] .course--cs * { background-color: #57068c; color: #ffffff; }
+:root[data-brand="nyu"] .course--cs * { background-color: transparent; }
+
+/* large highlighted panels: white card, solid violet rule, no lavender wash */
+:root[data-brand="nyu"] :is(.visa, .visa-panel, .vs-card--accent, .job-detail__visa) {
+  background: #ffffff;
+  border: 1px solid #d6d6d6;
+  border-top: 5px solid #57068c;
+}
+:root[data-brand="nyu"] .vs-lesson.is-flagged { background: #ffffff; box-shadow: inset 4px 0 0 #57068c; }
+:root[data-brand="nyu"] .al-card__shared { background: #ffffff; color: #57068c; box-shadow: inset 3px 0 0 #57068c; border-radius: 3px; }
+:root[data-brand="nyu"] .avatar.avatar--lg { background: #57068c; border-color: #57068c; color: #ffffff; }
+
+/* headings carry the violet */
+:root[data-brand="nyu"] :is(.semester__hello, .pipeline__title, .goals-panel__title, .visa-panel__title,
+  .visa__title, .al-head__title, .al-rail__title, .al-detail__name, .profile-card__name) { color: #57068c; }
+
+/* --- NYU: legibility on the new solid surfaces --------------------------- */
+/* a count inside a solid violet chip */
+:root[data-brand="nyu"] .al-chip[aria-pressed="true"] .al-chip__count { color: #d9c7e6; }
+
+/* The visa page keeps its own ink ramp on the page body. */
+:root[data-brand="nyu"] .page-visa {
+  --vs-ink: #404040; --vs-ink-2: #6d6d6d; --vs-track: #e6e6e6; --vs-box: #b8b8b8; --vs-quote: #6d6d6d;
+}
+
+/* NYU's teal and blue at small sizes land just under 4.5:1 on the grey ground;
+   a shade darker in the same families clears it (about 5:1). */
+:root[data-brand="nyu"] { --green: #00756f; --amber: #3e6a90; --dim: #6d6d6d; }
+:root[data-brand="nyu"] .page-plan,
+:root[data-brand="nyu"] .page-goals { --fp-dim: #6d6d6d; }
+:root[data-brand="nyu"] .week__hour { color: #6d6d6d; }
+
+/* Saved-list titles are pills, so they get the solid treatment too. */
+:root[data-brand="nyu"] .saved-rail__title { background: #57068c; color: #ffffff; border-color: #57068c; }
+:root[data-brand="nyu"] .saved-rail__item[data-tone="sage"] .saved-rail__title { background: #00756f; border-color: #00756f; }
+
+/* --- NYU: the last pale and faint spots ---------------------------------- */
+/* The Goals "this week" CS chip is painted inline from var(--c-cs); match the
+   inline value so it joins the schedule's solid violet CS blocks. */
+:root[data-brand="nyu"] .fp-week__chip[style*="--c-cs"] { background: #57068c !important; color: #ffffff; }
+
+/* The schedule's day and hour labels and the scrollbar share one grey; at
+   #B8B8B8 the labels were 1.8:1. #6D6D6D is NYU's mid grey and clears 4.5:1. */
+:root[data-brand="nyu"] { --scroll-thumb: #6d6d6d; }
+
+/* footer hints on the whiteboard, and a count on a grey pill */
+:root[data-brand="nyu"] .page-plan,
+:root[data-brand="nyu"] .page-goals { --fp-faint: #767676; }
+:root[data-brand="nyu"] .saved-rail__count { color: #404040; }
+
+/* the wins marker takes the violet: NYU's yellow on white is only 1.7:1 */
+:root[data-brand="nyu"] .fp-wins__star { color: #57068c; }
+
+/* whiteboard banner star count, and the footer hint on its near-white cards */
+:root[data-brand="nyu"] .fp-banner__stars { color: #57068c; }
+:root[data-brand="nyu"] .page-plan,
+:root[data-brand="nyu"] .page-goals { --fp-faint: #6d6d6d; }

@@ -107,7 +107,7 @@
 .rz-input { height: 32px; }
 .rz-textarea { min-height: 68px; resize: vertical; line-height: 1.55; }
 .rz-textarea--tall { min-height: 80px; }
-.rz-input::placeholder, .rz-textarea::placeholder { color: #9e998f; }
+.rz-input::placeholder, .rz-textarea::placeholder { color: var(--placeholder-ink); }
 .rz-input:focus, .rz-textarea:focus { outline: none; border-color: var(--accent-line); }
 
 .rz-entry {

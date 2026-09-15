@@ -229,8 +229,8 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 .fp-card[hidden] { display: none; }
 
 .fp-card--goals   { padding: 20px 22px; }
-.fp-card--habits  { background: #fbf3e7; border-color: #ead9b6; }
-.fp-card--wins    { background: #fdfaf0; border-color: #ede3c9; }
+.fp-card--habits  { background: var(--fp-habits-bg); border-color: var(--fp-habits-line); }
+.fp-card--wins    { background: var(--fp-wins-bg); border-color: var(--fp-wins-line); }
 .fp-card--letter  { border-color: var(--border-soft); }
 
 .fp-card__x {
@@ -253,7 +253,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   display: block; text-align: left; margin-top: 12px;
   font-size: 12.5px; font-weight: 500; color: var(--fp-accent);
 }
-.fp-foot { font-size: 10.5px; color: #c3bba9; margin-top: 10px; }
+.fp-foot { font-size: 10.5px; color: var(--fp-faint); margin-top: 10px; }
 .fp-input {
   width: 100%; margin-top: 8px;
   background: #fff; border: 1px solid var(--border);
@@ -273,7 +273,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   flex: 0 0 22px; width: 22px; height: 22px; margin-top: 6px;
   border-radius: 50%; display: grid; place-items: center;
   font-family: var(--font-body); font-size: 11px; font-weight: 600; color: #fff;
-  background: #b7afa3;
+  background: var(--badge);
 }
 .fp-goal.is-done .fp-goal__badge { background: var(--green); }
 .fp-goal__card {
@@ -361,7 +361,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 
 /* --- 3. habits + star jar --------------------------------------------------- */
 
-.fp-habits__title { color: #7a5c1e; }
+.fp-habits__title { color: var(--fp-gold-ink); }
 .fp-habit { margin-top: 14px; }
 .fp-habit__name { font-size: 13px; color: var(--ink-2); }
 .fp-habit__dots { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
@@ -377,7 +377,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   border: 1px solid var(--fp-star);
   background: var(--fp-star-lit);
 }
-.fp-habits__cap { font-size: 11px; color: #b49a5e; margin-top: 16px; }
+.fp-habits__cap { font-size: 11px; color: var(--fp-gold); margin-top: 16px; }
 
 .fp-jar { position: relative; width: 210px; height: 280px; margin: 8px auto 0; }
 /* Only the two jar plates are full-bleed. This used to read `.fp-jar img`,
@@ -399,7 +399,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   z-index: 2;
   transform-origin: 50% 50%;      /* JAR_PILE is solved for a centre rotation */
 }
-.fp-jar__label { font-size: 11px; color: #b49a5e; margin-top: 6px; text-align: center; }
+.fp-jar__label { font-size: 11px; color: var(--fp-gold); margin-top: 6px; text-align: center; }
 
 /* --- 4. this week ----------------------------------------------------------- */
 
@@ -431,7 +431,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 .fp-todo__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .fp-todo__title {
   font-family: var(--font-hand); font-weight: 600; font-size: 22px;
-  letter-spacing: .05em; color: #3a362f;
+  letter-spacing: .05em; color: var(--ink-warm);
 }
 .fp-todo__date { font-family: var(--font-mono); font-size: 9px; color: var(--fp-ink3); }
 .fp-todo__rule { height: 1px; background: var(--border-soft); margin: 10px 0 12px; }
@@ -446,7 +446,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 .fp-letter__cap { font-size: 12px; color: var(--fp-ink3); margin-top: 10px; text-align: center; }
 .fp-letter__text {
   width: 100%; margin-top: 10px;
-  background: #fffdf7; border: 1px solid var(--border);
+  background: var(--fp-cream); border: 1px solid var(--border);
   border-radius: 8px; padding: 10px 12px;
   font-size: 13px; min-height: 110px; resize: vertical;
   font-family: var(--font-hand); color: var(--ink);
@@ -508,7 +508,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   position: absolute; left: 14%; top: 9%; width: 72%; max-height: 170px;
   overflow: hidden; z-index: 4;
   font-family: var(--font-hand); font-size: 13.5px; line-height: 1.45;
-  color: #3a362f; white-space: pre-wrap; opacity: 0;
+  color: var(--ink-warm); white-space: pre-wrap; opacity: 0;
   transition: opacity .4s ease;
 }
 .fp-letter__stack.is-open .fp-letter__body { opacity: 1; }
@@ -538,7 +538,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 
 .fp-wins__head { display: flex; align-items: center; gap: 6px; }
 .fp-wins__star { color: var(--fp-star); font-size: 12px; }
-.fp-wins__label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .13em; color: #b49a5e; }
+.fp-wins__label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .13em; color: var(--fp-gold); }
 .fp-win { font-size: 13.5px; color: var(--ink-2); margin-top: 9px; }
 
 /* --- 10. skill in progress ----------------------------------------------------- */
@@ -590,7 +590,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
   font-family: var(--font-body); font-size: 8px; color: var(--ink-2);
 }
 .cal__day--mute { background: var(--ink-3); color: var(--panel-alt); }
-.cal__day--dark { background: #6b665e; }
+.cal__day--dark { background: var(--fp-cal-dark); }
 .cal__day--today { background: #fff; border: 1px solid var(--accent); color: var(--accent); font-weight: 600; }
 
 /* --- added panels (A's + tool) ------------------------------------------------- */
@@ -609,7 +609,7 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 }
 .wb-note--checklist { background: var(--panel-alt); }
 .wb-note--habit     { background: var(--panel-alt); }
-.wb-note--people    { background: var(--pl-sage); border-color: #d7e0d0; }
+.wb-note--people    { background: var(--pl-sage); border-color: var(--fp-sage-line); }
 .wb-note--wins      { background: var(--pl-stone); }
 
 .wb-note__label {
@@ -742,14 +742,14 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 .wb-picker__mod {
   display: flex; align-items: center; gap: 10px;
   width: 100%; padding: 5px 8px; border-radius: 8px;
-  font-size: 13px; color: #3a362f; text-align: left;
+  font-size: 13px; color: var(--ink-warm); text-align: left;
 }
 .wb-picker__mod:hover { background: var(--sunken); }
 .wb-picker__dot {
   flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%;
   background: var(--green);
 }
-.wb-picker__mod.is-off .wb-picker__dot { background: #d9cfbb; }
+.wb-picker__mod.is-off .wb-picker__dot { background: var(--fp-off); }
 .wb-picker__mod.is-off { color: var(--ink-4); }
 
 /* The pigeon is chrome, not board content: it is the companion that is always

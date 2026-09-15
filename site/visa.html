@@ -4,11 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Visa · Flightplan</title>
+<script>
+/* Theme bootstrap. Runs before any stylesheet paints, so a page opened in the
+   NYU theme never flashes the default palette first; js/sidebar.js owns the
+   toggle and keeps this in sync. */
+try {
+  if (localStorage.getItem('flightplan.brand') === 'nyu') {
+    document.documentElement.setAttribute('data-brand', 'nyu');
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.setAttribute('data-nyu-fonts', '');
+    l.href = 'https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Montserrat:wght@400;500;600;700&display=swap';
+    document.head.appendChild(l);
+  }
+} catch (e) { /* storage blocked: the default theme stands */ }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=2356b75b">
-<link rel="stylesheet" href="css/visa.css?v=64573060">
+<link rel="stylesheet" href="css/base.css?v=b8931e34">
+<link rel="stylesheet" href="css/visa.css?v=21b17ec0">
 </head>
 <body class="page-visa">
 

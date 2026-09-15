@@ -44,7 +44,7 @@
   display: flex;
   flex-direction: column;
   background: var(--panel);
-  border: 1px solid #e4ded0;
+  border: 1px solid var(--rule);
   border-radius: 14px;
   padding: 22px 24px;
   cursor: pointer;      /* js/home.js routes a click on the card body */
@@ -86,8 +86,8 @@
   border: 1px solid transparent;
   color: var(--ink);
 }
-.appl__tag--interview { background: #e6ece0; }
-.appl__tag--applied   { background: #f0d9c8; }
+.appl__tag--interview { background: var(--green-tint); }
+.appl__tag--applied   { background: var(--accent-tint); }
 .appl__tag--saved     { background: var(--panel); border-color: var(--border); }
 
 /* Four equal segments spanning the card. The old rail was four fixed 90px
@@ -95,7 +95,7 @@
    card's and stranded space on the right. */
 .stages { display: flex; gap: 6px; align-items: center; }
 .stage { flex: 1; }
-.stage__bar { height: 3px; border-radius: 2px; background: #ede7da; }
+.stage__bar { height: 3px; border-radius: 2px; background: var(--border-soft); }
 .stage__label {
   display: block;
   margin-top: 4px;
@@ -103,10 +103,10 @@
   font-family: var(--font-mono);
   font-size: 7px;
   letter-spacing: .06em;
-  color: #b4ac9c;
+  color: var(--dim);
 }
-.stage.is-done .stage__bar   { background: #5a7355; }
-.stage.is-done .stage__label { color: #5a7355; }
+.stage.is-done .stage__bar   { background: var(--green); }
+.stage.is-done .stage__label { color: var(--green); }
 
 .appl__note { font-size: 11px; color: var(--ink-3); margin-top: 7px; }
 .appl__note--alert { color: var(--accent); }
@@ -118,7 +118,7 @@
   padding-top: 20px;
   font-size: 12.5px;
   font-weight: 500;
-  color: #a2593a;
+  color: var(--accent-b);
 }
 
 .stages-row { display: flex; align-items: flex-start; flex-wrap: wrap; }
@@ -130,7 +130,7 @@
   display: flex;
   flex-direction: column;
   background: var(--panel);
-  border: 1px solid #e4ded0;
+  border: 1px solid var(--rule);
   border-radius: 14px;
   padding: 22px 24px;
   min-height: 0;
@@ -181,8 +181,8 @@
      the same job and matches .home-lower's own 20px gap, so the three cards sit
      on one rhythm instead of the visa strip butting straight into them. */
   margin-top: 20px;
-  background: #f7edea;
-  border: 1px solid #e9d6ce;
+  background: var(--visa-bg);
+  border: 1px solid var(--visa-line);
   border-radius: 14px;
   padding: 22px 24px;
   cursor: pointer;      /* js/home.js routes a click on the card body */
@@ -191,7 +191,7 @@
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: .13em;
-  color: #a2593a;
+  color: var(--accent-b);
 }
 /* B sets this at 23px in ink, not 36px in accent — it is a card heading sitting
    under the goals panel, not a page title, and the accent is spent on the dots
@@ -209,9 +209,9 @@
 .visa-col { min-width: 112px; flex: 1; }
 .visa-col__head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
 .visa-col__dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
-.visa-col__dot--ok    { background: #5a7355; }
-.visa-col__dot--alert { background: #b4552f; }
-.visa-col__dot--warn  { background: #96742e; }
+.visa-col__dot--ok    { background: var(--green); }
+.visa-col__dot--alert { background: var(--dot-alert); }
+.visa-col__dot--warn  { background: var(--dot-warn); }
 .visa-col__label {
   font-family: var(--font-mono);
   font-size: 8.5px;
@@ -219,9 +219,9 @@
   color: var(--ink-3);
   white-space: nowrap;
 }
-.visa-col__value { font-size: 12.5px; color: #3a362f; line-height: 1.35; text-wrap: pretty; }
+.visa-col__value { font-size: 12.5px; color: var(--ink-warm); line-height: 1.35; text-wrap: pretty; }
 
-.visa-panel__link { display: inline-block; font-size: 12.5px; font-weight: 500; color: #a2593a; }
+.visa-panel__link { display: inline-block; font-size: 12.5px; font-weight: 500; color: var(--accent-b); }
 
 /* The five shortcuts. Each is the answer to "why would I open the visa page",
    so each carries its own state — 2 of 7 lessons, one renewal due, 4 of 12
@@ -234,14 +234,14 @@
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 11.5px;
-  color: #3a362f;
+  color: var(--ink-warm);
   transition: border-color .15s ease;
 }
-.visa-chip:hover { border-color: #e9d6ce; }
+.visa-chip:hover { border-color: var(--visa-line); }
 .visa-chip__dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
-.visa-chip__dot--ok   { background: #5a7355; }
-.visa-chip__dot--warn { background: #96742e; }
-.visa-chip__dot--rule { background: #8c4535; }
+.visa-chip__dot--ok   { background: var(--green); }
+.visa-chip__dot--warn { background: var(--dot-warn); }
+.visa-chip__dot--rule { background: var(--accent); }
 
 /* --- narrow viewports ------------------------------------------------------ */
 

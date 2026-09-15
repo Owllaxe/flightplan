@@ -34,10 +34,10 @@
 .course__credits { font-size: 10px; color: var(--ink-2); margin-top: 18px; }
 
 .course--cs   { background: var(--c-cs); }
-.course--math { background: #dde2d5; }
-.course--phys { background: #eee0ba; }
-.course--engl { background: #f2d3d8; }
-.course--psy  { background: #e6d0c4; }
+.course--math { background: var(--sch-math); }
+.course--phys { background: var(--sch-phys); }
+.course--engl { background: var(--sch-engl); }
+.course--psy  { background: var(--sch-psy); }
 
 .week {
   position: relative;
@@ -71,8 +71,8 @@
   display: grid; place-items: center;
   width: calc(100% / 7 - var(--block-inset) * 2);
 }
-.block--cs   { background: var(--c-cs);  color: #8c4535; }
-.block--engl { background: #f2d3d8;      color: #994d66; font-size: 10.5px; }
-.block--phys { background: #eee0ba;      color: #8c6b26; }
-.block--math { background: #dde2d5;      color: #5a7355; font-size: 10.5px; }
-.block--psy  { background: #e6d0c4;      color: #805238; }
+.block--cs   { background: var(--c-cs);  color: var(--accent); }
+.block--engl { background: var(--sch-engl);      color: var(--sch-engl-ink); font-size: 10.5px; }
+.block--phys { background: var(--sch-phys);      color: var(--sch-phys-ink); }
+.block--math { background: var(--sch-math);      color: var(--green); font-size: 10.5px; }
+.block--psy  { background: var(--sch-psy);      color: var(--sch-psy-ink); }

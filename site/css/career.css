@@ -357,7 +357,7 @@
 
 .job__warn {
   width: 16px; height: 16px; border-radius: 50%;
-  background: #c0392b;
+  background: var(--danger);
   color: #fff; font-size: 10px; font-weight: 600;
   display: grid; place-items: center;
 }
@@ -433,7 +433,7 @@
 .startups.is-moving.is-sweep { transition-timing-function: var(--ease-out), linear; }
 
 .startups__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex: 0 0 auto; }
-.startups__title { font-family: var(--font-hand); font-size: 24px; font-weight: 400; color: #000; }
+.startups__title { font-family: var(--font-hand); font-size: 24px; font-weight: 400; color: var(--title-ink); }
 .startups__back img { transition: transform .28s var(--ease-out); transform: rotate(-90deg); }
 .is-startups-wide .startups__back img { transform: rotate(90deg); }
 
