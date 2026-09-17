@@ -9,7 +9,8 @@
      · the "Continue: …" link, which points at the first unfinished lesson
      · the OIE mail link, built from whichever question chips are lit
      · the SSN step-2 letter link, an OIE mail naming the signed-in student
-     · "Show me how", which jumps to the gap-semester lesson
+     · the "Needs your attention" count, and each alert's OIE mail link
+     · opening the folded roadmap when "Continue" or a lesson link needs it
 
    NOTE ON ORDER: this module's body runs before app.js's DOMContentLoaded
    handler (both are deferred modules, and app.js registers its listener when
@@ -38,8 +39,9 @@ const cont     = document.getElementById('roadmapContinue');
 const chips    = [...document.querySelectorAll('#quickQuestions input[data-check]')];
 const send     = document.getElementById('sendQuestion');
 const letter   = document.getElementById('requestLetter');
-const timeOff  = document.getElementById('lessonTimeOff');
-const howBtn   = document.getElementById('showMeHow');
+const fold     = document.getElementById('roadmapFold');
+const alerts   = [...document.querySelectorAll('.vs-alert input[data-check]')];
+const alertCt  = document.getElementById('alertCount');
 
 /* Every OIE mail on this page is composed here, so the address lives once.
    A body-less call keeps the plain `mailto:…?subject=…` the chips have always
@@ -87,7 +89,20 @@ function paintLetter() {
 
 /* app.js restores the stored values on DOMContentLoaded; this listener is
    registered later, so it runs after that and sees the restored state. */
+/* The alert strip's count reads what is still open; a ticked alert folds down
+   to its title so the ones left keep the attention. */
+function paintAlerts() {
+  const open = alerts.filter((el) => !el.checked).length;
+  alertCt.textContent = open ? `${open} to do` : 'All done — nice work';
+  alertCt.classList.toggle('is-clear', !open);
+}
+
+document.querySelectorAll('[data-oie-subject]').forEach((a) => {
+  a.href = oieMailto(a.dataset.oieSubject);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
+  paintAlerts();
   paintRoadmap();
   paintQuestion();
   paintLetter();
@@ -95,16 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 lessons.forEach((el) => el.addEventListener('change', paintRoadmap));
 chips.forEach((el) => el.addEventListener('change', paintQuestion));
+alerts.forEach((el) => el.addEventListener('change', paintAlerts));
 
-/* --- "Show me how" points at the lesson that answers it -------------------- */
+/* --- "Continue" opens the folded course at the next lesson ------------------ */
 
-howBtn?.addEventListener('click', () => {
-  timeOff.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  timeOff.classList.add('is-flagged');
-  setTimeout(() => timeOff.classList.remove('is-flagged'), 2200);
-});
-
-cont?.addEventListener('click', () => {
+cont?.addEventListener('click', (e) => {
+  e.preventDefault();
+  if (fold) fold.open = true;
   const next = lessons.find((el) => !el.checked);
   next?.closest('.vs-lesson').scrollIntoView({ block: 'center', behavior: 'smooth' });
 });

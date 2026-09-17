@@ -203,11 +203,14 @@ img { display: block; }
   font-weight: 700;
   font-size: 26px;
   line-height: 34px;
-  color: var(--ink-2);
-  transition: background .15s ease, color .15s ease;
+  /* No pill: the current page is marked by ink alone. The other pages sit in a
+     soft warm taupe (3.2:1 on the sidebar, fine for 26px bold), hover darkens
+     them, and the current page takes the full terracotta accent. */
+  color: var(--nav-ink, #9c8b7d);
+  transition: color .15s ease;
 }
-.sidebar__link:hover { background: color-mix(in srgb, var(--accent-tint) 45%, transparent); }
-.sidebar__link.is-active { background: var(--accent-tint); color: var(--accent); }
+.sidebar__link:hover { color: var(--nav-ink-hover, #5c554a); }
+.sidebar__link.is-active { color: var(--nav-ink-active, var(--accent)); }
 
 /* --- THIS TERM (build B §3.4) ----------------------------------------------
    Sits immediately after the nav. B reads doneCr/totalCr/inProgCr/pct from its
@@ -484,6 +487,12 @@ img { display: block; }
    and still step in lockstep. The aspect ratio is one native frame, 280 x 297. */
 #pigeon-stage {
   aspect-ratio: 280 / 297;
+  /* The box around it ignores the pointer; the bird itself can be picked up
+     and dragged out of the way (js/pigeon.js). */
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
   background-image: url('../assets/b/pigeon-stage.webp');
   background-repeat: no-repeat;
 }
@@ -491,18 +500,91 @@ img { display: block; }
    260px container, the whiteboard's is pinned to 177px by css/plan.css. Setting
    it on the id here would outrank both. */
 .mascot #pigeon-stage { width: 100%; }
-.mascot__bubble {
-  position: absolute;
-  right: calc(var(--mascot-lg) * .73); bottom: calc(var(--mascot-lg) * .57);
-  width: 235px; min-height: 74px;
-  background: var(--panel-alt);
-  border: 2px solid var(--ink);
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-size: 12.5px;
-  color: var(--ink-2);
-  box-shadow: var(--sh-1);
+.is-dragging #pigeon-stage { cursor: grabbing; }
+#pigeon-stage:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+/* --- the pigeon's speech bubble (build B's #pigeon-dock bubble) -------------
+   Built by js/pigeon.js. B's literal colours are the defaults; the NYU theme
+   overrides the --pg-* tokens below. It opens to the bird's left with B's tail
+   pointing at it, and flips to the right when the bird is dragged too far left. */
+:root {
+  --pg-paper: #faf8f1; --pg-line: #363636; --pg-head: #8c4535; --pg-from: #9a8f7d;
+  --pg-text: #363636; --pg-cheer: #a2593a; --pg-dash: #e0d8c6; --pg-act: #8c4535;
+  --pg-act-ink: #fdfbf6; --pg-done: #5a7355; --pg-box: #6b6055;
 }
+.pg-bubble {
+  position: absolute;
+  right: 88%; bottom: 52%;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 130px));
+  background: var(--pg-paper);
+  border: 2px solid var(--pg-line);
+  border-radius: 24px 26px 3px 24px;
+  padding: 13px 26px 13px 15px;
+  box-shadow: 2px 3px 0 rgba(54, 54, 54, .25);
+  pointer-events: auto;
+  cursor: auto;
+  text-align: left;
+  z-index: 3;
+}
+.pg-bubble[hidden] { display: none !important; }
+.pg-bubble__x {
+  position: absolute; top: 5px; right: 7px;
+  padding: 2px 4px; font-size: 12px; line-height: 1; color: var(--pg-from);
+}
+.pg-bubble__x:hover { color: var(--pg-line); }
+.pg-bubble__head { font-family: var(--font-nav); font-size: 18px; line-height: 1.25; color: var(--pg-head); }
+.pg-bubble__from { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .12em; color: var(--pg-from); margin-top: 2px; }
+.pg-bubble__msg { font-family: var(--font-nav); font-size: 15px; line-height: 1.3; color: var(--pg-text); margin-top: 5px; text-wrap: pretty; }
+.pg-item { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.pg-item__box {
+  flex: none; width: 15px; height: 15px; border-radius: 4px;
+  border: 1.5px solid var(--pg-box); background: #fff; color: var(--pg-box);
+  font-size: 10px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
+}
+.pg-item__box.is-done { border-color: var(--pg-done); background: var(--pg-done); color: #fdfbf6; }
+.pg-item__box.is-go { border-radius: 50%; }
+.pg-item__text {
+  flex: 1; font-family: var(--font-nav); font-size: 15px; line-height: 1.25; text-align: left;
+  color: var(--pg-text); cursor: pointer; padding: 0;
+}
+.pg-item__text.is-done { color: var(--pg-from); text-decoration: line-through; }
+.pg-item__chip {
+  flex: none; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .08em;
+  padding: 2px 7px; border-radius: 8px; color: #fdfbf6;
+}
+.pg-bubble__act {
+  display: inline-block; background: var(--pg-act); color: var(--pg-act-ink); border-radius: 14px;
+  padding: 7px 14px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .04em;
+  margin-top: 10px; margin-right: 8px; text-decoration: none;
+}
+.pg-bubble__cheer {
+  font-family: var(--font-nav); font-size: 13.5px; line-height: 1.35; color: var(--pg-cheer);
+  margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--pg-dash);
+}
+.pg-bubble__tail {
+  position: absolute; right: -16px; bottom: -2px; width: 20px; height: 16px;
+  background: var(--pg-paper); border-bottom: 2px solid var(--pg-line);
+  clip-path: polygon(0 0, 100% 100%, 0 72%);
+}
+/* Dragged to the left edge: the bubble opens on the other side, tail mirrored. */
+.pg-flip .pg-bubble { right: auto; left: 88%; border-radius: 26px 24px 24px 3px; padding: 13px 15px 13px 26px; }
+.pg-flip .pg-bubble__x { right: auto; left: 7px; }
+.pg-flip .pg-bubble__tail { right: auto; left: -16px; clip-path: polygon(100% 0, 0 100%, 100% 72%); }
+
+/* Pages without their own mascot markup (Career, Alumni) get the small bird. */
+.mascot--injected { width: var(--mascot-sm); }
+
+/* Planner: only the head pokes in from the right edge, low on the screen. The
+   bird leans in from off-screen; everything below the helmet stays past the
+   edge. Dragging slides it up and down that edge. */
+.mascot--peek {
+  --peek: clamp(150px, min(24vh, 15vw), 260px);
+  width: var(--peek);
+  right: calc(var(--peek) * -.52);
+  bottom: calc(var(--peek) * .05);
+}
+.mascot--peek #pigeon-stage { transform: rotate(-38deg); transform-origin: 50% 60%; }
+.mascot--peek .pg-bubble { right: 70%; bottom: 62%; }
 
 /* --- modal ----------------------------------------------------------------- */
 
@@ -592,7 +674,6 @@ img { display: block; }
   --font-hand:       'Frank Ruhl Libre', Georgia, serif;
   --font-serif:      'Frank Ruhl Libre', Georgia, serif;
   --font-newsreader: 'Frank Ruhl Libre', Georgia, serif;
-  --font-nav:        'Montserrat', Verdana, sans-serif;
   --font-body:       'Montserrat', Verdana, sans-serif;
   --font-mono:       'Montserrat', Verdana, sans-serif;
   --font-initials:   'Frank Ruhl Libre', Georgia, serif;
@@ -608,10 +689,15 @@ img { display: block; }
   --fp-star: #d4c11a; --fp-star-lit: #f4ec51; --fp-dot: #cfcfcf;
 }
 :root[data-brand="nyu"] .fp-letter__err { --fp-err: #b00b5e; }
+:root[data-brand="nyu"] {
+  --pg-paper: #ffffff; --pg-line: #57068c; --pg-head: #57068c; --pg-from: #6d6d6d;
+  --pg-text: #222222; --pg-cheer: #57068c; --pg-dash: #d6d6d6; --pg-act: #57068c;
+  --pg-act-ink: #ffffff; --pg-done: #00756f; --pg-box: #6d6d6d;
+}
 
-/* Sizes tuned for the handwritten face would shout in Montserrat and the serif:
-   the nav at 26px bold and the 42px wordmark are brought back to scale. */
-:root[data-brand="nyu"] .sidebar__link { font-size: 17px; font-weight: 600; letter-spacing: .01em; }
+/* The nav buttons keep the default handwritten face (--font-nav is not
+   overridden above), so they keep its size too. Only the wordmark, which does
+   switch to the serif, is brought back to scale. */
 :root[data-brand="nyu"] .sidebar__title { font-size: 30px; font-weight: 700; }
 
 /* --- the theme toggle (built by js/sidebar.js under THIS TERM) ------------ */
@@ -659,9 +745,9 @@ img { display: block; }
 :root[data-brand="nyu"] .sidebar__tagline,
 :root[data-brand="nyu"] .term__label,
 :root[data-brand="nyu"] .term__pct-cap { color: #d9c7e6; }
-:root[data-brand="nyu"] .sidebar__link { color: #ffffff; }
-:root[data-brand="nyu"] .sidebar__link:hover { background: #702b9d; }
-:root[data-brand="nyu"] .sidebar__link.is-active { background: #ffffff; color: #57068c; }
+/* NYU: other pages in light violet (5.6:1 on the violet sidebar), the current
+   page pure white. */
+:root[data-brand="nyu"] { --nav-ink: #c9a8e0; --nav-ink-hover: #e8dbf2; --nav-ink-active: #ffffff; }
 :root[data-brand="nyu"] .term__bar { background: #330662; }
 :root[data-brand="nyu"] .term__bar-done { background: #ffffff; }
 :root[data-brand="nyu"] .term__bar-prog { background: #ab82c5; opacity: 1; }

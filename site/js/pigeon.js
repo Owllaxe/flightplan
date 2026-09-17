@@ -1,3 +1,5 @@
+import { store } from './store.js';
+
 /* The pigeon.
 
    Build B animates the mascot from `assets/b/pigeon-stage.webp`, an 11 x 11
@@ -143,5 +145,356 @@ new MutationObserver(() => {
   if (document.getElementById('pigeon-quiz') && !timer) start();
 }).observe(document.documentElement, { childList: true, subtree: true });
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-else start();
+/* --- the dock ---------------------------------------------------------------
+   Every signed-in page gets a pigeon. Home, Goals, Profile, Resume and Visa
+   carry their own mascot markup; the rest (Career, Alumni, Planner) get one
+   built here. On Planner only the head pokes in from the right edge, so it
+   never covers the board. The login page has its own bird and is left alone. */
+
+const PAGE = (location.pathname.split('/').pop() || 'index.html').replace(/\.html$/, '') || 'index';
+
+function ensureDock() {
+  let bird = document.getElementById('pigeon-stage');
+  if (bird) return bird;
+  if (!document.querySelector('.sidebar')) return null;       /* login, embedded app */
+  const box = document.createElement('div');
+  box.className = 'mascot mascot--injected' + (PAGE === 'planner' ? ' mascot--peek' : '');
+  bird = document.createElement('div');
+  bird.id = 'pigeon-stage';
+  bird.setAttribute('aria-label', 'Your pigeon');
+  box.append(bird);
+  document.body.append(box);
+  return bird;
+}
+
+/* --- the speech bubble (build B) --------------------------------------------
+   B's bubble, rebuilt from its markup: a head line that counts what still needs
+   you, where it is speaking from, a line for this page, up to five reminders you
+   can tick off or jump to, an outreach action, and a cheer. Clicking the bird
+   opens and closes it; the x closes it. The choice is remembered per page for
+   the browser session. Home and Planner start closed so the bubble does not
+   cover the page; everywhere else it starts open, as in B. */
+
+const FROM = {
+  index: 'YOUR SEMESTER', planner: 'YOUR PLANNER', plan: 'YOUR GOALS', career: 'YOUR CAREER PLAN',
+  alumni: 'YOUR NETWORK', visa: 'YOUR VISA PLAN', profile: 'YOUR PROFILE', resume: 'YOUR RESUME',
+};
+
+const CHEERS = [
+  'every application is a rep — you’re getting stronger',
+  'future you is already proud of this version of you',
+  'small steps still cover ground — keep going',
+  'you’ve handled harder weeks than this one',
+  'planes take off against the wind — so do you',
+];
+
+const CAT = { goal: ['GOALS', '#739159'], todo: ['TO-DO', '#A5822C'], visa: ['VISA', '#A24D36'], career: ['CAREER', '#54676A'] };
+
+const mail = (to, subject, body) =>
+  `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+function firstName() {
+  const s = store.all();
+  const n = (s.auth && s.auth.name) || (s.identity && s.identity.name) || '';
+  return n.split(' ')[0];
+}
+
+function message() {
+  const name = firstName();
+  const lines = {
+    index: `Ready to plan your next adventure, ${name || 'friend'}?`,
+    planner: 'Drag a course to another semester, or click one to swap it. Drag it off the board to remove it.',
+    plan: 'Tick a goal when it is done and I will add a star to the jar.',
+    career: 'Add the roles you are aiming for, and I will keep them next to your coursework.',
+    alumni: 'Search by your major or the courses you took to find people who walked the same path.',
+    visa: 'Your passport expires Dec 2026, and the travel signature is due before winter break. Ask OIE to sign the I-20 first.',
+    profile: 'Office hours are Tuesday and Thursday. I will remind you.',
+    resume: 'Bullets that start with a verb read stronger. Just saying.',
+  };
+  return lines[PAGE] || 'Ready to plan your next adventure?';
+}
+
+const goalKey = (text) =>
+  `pl-goal-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+
+function reminders() {
+  const s = store.all();
+  const quiz = (s.flightplan && s.flightplan.quiz) || {};
+  const items = [];
+  const go = (href) => () => { location.href = href; };
+
+  const goals = Array.isArray(quiz.goals) ? quiz.goals.map((g) => String(g).trim()).filter(Boolean) : [];
+  goals.slice(0, 2).forEach((t) => {
+    const key = goalKey(t);
+    const done = !!store.get('checks', key, false);
+    items.push({ text: t, cat: 'goal', done, pending: !done,
+      toggle: () => { store.set('checks', key, done ? undefined : true); if (!done) reactPigeon('positive'); },
+      go: go('plan.html') });
+  });
+
+  const todo = store.get('lists', 'plan-todo', null);
+  if (Array.isArray(todo)) {
+    todo.map((t, i) => ({ t, i })).filter(({ t }) => t && !t.done).slice(0, 2).forEach(({ t, i }) => {
+      items.push({ text: t.t, cat: 'todo', done: false, pending: true,
+        toggle: () => {
+          const list = store.get('lists', 'plan-todo', []);
+          if (list[i]) { list[i].done = true; store.set('lists', 'plan-todo', list); }
+          reactPigeon('positive');
+        },
+        go: go('plan.html') });
+    });
+  }
+
+  if (quiz.intl !== false && PAGE !== 'visa') {
+    items.push({ text: 'your visa checklist — 1 renewal due', cat: 'visa', info: true, go: go('visa.html') });
+  }
+
+  const saved = Object.keys(s.bookmarks || {}).filter((k) => s.bookmarks[k] && !k.startsWith('al-')).length;
+  if (saved && PAGE !== 'career') {
+    items.push({ text: `${saved} saved job${saved === 1 ? '' : 's'} — apply to one this week`, cat: 'career', info: true, go: go('career.html') });
+  }
+  return items.slice(0, 5);
+}
+
+function actions() {
+  const intl = ((store.all().flightplan || {}).quiz || {}).intl;
+  if (PAGE === 'visa' && intl !== false) return [{ label: 'Email the OIE →',
+    href: mail('oie@andrew.cmu.edu', 'Question about my visa plan', 'Hi OIE team,\n\nI have a question about my visa plan:\n\n') }];
+  if (PAGE === 'career') return [{ label: 'Message your advisor →',
+    href: mail('advisor@university.edu', 'Quick question about my career plan', 'Hi,\n\nCould we talk about my applications this term?\n\n') }];
+  if (PAGE === 'plan') return [{ label: 'Share goals with advisor →',
+    href: mail('advisor@university.edu', 'My goals this semester', 'Hi,\n\nHere are the goals I’m working toward this semester — I’d love your thoughts.\n\n') }];
+  return [];
+}
+
+function h(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+const OPEN_KEY = 'flightplan.pigeonBubble';
+
+function bubbleWanted() {
+  try {
+    const all = JSON.parse(sessionStorage.getItem(OPEN_KEY) || '{}');
+    if (PAGE in all) return all[PAGE];
+  } catch { /* fall through */ }
+  return !['index', 'planner', 'visa'].includes(PAGE);
+}
+
+function rememberBubble(open) {
+  try {
+    const all = JSON.parse(sessionStorage.getItem(OPEN_KEY) || '{}');
+    all[PAGE] = open;
+    sessionStorage.setItem(OPEN_KEY, JSON.stringify(all));
+  } catch { /* ignore */ }
+}
+
+let bubble = null;
+let dockBox = null;
+
+function renderBubble() {
+  if (!bubble) return;
+  const items = reminders();
+  const pending = items.filter((i) => i.pending).length;
+  bubble.textContent = '';
+
+  const x = h('button', 'pg-bubble__x', '✕');
+  x.type = 'button';
+  x.title = 'Dismiss';
+  x.setAttribute('aria-label', 'Close the pigeon’s note');
+  x.addEventListener('click', () => {
+    if (pending) reactPigeon('negative');
+    setBubble(false);
+  });
+
+  bubble.append(
+    x,
+    h('div', 'pg-bubble__head', pending ? (pending === 1 ? 'one thing needs you' : `${pending} things need you`) : 'all clear — nice work!'),
+    h('div', 'pg-bubble__from', FROM[PAGE] || 'FLIGHTPLAN'),
+    h('div', 'pg-bubble__msg', message()),
+  );
+
+  items.forEach((it) => {
+    const row = h('div', 'pg-item');
+    const box = h('button', 'pg-item__box' + (it.done ? ' is-done' : '') + (it.info ? ' is-go' : ''),
+      it.info ? '→' : (it.done ? '✓' : ''));
+    box.type = 'button';
+    box.title = it.info ? 'Take me there' : (it.done ? 'Uncheck' : 'Check it off');
+    box.setAttribute('aria-label', `${box.title}: ${it.text}`);
+    box.addEventListener('click', () => { if (it.info) it.go(); else { it.toggle(); renderBubble(); } });
+    const txt = h('button', 'pg-item__text' + (it.done ? ' is-done' : ''), it.text);
+    txt.type = 'button';
+    txt.addEventListener('click', it.go);
+    const chip = h('span', 'pg-item__chip', CAT[it.cat][0]);
+    chip.style.background = CAT[it.cat][1];
+    row.append(box, txt, chip);
+    bubble.append(row);
+  });
+
+  actions().forEach((a) => {
+    const link = h('a', 'pg-bubble__act', a.label);
+    link.href = a.href;
+    bubble.append(link);
+  });
+
+  const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  bubble.append(h('div', 'pg-bubble__cheer', CHEERS[(doy + PAGE.length) % CHEERS.length]), h('span', 'pg-bubble__tail'));
+}
+
+function setBubble(open) {
+  if (!bubble) return;
+  if (open) renderBubble();
+  bubble.hidden = !open;
+  rememberBubble(open);
+  const bird = document.getElementById('pigeon-stage');
+  if (bird) bird.setAttribute('aria-expanded', String(open));
+  if (dockBox) flip(dockBox);
+}
+
+function initBubble(box) {
+  bubble = h('div', 'pg-bubble');
+  /* The bubble's own clicks must not start a drag on the bird. */
+  bubble.addEventListener('pointerdown', (e) => e.stopPropagation());
+  box.prepend(bubble);
+  setBubble(bubbleWanted());
+}
+
+/* --- dragging ---------------------------------------------------------------
+   The bird can sit over a card or a button, so it can be picked up and put
+   somewhere else. The whole mascot box moves (bubble, planet and all), is kept
+   on screen, and remembers where it was left on each page, stored as a fraction
+   of the viewport so it lands in the same place after a resize. A click without
+   a drag opens or closes the bubble. Double-click (or Home/Escape while focused)
+   sends it back to its corner; arrow keys nudge it. On Planner the peeking head
+   only slides up and down the right edge. */
+
+const POS_KEY = 'flightplan.pigeonPos';
+
+function readPos() {
+  try { return JSON.parse(localStorage.getItem(POS_KEY) || '{}'); } catch { return {}; }
+}
+
+function writePos(pos) {
+  try {
+    const all = readPos();
+    if (pos) all[PAGE] = pos; else delete all[PAGE];
+    localStorage.setItem(POS_KEY, JSON.stringify(all));
+  } catch { /* storage blocked: the bird just forgets */ }
+}
+
+const isPeek = (box) => box.classList.contains('mascot--peek');
+
+/* Not enough room to the bird's left for the bubble: open it on the right. */
+function flip(box) {
+  if (isPeek(box)) return;
+  const r = box.getBoundingClientRect();
+  const need = bubble && !bubble.hidden ? bubble.offsetWidth : 300;
+  box.classList.toggle('pg-flip', r.left + r.width * .12 < need + 8);
+}
+
+function place(box, left, top) {
+  const y = Math.min(Math.max(0, top), Math.max(0, window.innerHeight - box.offsetHeight));
+  box.style.top = `${y}px`;
+  box.style.bottom = 'auto';
+  if (!isPeek(box)) {
+    const x = Math.min(Math.max(0, left), Math.max(0, window.innerWidth - box.offsetWidth));
+    box.style.left = `${x}px`;
+    box.style.right = 'auto';
+  }
+  flip(box);
+}
+
+function unplace(box) {
+  ['left', 'top', 'right', 'bottom'].forEach((k) => box.style.removeProperty(k));
+  flip(box);
+}
+
+function save(box) {
+  const r = box.getBoundingClientRect();
+  writePos({ x: r.left / window.innerWidth, y: r.top / window.innerHeight });
+}
+
+function restore(box) {
+  const pos = readPos()[PAGE];
+  if (pos && Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
+    place(box, pos.x * window.innerWidth, pos.y * window.innerHeight);
+  } else flip(box);
+}
+
+function initDock() {
+  const bird = ensureDock();
+  const box = bird && bird.closest('.mascot, .pl-mascot, .gb-mascot');
+  if (!box || bird.dataset.draggable) return;
+  dockBox = box;
+  bird.dataset.draggable = '1';
+  bird.tabIndex = 0;
+  bird.setAttribute('role', 'button');
+  bird.title = 'Click to talk to the pigeon — drag to move it';
+
+  initBubble(box);
+  restore(box);
+
+  let drag = null;
+
+  bird.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const r = box.getBoundingClientRect();
+    drag = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top, sx: e.clientX, sy: e.clientY, moved: false };
+    try { bird.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
+    e.preventDefault();
+  });
+
+  bird.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 4) return;
+    if (!drag.moved) { drag.moved = true; box.classList.add('is-dragging'); }
+    place(box, e.clientX - drag.dx, e.clientY - drag.dy);
+  });
+
+  const end = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const { moved } = drag;
+    box.classList.remove('is-dragging');
+    drag = null;
+    if (moved) { save(box); return; }
+    if (e.type !== 'pointerup') return;
+    /* A plain click: wake a dozing bird, otherwise open or close the bubble. */
+    if (expr === 'sleepy') { restPigeon(); return; }
+    setBubble(bubble.hidden);
+  };
+  bird.addEventListener('pointerup', end);
+  bird.addEventListener('pointercancel', end);
+
+  bird.addEventListener('dblclick', () => { unplace(box); writePos(null); });
+
+  bird.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { setBubble(bubble.hidden); e.preventDefault(); return; }
+    if (e.key === 'Home' || e.key === 'Escape') { unplace(box); writePos(null); e.preventDefault(); return; }
+    const step = e.shiftKey ? 60 : 20;
+    const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (!d) return;
+    const r = box.getBoundingClientRect();
+    place(box, r.left + d[0], r.top + d[1]);
+    save(box);
+    e.preventDefault();
+  });
+
+  /* Keep a moved bird on screen when the window changes size. */
+  window.addEventListener('resize', () => {
+    if (box.style.top) restore(box); else flip(box);
+  });
+
+  /* Ticking a goal or to-do on the page itself should show in an open bubble. */
+  document.addEventListener('change', () => { if (!bubble.hidden) setTimeout(renderBubble, 0); });
+}
+
+function boot() {
+  initDock();
+  start();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();

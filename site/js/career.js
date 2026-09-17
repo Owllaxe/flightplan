@@ -306,8 +306,23 @@ function savedHeight() {
   return Math.max(180, Math.min(want, room));
 }
 
+/* Opening the list also moves the listings and the start-ups panel out of its
+   way: the page gets a right-hand margin as wide as the rail (plus the row's
+   gap), and the two panels slide left into the space that is left, so the list
+   drops all the way down beside them instead of covering the start-ups. */
+const mainEl = document.querySelector('.main');
+
 function setSavedOpen(on) {
-  if (on) rail.style.setProperty('--saved-open-h', `${savedHeight()}px`);
+  if (on) {
+    rail.style.setProperty('--saved-open-h', `${savedHeight()}px`);
+    const gap = parseFloat(getComputedStyle(rail.parentElement.parentElement).columnGap) || 23;
+    mainEl.style.setProperty('--saved-room', `${rail.getBoundingClientRect().width + gap}px`);
+  }
+  /* the visa strip only steps aside when a long list actually reaches it */
+  const strip = mainEl.querySelector('.visa');
+  const reach = rail.getBoundingClientRect().top + savedHeight();
+  mainEl.classList.toggle('is-saved-tall', on && !!strip && reach > strip.getBoundingClientRect().top);
+  mainEl.classList.toggle('is-saved-open', on);
   rail.classList.toggle('is-open', on);
   saved.setAttribute('aria-expanded', String(on));
   saved.setAttribute('aria-label', on ? 'Collapse the saved list' : 'Show the whole saved list');
@@ -1000,3 +1015,71 @@ setWide(isWide());
 renderWide(wideSlug);
 renderSaved();
 paintCredits();
+
+/* --- the ! on a listing: a hover preview of its visa note -------------------
+   The native title tooltip took a second to appear and only said "Visa
+   restrictions apply". The card already carries the real explanation in
+   `data-visa` (the detail pane reads it), so hovering or focusing the ! shows
+   its first sentence in a small styled tip. One tip element serves every card. */
+
+const warnTip = document.createElement('div');
+warnTip.className = 'warn-tip';
+warnTip.id = 'warnTip';
+warnTip.setAttribute('role', 'tooltip');
+warnTip.hidden = true;
+document.body.append(warnTip);
+
+function firstSentence(text) {
+  const m = text.match(/^.*?[.!?](?=\s|$)/);
+  return m ? m[0] : text;
+}
+
+function showWarnTip(warn) {
+  const card = warn.closest('[data-visa]');
+  if (!card) return;
+  warnTip.textContent = '';
+  const head = document.createElement('p');
+  head.className = 'warn-tip__head';
+  head.textContent = 'Visa note';
+  const body = document.createElement('p');
+  body.className = 'warn-tip__body';
+  body.textContent = firstSentence(card.dataset.visa);
+  const more = document.createElement('p');
+  more.className = 'warn-tip__more';
+  more.textContent = 'Open the listing for the full note.';
+  warnTip.append(head, body, more);
+  warnTip.hidden = false;
+
+  const r = warn.getBoundingClientRect();
+  const w = warnTip.offsetWidth;
+  const h = warnTip.offsetHeight;
+  let left = r.left + r.width / 2 - w / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+  let top = r.bottom + 10;
+  const below = top + h <= window.innerHeight - 8;
+  if (!below) top = r.top - h - 10;
+  warnTip.classList.toggle('is-above', !below);
+  warnTip.style.left = `${left}px`;
+  warnTip.style.top = `${top}px`;
+  warnTip.style.setProperty('--arrow-x', `${r.left + r.width / 2 - left}px`);
+  warn.setAttribute('aria-describedby', 'warnTip');
+}
+
+function hideWarnTip() {
+  warnTip.hidden = true;
+}
+
+document.querySelectorAll('.job .job__warn').forEach((warn) => {
+  const card = warn.closest('[data-visa]');
+  if (!card) return;
+  /* the tip replaces the native tooltip; the label keeps it named */
+  warn.removeAttribute('title');
+  warn.setAttribute('aria-label', 'Visa restrictions apply');
+  warn.tabIndex = 0;
+  warn.addEventListener('pointerenter', () => showWarnTip(warn));
+  warn.addEventListener('pointerleave', hideWarnTip);
+  warn.addEventListener('focus', () => showWarnTip(warn));
+  warn.addEventListener('blur', hideWarnTip);
+});
+document.getElementById('jobs')?.addEventListener('scroll', hideWarnTip, { passive: true });
+window.addEventListener('scroll', hideWarnTip, { passive: true });

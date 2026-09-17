@@ -91,6 +91,14 @@
 }
 
 .saved-rail__list { margin-top: 15px; }
+
+/* Open list: everything under the profile row slides left by the rail's width,
+   so the list drops down beside the listings and start-ups, not over them. */
+.career-body,
+.career-page .visa { transition: margin-right var(--panel-ms) var(--ease-out); }
+.main.is-saved-open .career-body,
+.main.is-saved-tall .visa { margin-right: var(--saved-room, 310px); }
+.career-page .main.is-saved-tall .visa { width: auto; }
 /* Each row opens the listing it names, so it is a <button> now. A button is
    inline-block and centre-aligned by default and the rows are full-width text,
    so the three defaults have to be put back before the drawn spacing means
@@ -361,6 +369,38 @@
   color: #fff; font-size: 10px; font-weight: 600;
   display: grid; place-items: center;
 }
+
+.job .job__warn { cursor: help; }
+.job .job__warn:focus-visible { outline: 2px solid var(--danger); outline-offset: 2px; }
+
+/* hover preview for the ! (js/career.js) */
+.warn-tip {
+  position: fixed;
+  z-index: 60;
+  width: max-content;
+  max-width: 260px;
+  padding: 10px 12px 11px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--danger);
+  border-radius: 10px;
+  box-shadow: var(--sh-2);
+  pointer-events: none;
+  animation: warnTipIn .14s ease-out;
+}
+.warn-tip::before {
+  content: '';
+  position: absolute;
+  top: -9px; left: calc(var(--arrow-x, 50%) - 6px);
+  border: 6px solid transparent;
+  border-bottom-color: var(--danger);
+}
+.warn-tip.is-above { border-top: 1px solid var(--border); border-bottom: 3px solid var(--danger); }
+.warn-tip.is-above::before { top: auto; bottom: -15px; border-bottom-color: transparent; border-top-color: var(--danger); }
+.warn-tip__head { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--danger); }
+.warn-tip__body { margin-top: 4px; font-size: 12.5px; line-height: 1.4; color: var(--ink); }
+.warn-tip__more { margin-top: 5px; font-size: 11px; color: var(--ink-3); }
+@keyframes warnTipIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
 
 .job__title { font-family: var(--font-serif); font-size: 16px; margin-top: 22px; }
 .job__company { font-size: 12px; font-weight: 500; color: var(--ink-2); margin-top: 6px; }
@@ -976,7 +1016,10 @@
   .startups__back img,
   .job-detail__close img,
   .saved-rail__title,
+  .career-body,
+  .career-page .visa,
   .job { transition: none; }
+  .warn-tip { animation: none; }
 
   /* the detail pane rises on `jobRise`, which the zeroed tokens above already
      flatten — this only stops the animation being *scheduled* at all, so a pane
