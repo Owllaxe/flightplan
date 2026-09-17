@@ -146,8 +146,9 @@ new MutationObserver(() => {
 }).observe(document.documentElement, { childList: true, subtree: true });
 
 /* --- the dock ---------------------------------------------------------------
-   Every signed-in page gets a pigeon. Home, Goals, Profile, Resume and Visa
-   carry their own mascot markup; the rest (Career, Alumni, Planner) get one
+   Every signed-in page gets a pigeon. Home, Goals, Resume and Visa
+   carry their own mascot markup; Profile has no pigeon by request; Career,
+   Alumni and Planner get one
    built here. On Planner only the head pokes in from the right edge, so it
    never covers the board. The login page has its own bird and is left alone. */
 
@@ -157,6 +158,7 @@ function ensureDock() {
   let bird = document.getElementById('pigeon-stage');
   if (bird) return bird;
   if (!document.querySelector('.sidebar')) return null;       /* login, embedded app */
+  if (PAGE === 'profile') return null;                         /* no bird on Profile */
   const box = document.createElement('div');
   box.className = 'mascot mascot--injected' + (PAGE === 'planner' ? ' mascot--peek' : '');
   bird = document.createElement('div');
@@ -281,6 +283,8 @@ function bubbleWanted() {
     const all = JSON.parse(sessionStorage.getItem(OPEN_KEY) || '{}');
     if (PAGE in all) return all[PAGE];
   } catch { /* fall through */ }
+  /* on a phone the bubble would cover most of the screen: start closed */
+  if (window.matchMedia('(max-width: 900px)').matches) return false;
   return !['index', 'planner', 'visa'].includes(PAGE);
 }
 
@@ -341,7 +345,91 @@ function renderBubble() {
   });
 
   const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  bubble.append(h('div', 'pg-bubble__cheer', CHEERS[(doy + PAGE.length) % CHEERS.length]), h('span', 'pg-bubble__tail'));
+  bubble.append(h('div', 'pg-bubble__cheer', CHEERS[(doy + PAGE.length) % CHEERS.length]));
+  bubble.prepend(...outline());
+}
+
+/* --- the hand-drawn outline --------------------------------------------------
+   A pen line that wobbles a little at every corner, drawn twice (a firm stroke
+   and a faint second pass slightly off it) the way an ink sketch doubles back.
+   The body lives in a 200 x 100 box stretched to the bubble; the strokes use
+   non-scaling-stroke so a tall bubble does not get fat sides. The tail is a
+   separate fixed-size drawing so its point never distorts. */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+function svg(cls, attrs, paths) {
+  const el = document.createElementNS(SVGNS, 'svg');
+  el.setAttribute('class', cls);
+  el.setAttribute('aria-hidden', 'true');
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  paths.forEach(([pc, d]) => {
+    const path = document.createElementNS(SVGNS, 'path');
+    path.setAttribute('class', pc);
+    path.setAttribute('d', d);
+    path.setAttribute('vector-effect', 'non-scaling-stroke');
+    el.append(path);
+  });
+  return el;
+}
+
+const BODY = 'M8,3 C45,1 120,3 190,2 C197,2 199,6 199,20 C198,48 200,72 198,90 C197,97 191,98 165,98 C115,97 55,99 12,98 C4,97 1,93 1,76 C2,50 0,26 2,12 C3,5 5,3 8,3 Z';
+const BODY_2 = 'M12,5 C60,3 130,5 187,4 C196,5 197,14 197,32 C196,58 198,80 195,94';
+const TAIL_FILL = 'M-4,0 L25,0 L24,7 C26,16 28,25 32,34 C22,28 12,20 -2,8 Z';
+const TAIL_INK = 'M23,7 C25,16 28,25 32,34 C22,28 12,20 -1,8';
+
+function outline() {
+  return [
+    svg('pg-bubble__shape', { viewBox: '0 0 200 100', preserveAspectRatio: 'none' },
+      [['pg-bubble__fill', BODY], ['pg-bubble__ink', BODY], ['pg-bubble__ink pg-bubble__ink--2', BODY_2]]),
+    svg('pg-bubble__tail', { viewBox: '0 0 34 36' },
+      [['pg-bubble__fill', TAIL_FILL], ['pg-bubble__ink', TAIL_INK]]),
+  ];
+}
+
+/* Where the beak is on one sprite frame (280 x 297), as a share of the frame:
+   the idle, excited and sleepy loops all keep the tip within a few px of it. */
+const BEAK = { x: 0.221, y: 0.296 };
+/* Flipped to the right, the tail points at the top of the helmet instead. */
+const CROWN = { x: 0.56, y: 0.1 };
+/* The tail's tip, measured from the bubble's bottom-right corner (see the CSS:
+   the 34 x 36 tail sits 26px in and 8px up, its point at 32, 34). */
+const TIP = { dx: 6, dy: 26 };
+
+/* Point on the bird, in the mascot box's own coordinates — through the bird's
+   CSS transform when it has one (the Planner head is tilted). */
+function birdPoint(box, share) {
+  const bird = document.getElementById('pigeon-stage');
+  const w = bird.offsetWidth;
+  const hgt = bird.offsetHeight;
+  let x = share.x * w;
+  let y = share.y * hgt;
+  const cs = getComputedStyle(bird);
+  if (cs.transform && cs.transform !== 'none') {
+    const m = new DOMMatrix(cs.transform);
+    const [ox, oy] = cs.transformOrigin.split(' ').map(parseFloat);
+    const rx = x - ox;
+    const ry = y - oy;
+    x = m.a * rx + m.c * ry + m.e + ox;
+    y = m.b * rx + m.d * ry + m.f + oy;
+  }
+  return { x: bird.offsetLeft + x, y: bird.offsetTop + y };
+}
+
+function positionBubble() {
+  if (!bubble || bubble.hidden || !dockBox) return;
+  const box = dockBox;
+  const flipped = box.classList.contains('pg-flip');
+  const p = birdPoint(box, flipped ? CROWN : BEAK);
+  const boxH = box.clientHeight;
+  bubble.style.bottom = `${boxH - (p.y - TIP.dy)}px`;
+  if (flipped) {
+    bubble.style.right = 'auto';
+    bubble.style.left = `${p.x + TIP.dx}px`;
+  } else {
+    bubble.style.left = 'auto';
+    bubble.style.right = `${box.clientWidth - (p.x - TIP.dx)}px`;
+  }
 }
 
 function setBubble(open) {
@@ -352,6 +440,7 @@ function setBubble(open) {
   const bird = document.getElementById('pigeon-stage');
   if (bird) bird.setAttribute('aria-expanded', String(open));
   if (dockBox) flip(dockBox);
+  positionBubble();
 }
 
 function initBubble(box) {
@@ -392,7 +481,8 @@ function flip(box) {
   if (isPeek(box)) return;
   const r = box.getBoundingClientRect();
   const need = bubble && !bubble.hidden ? bubble.offsetWidth : 300;
-  box.classList.toggle('pg-flip', r.left + r.width * .12 < need + 8);
+  box.classList.toggle('pg-flip', r.left + r.width * .22 < need + 8);
+  positionBubble();
 }
 
 function place(box, left, top) {
@@ -436,6 +526,10 @@ function initDock() {
 
   initBubble(box);
   restore(box);
+  /* The box can still change size after this (the Goals planet image loads
+     late, the bird scales with the window), so the tail is re-aimed whenever
+     it does. */
+  if ('ResizeObserver' in window) new ResizeObserver(() => positionBubble()).observe(box);
 
   let drag = null;
 
@@ -485,6 +579,7 @@ function initDock() {
   /* Keep a moved bird on screen when the window changes size. */
   window.addEventListener('resize', () => {
     if (box.style.top) restore(box); else flip(box);
+    positionBubble();
   });
 
   /* Ticking a goal or to-do on the page itself should show in an open bubble. */

@@ -511,16 +511,15 @@ img { display: block; }
   --pg-text: #363636; --pg-cheer: #a2593a; --pg-dash: #e0d8c6; --pg-act: #8c4535;
   --pg-act-ink: #fdfbf6; --pg-done: #5a7355; --pg-box: #6b6055;
 }
+/* The outline is two SVGs drawn by js/pigeon.js: a wobbly, pen-drawn body that
+   stretches to the text (its stroke does not stretch with it), and a fixed-size
+   tail whose tip js/pigeon.js parks on the bird's beak. Neither the right/bottom
+   nor left/bottom offsets live here; they are measured from the sprite. */
 .pg-bubble {
   position: absolute;
-  right: 88%; bottom: 52%;
   width: max-content;
   max-width: min(300px, calc(100vw - 130px));
-  background: var(--pg-paper);
-  border: 2px solid var(--pg-line);
-  border-radius: 24px 26px 3px 24px;
-  padding: 13px 26px 13px 15px;
-  box-shadow: 2px 3px 0 rgba(54, 54, 54, .25);
+  padding: 19px 30px 19px 20px;
   pointer-events: auto;
   cursor: auto;
   text-align: left;
@@ -528,7 +527,7 @@ img { display: block; }
 }
 .pg-bubble[hidden] { display: none !important; }
 .pg-bubble__x {
-  position: absolute; top: 5px; right: 7px;
+  position: absolute; top: 8px; right: 10px;
   padding: 2px 4px; font-size: 12px; line-height: 1; color: var(--pg-from);
 }
 .pg-bubble__x:hover { color: var(--pg-line); }
@@ -561,15 +560,30 @@ img { display: block; }
   font-family: var(--font-nav); font-size: 13.5px; line-height: 1.35; color: var(--pg-cheer);
   margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--pg-dash);
 }
-.pg-bubble__tail {
-  position: absolute; right: -16px; bottom: -2px; width: 20px; height: 16px;
-  background: var(--pg-paper); border-bottom: 2px solid var(--pg-line);
-  clip-path: polygon(0 0, 100% 100%, 0 72%);
+.pg-bubble__shape {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  overflow: visible;
+  z-index: -1;
+  filter: drop-shadow(2px 3px 0 rgba(54, 54, 54, .22));
+  pointer-events: none;
 }
+.pg-bubble__tail {
+  position: absolute;
+  left: calc(100% - 26px); top: calc(100% - 8px);
+  width: 34px; height: 36px;
+  overflow: visible;
+  z-index: -1;
+  pointer-events: none;
+}
+.pg-bubble__fill { fill: var(--pg-paper); }
+.pg-bubble__ink  { fill: none; stroke: var(--pg-line); stroke-width: 2.2px; stroke-linecap: round; stroke-linejoin: round; }
+.pg-bubble__ink--2 { stroke-width: 1px; opacity: .55; }
 /* Dragged to the left edge: the bubble opens on the other side, tail mirrored. */
-.pg-flip .pg-bubble { right: auto; left: 88%; border-radius: 26px 24px 24px 3px; padding: 13px 15px 13px 26px; }
+.pg-flip .pg-bubble { padding: 19px 20px 19px 30px; }
 .pg-flip .pg-bubble__x { right: auto; left: 7px; }
-.pg-flip .pg-bubble__tail { right: auto; left: -16px; clip-path: polygon(100% 0, 0 100%, 100% 72%); }
+/* mirrored: the tail leaves the bottom-left corner instead */
+.pg-flip .pg-bubble__tail { left: -8px; transform: scaleX(-1); }
 
 /* Pages without their own mascot markup (Career, Alumni) get the small bird. */
 .mascot--injected { width: var(--mascot-sm); }
@@ -584,7 +598,6 @@ img { display: block; }
   bottom: calc(var(--peek) * .05);
 }
 .mascot--peek #pigeon-stage { transform: rotate(-38deg); transform-origin: 50% 60%; }
-.mascot--peek .pg-bubble { right: 70%; bottom: 62%; }
 
 /* --- modal ----------------------------------------------------------------- */
 
@@ -830,3 +843,89 @@ img { display: block; }
 :root[data-brand="nyu"] .fp-banner__stars { color: #57068c; }
 :root[data-brand="nyu"] .page-plan,
 :root[data-brand="nyu"] .page-goals { --fp-faint: #6d6d6d; }
+
+
+/* ===========================================================================
+   § PHONES + SMALL TABLETS (≤ 900px)
+   The 217px rail would leave a phone ~160px of page, so below 900px it becomes
+   a 56px top bar: brand on the left, a menu button on the right (built by
+   js/sidebar.js). The rest of the rail opens as a full-screen menu under the
+   bar. Pages get a 16px gutter and never scroll sideways. Page stylesheets add
+   their own rules for this width below their desktop ones.
+   =========================================================================== */
+
+.sidebar__menu-btn { display: none; }
+
+@media (max-width: 900px) {
+  html, body { overflow-x: hidden; }
+
+  .app { display: block; min-height: 100vh; }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 35;            /* over the pigeon (30), under modals (40) */
+    width: auto;
+    height: 56px;
+    padding: 0 8px 0 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    align-content: start;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .sidebar__brand { display: flex; align-items: center; gap: 9px; padding: 0; height: 56px; }
+  .sidebar__mark { width: 28px; height: 26px; margin: 0; }
+  .sidebar__title { font-size: 24px; line-height: 1; }
+  :root[data-brand="nyu"] .sidebar__title { font-size: 22px; }
+  .sidebar__tagline { display: none; }
+
+  .sidebar__menu-btn {
+    display: inline-flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+    width: 44px; height: 44px;
+    border-radius: 10px;
+  }
+  .sidebar__menu-btn span {
+    display: block; width: 22px; height: 2px; border-radius: 2px;
+    background: var(--ink);
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  :root[data-brand="nyu"] .sidebar__menu-btn span { background: #ffffff; }
+  .sidebar.is-open .sidebar__menu-btn span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .sidebar.is-open .sidebar__menu-btn span:nth-child(2) { opacity: 0; }
+  .sidebar.is-open .sidebar__menu-btn span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* everything under the brand row lives in the menu */
+  .sidebar > :where(:not(.sidebar__brand):not(.sidebar__menu-btn)) { display: none; grid-column: 1 / -1; }
+  .sidebar.is-open {
+    z-index: 70;
+    height: 100vh; height: 100dvh;
+    overflow-y: auto;
+    padding-bottom: 32px;
+  }
+  .sidebar.is-open > :where(:not(.sidebar__brand):not(.sidebar__menu-btn)) { display: block; }
+  .sidebar.is-open .sidebar__nav { display: flex; gap: 4px; padding: 16px 8px 0; }
+  .sidebar.is-open .sidebar__link { width: 100%; height: 48px; padding: 0 8px; font-size: 28px; }
+  .sidebar.is-open .sidebar__term,
+  .sidebar.is-open .sidebar__theme { padding: 0 16px; margin-top: 22px; }
+  .sidebar.is-open .theme-toggle { max-width: 260px; }
+  .sidebar.is-open .sidebar__foot {
+    display: flex; align-items: center; gap: 16px;
+    margin-top: 26px; padding: 0 16px;
+  }
+  .sidebar.is-open .sidebar__foot .signout { margin: 0; }
+  body.nav-open { overflow: hidden; }
+
+  .main { padding: 72px 16px 40px; min-width: 0; }
+
+  /* the corner pigeon: small enough to live beside content on a phone */
+  :root {
+    --mascot-lg: clamp(84px, 26vw, 130px);
+    --mascot-sm: clamp(78px, 23vw, 118px);
+  }
+
+  /* modals take the screen instead of floating in a 24px frame */
+  .modal-backdrop { padding: 12px; }
+}

@@ -495,6 +495,21 @@ function selectCard(card) {
 /** Opening a detail plays ONE animation — the pane rising in. Leaving the wide
     state or the expanded grid to get here is a state switch, not a swipe, so
     the two sequences can never run at once. */
+/* Once the page stacks into one column (≤ 1100px) a pane opens below the
+   listings, possibly a screen or more away from the card that was tapped, so
+   bring it into view. Side by side it is already beside the card. */
+const stackedPage = window.matchMedia('(max-width: 1100px)');
+function revealPane(pane) {
+  if (!stackedPage.matches) return;
+  setTimeout(() => {
+    /* the pane may still be mid-rise; measure where it lands, not where it is */
+    const tf = getComputedStyle(pane).transform;
+    const lift = tf && tf !== 'none' ? new DOMMatrix(tf).f : 0;
+    const top = pane.getBoundingClientRect().top - lift + window.scrollY - 72;
+    window.scrollTo({ top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }, 0);
+}
+
 function openDetail(card) {
   settle();
   closeJobDetail();           /* the two panes share a column — never both */
@@ -512,6 +527,7 @@ function openDetail(card) {
   });
 
   body.classList.add('is-detail');
+  revealPane(detail);
 
   const t = timing();
   if (still(t)) return;
@@ -650,6 +666,7 @@ function openJobDetail(card) {
 
   syncSave();
   body.classList.add('is-job-detail');
+  revealPane(jobDetail);
 
   const t = timing();
   if (still(t)) return;

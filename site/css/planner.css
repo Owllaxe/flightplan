@@ -114,3 +114,11 @@
    bundle's own nav rail and clear its seeded course selection. The class is only
    ever added by script, so with scripting off the planner still shows. */
 .planner-frame.is-booting { visibility: hidden; }
+
+/* --- phones: clear the fixed top bar (css/base.css) --------------------------- */
+@media (max-width: 900px) {
+  .page-planner .main { padding-top: 56px; }
+  .planner-bar { height: 48px; padding: 0 12px 0 16px; gap: 10px; }
+  .planner-bar__title { font-size: 22px; }
+  .planner-toggle button { padding: 6px 9px; }
+}

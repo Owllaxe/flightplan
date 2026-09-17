@@ -22,8 +22,8 @@ try {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=c3c66a54">
-<link rel="stylesheet" href="css/planner.css?v=d73fa6b7">
+<link rel="stylesheet" href="css/base.css?v=663db8d1">
+<link rel="stylesheet" href="css/planner.css?v=e08fdaea">
 </head>
 <body class="page-planner">
 
@@ -290,6 +290,53 @@ function correct() {
 }
 
 correct();
+
+/* ------------------------------------------------------------ phone layout
+   The hosted app was drawn for a desktop: a 1000px board beside a sticky 300px
+   overview panel. In a phone-width frame the panel squeezed the board to a
+   sliver. These rules, injected into the frame, stack the two instead — the
+   board first (it scrolls sideways inside its own box, as a board should) and
+   the overview under it — and pull the app's gutters in. They only apply while
+   the frame itself is narrow, so the desktop layout is untouched. The app sets
+   its styles inline, so the selectors match on those declarations. */
+const MOBILE_CSS = `
+@media (max-width: 760px) {
+  div:has(> [style*="position: sticky"][style*="width: 300px"]) {
+    flex-direction: column !important; gap: 14px !important;
+  }
+  [style*="position: sticky"][style*="width: 300px"] {
+    position: static !important; width: auto !important; align-self: stretch !important;
+  }
+  [style*="flex: 1 1 0%"][style*="overflow-x: auto"] {
+    flex: none !important; width: 100% !important; align-self: stretch !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  [style*="padding: 22px 24px 80px"] { padding: 14px 12px 96px !important; }
+
+  /* semester view: the heading row stacks, its controls wrap under it */
+  [style*="max-width: 1180px"][style*="padding: 34px 30px 90px"] { padding: 18px 14px 96px !important; }
+  [style*="align-items: flex-end"][style*="justify-content: space-between"][style*="gap: 30px"] {
+    flex-direction: column !important; align-items: stretch !important; gap: 14px !important;
+  }
+  [style*="flex: 0 0 auto"][style*="flex-direction: column"][style*="align-items: flex-end"] {
+    align-items: flex-start !important; max-width: 100% !important;
+  }
+  [style*="flex: 0 0 auto"][style*="flex-direction: column"][style*="align-items: flex-end"] > * { flex-wrap: wrap !important; max-width: 100% !important; }
+  h1[style*="font-size: 34px"] { font-size: 28px !important; }
+}`;
+
+function injectMobile() {
+  try {
+    const doc = frame.contentDocument;
+    if (!doc || !doc.head || doc.getElementById('fp-mobile')) return;
+    const style = doc.createElement('style');
+    style.id = 'fp-mobile';
+    style.textContent = MOBILE_CSS;
+    doc.head.append(style);
+  } catch (e) { /* not same-origin yet */ }
+}
+frame.addEventListener('load', injectMobile);
+injectMobile();
 </script>
 
 </body>

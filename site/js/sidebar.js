@@ -234,4 +234,31 @@ function initBrand() {
   window.addEventListener('storage', (e) => { if (e.key === BRAND_KEY) applyBrand(); });
 }
 
-document.addEventListener('DOMContentLoaded', () => { paintSidebar(); initBrand(); });
+/* --- phones and small tablets: the sidebar becomes a top bar ----------------
+   At 900px and below css/base.css turns the rail into a 56px bar holding the
+   brand and this button; the rest of the rail (nav, THIS TERM, theme, avatar,
+   sign out) opens as a full-screen menu under it. */
+function buildMenuButton() {
+  document.querySelectorAll('.sidebar').forEach((bar) => {
+    if (bar.querySelector('.sidebar__menu-btn')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sidebar__menu-btn';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', 'Open menu');
+    btn.innerHTML = '<span></span><span></span><span></span>';
+    const set = (open) => {
+      bar.classList.toggle('is-open', open);
+      document.body.classList.toggle('nav-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    };
+    btn.addEventListener('click', () => set(!bar.classList.contains('is-open')));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && bar.classList.contains('is-open')) { set(false); btn.focus(); } });
+    /* leaving the phone layout (rotating, resizing) must not strand an open menu */
+    window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => { if (e.matches) set(false); });
+    bar.querySelector('.sidebar__brand').insertAdjacentElement('afterend', btn);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => { paintSidebar(); initBrand(); buildMenuButton(); });

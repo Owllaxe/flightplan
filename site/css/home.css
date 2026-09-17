@@ -265,3 +265,16 @@
 @media (max-width: 1100px) {
   .page-home .main { padding-bottom: calc(var(--mascot-sm) * 1.061 + 30px); }   /* clears the bird at any size */
 }
+
+/* --- phones ----------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .semester { padding: 16px 14px 18px; border-radius: 16px; }
+  .semester__head { gap: 14px; }
+  .semester__avatar.avatar { width: 64px; height: 64px; flex: 0 0 64px; font-size: 24px; }
+  .semester__hello { font-size: 30px; }
+  .semester__meta { font-size: 13px; margin-top: 4px; }
+  .semester__eyebrow { margin: 16px 0 12px; font-size: 11px; }
+  .home-lower { gap: 16px; }
+  .pipeline, .goals-panel, .visa-panel { padding-left: 16px; padding-right: 16px; }
+  .visa-col { min-width: 0; flex: 1 1 40%; }
+}

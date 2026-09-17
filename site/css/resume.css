@@ -348,3 +348,18 @@
 @media print {
   .rz-menu { display: none !important; }
 }
+
+/* --- phones ------------------------------------------------------------------ */
+@media (max-width: 600px) {
+  .rz-title { font-size: 34px; }
+  .rz-actions { width: 100%; gap: 10px; margin-top: 10px; }
+  .segmented, .rz-export { flex: 1 1 0; width: auto; }
+  .rz-divider { margin: 12px 0 18px; }
+  .rz-cols { gap: 16px; }
+  .rz-col { gap: 16px; }
+  .rz-card { padding: 14px; border-radius: 14px; }
+  .rz-card__title { margin-left: 8px; font-size: 18px; }
+  .rz-card__badge { width: auto; padding: 0 8px; }
+  .rz-card__menu-wrap, .rz-card__collapse { margin-left: 4px; width: 32px; flex-basis: 32px; height: 32px; align-items: center; }
+  .rz-paper { padding: 24px 18px; min-height: 0; border-radius: 6px; }
+}

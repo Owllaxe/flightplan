@@ -22,8 +22,8 @@ try {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=c3c66a54">
-<link rel="stylesheet" href="css/alumni.css?v=974a9532">
+<link rel="stylesheet" href="css/base.css?v=663db8d1">
+<link rel="stylesheet" href="css/alumni.css?v=997c46b0">
 </head>
 <body class="alumni-page">
 
@@ -73,42 +73,63 @@ try {
       <button class="btn btn--sm al-head__cta" type="button" id="alFind">Find someone to talk to</button>
     </header>
 
-    <!-- 2 · search + filters ------------------------------------------------>
+    <!-- 2 · search + filters ------------------------------------------------
+         One row: the search, the three toggles most students reach for, and a
+         Filters button. Major, field, courses and country live in the panel it
+         opens, so the page starts with five controls instead of thirty. What is
+         switched on shows as removable tags under the row. -->
     <section class="al-box al-search" aria-label="Search alumni">
       <div class="al-search__row">
         <input class="al-search__input" id="alQ" type="search" autocomplete="off"
                placeholder="Search by name, company, role, major, course or topic…"
                aria-label="Search alumni">
-        <button class="al-search__clear" type="button" id="alClear">Clear all</button>
+        <div class="al-quick" role="group" aria-label="Quick filters">
+          <button class="al-chip" type="button" data-flag="open" aria-pressed="false">Open to chat</button>
+          <button class="al-chip" type="button" data-flag="visa" aria-pressed="false">Visa path</button>
+          <button class="al-chip" type="button" data-flag="country" aria-pressed="false">From my country</button>
+        </div>
+        <button class="al-filters-btn" type="button" id="alFiltersBtn" aria-expanded="false" aria-controls="alPanel">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M4 8h8M6 12h4" /></svg>
+          Filters <span class="al-filters-btn__n" id="alFiltersN" hidden></span>
+        </button>
       </div>
 
-      <div class="al-groups">
-        <div class="al-group">
-          <span class="al-group__label">START HERE</span>
-          <div class="al-group__chips">
-            <button class="al-chip al-chip--key" type="button" data-flag="visa" aria-pressed="false">Went through OPT / H-1B</button>
-            <button class="al-chip al-chip--key" type="button" data-flag="country" aria-pressed="false">From my country</button>
-            <select class="al-country" id="alCountry" aria-label="Your home country">
-              <option value="">Choose your country…</option>
-            </select>
-            <button class="al-chip" type="button" data-flag="open" aria-pressed="false">Open to chat now</button>
+      <div class="al-panel" id="alPanel" hidden>
+        <div class="al-panel__grid">
+          <div class="al-group">
+            <span class="al-group__label">MAJOR</span>
+            <div class="al-group__chips" id="alMajors"></div>
+          </div>
+          <div class="al-group">
+            <span class="al-group__label">FIELD</span>
+            <div class="al-group__chips" id="alFields"></div>
+          </div>
+          <div class="al-group">
+            <span class="al-group__label">COURSES YOU TOOK</span>
+            <div class="al-group__chips" id="alCourses"></div>
+          </div>
+          <div class="al-group">
+            <label class="al-group__label" for="alCountry">YOUR HOME COUNTRY</label>
+            <div class="al-group__chips">
+              <select class="al-country" id="alCountry">
+                <option value="">Choose your country…</option>
+              </select>
+              <span class="al-panel__hint">Used by “From my country”.</span>
+            </div>
           </div>
         </div>
-        <div class="al-group">
-          <span class="al-group__label">MAJOR</span>
-          <div class="al-group__chips" id="alMajors"></div>
-        </div>
-        <div class="al-group">
-          <span class="al-group__label">FIELD</span>
-          <div class="al-group__chips" id="alFields"></div>
-        </div>
-        <div class="al-group">
-          <span class="al-group__label">MY COURSES</span>
-          <div class="al-group__chips" id="alCourses"></div>
+        <div class="al-panel__foot">
+          <button class="al-search__clear" type="button" id="alPanelClear">Reset these</button>
+          <button class="btn btn--sm" type="button" id="alPanelDone">Show alumni</button>
         </div>
       </div>
 
-      <p class="al-result" id="alResult" aria-live="polite"></p>
+      <div class="al-tags" id="alTags" hidden></div>
+
+      <div class="al-result-row">
+        <p class="al-result" id="alResult" aria-live="polite"></p>
+        <button class="al-search__clear" type="button" id="alClear" hidden>Clear all</button>
+      </div>
     </section>
 
     <div class="al-body">

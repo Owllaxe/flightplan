@@ -767,3 +767,55 @@ body.page-goals .app { height: 100vh; overflow: hidden; }
 }
 .pl-mascot .pigeon, .gb-mascot .pigeon { width: var(--goals-pigeon); }
 .pl-mascot .planet, .gb-mascot .planet { width: calc(var(--goals-pigeon) * .959); margin: calc(var(--goals-pigeon) * -.13) 0 0 calc(var(--goals-pigeon) * -.041); }
+
+/* ===========================================================================
+   PHONES + SMALL TABLETS (≤ 900px)
+   A pannable 1400px whiteboard does not work under a thumb, so the board is
+   laid out as a normal scrolling page: banner, then every card in one column,
+   then any notes added with +. js/plan.js stops panning and wheel-zooming at
+   this width; card positions saved on a desktop are ignored here, not lost.
+   Doodles are board-space drawings, so they are hidden rather than misplaced,
+   and the draw/erase/zoom controls go with them.
+   =========================================================================== */
+@media (max-width: 900px) {
+  body.page-plan, body.page-goals,
+  body.page-plan .app, body.page-goals .app { height: auto; overflow: visible; }
+  body.page-plan, body.page-goals { overflow-x: hidden; }
+  .page-plan .main, .page-goals .main { height: auto; overflow: visible; padding: 72px 16px 110px; display: flex; flex-direction: column; }
+
+  .wb-canvas {
+    position: static;
+    overflow: visible;
+    touch-action: auto;
+    background-color: transparent;
+    background-image: none !important;
+  }
+  .wb-stage { position: static; width: auto; height: auto; transform: none !important; }
+  .wb-ink, .wb-clear, .wb-zoom,
+  .pl-tools [data-tool="draw"], .pl-tools [data-tool="erase"] { display: none !important; }
+
+  .board { position: static; width: auto; padding: 0; }
+  .fp-row--1, .fp-row--2 { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .fp-row--1 { margin-bottom: 14px; }
+  .fp-col { gap: 14px; }
+  .fp-card { transform: none; touch-action: auto; padding: 16px; }
+
+  .wb-panels { position: static; width: auto; height: auto; display: grid; gap: 14px; margin-top: 14px; }
+  .wb-note { position: relative; left: auto !important; top: auto !important; width: auto !important; transform: none; }
+
+  .fp-banner {
+    position: static;
+    order: -1;
+    margin-bottom: 14px;
+    pointer-events: auto;
+    gap: 8px;
+  }
+  .fp-banner__id { flex-wrap: wrap; padding: 8px 14px; gap: 2px 10px; }
+  .fp-banner__title { font-size: 24px; }
+  .fp-banner__stat { margin-left: 0; font-size: 12px; }
+
+  .wb-chrome { left: 16px; bottom: 16px; }
+  .wb-picker { left: 16px; right: 16px; width: auto; bottom: 76px; max-height: 60vh; }
+
+  .pl-mascot, .gb-mascot { right: 6px; bottom: 12px; --goals-pigeon: clamp(64px, 18vw, 96px); }
+}

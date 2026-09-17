@@ -463,3 +463,30 @@
 @media (prefers-reduced-motion: reduce) {
   .vs-chip, .vs-alert, .vs-fold__chev { transition: none; }
 }
+
+/* --- phones ------------------------------------------------------------------ */
+@media (max-width: 600px) {
+  .page-visa { --vs-pad: 16px; --vs-pad-r: 16px; }
+  .vs-board { gap: 16px; }
+  .vs-head__title { font-size: 34px; }
+  .vs-alerts { padding: 14px 12px; border-radius: 16px; }
+  .vs-alerts__title { font-size: 24px; }
+  .vs-alerts__count { white-space: nowrap; flex: none; }
+  .vs-alerts__grid { gap: 10px; }
+  .vs-alert { padding: 12px 14px 14px; }
+  .vs-cols, .vs-col--main { gap: 16px; }
+  .vs-card { padding: 18px var(--vs-pad) 20px; border-radius: 16px; }
+  .vs-title { font-size: 26px; }
+
+  /* the timeline keeps its real spacing; its captions shrink to fit 300px */
+  .vs-timeline { padding: 0 4px; }
+  .vs-mark__when { font-size: 8.5px; letter-spacing: .4px; }
+  .vs-mark__what { font-size: 10px; white-space: normal; width: 72px; }
+  .vs-mark--start .vs-mark__what, .vs-mark--end .vs-mark__what { width: 64px; }
+  .vs-timeline .eyebrow { margin-bottom: 76px; }
+  .vs-timeline__foot { margin-top: 58px; }
+
+  .vs-rule__head, .vs-doc { gap: 12px; }
+  .vs-fold__sum { align-items: flex-start; }
+  .vs-send { width: 100%; }
+}

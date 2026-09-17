@@ -94,11 +94,15 @@
 
 /* Open list: everything under the profile row slides left by the rail's width,
    so the list drops down beside the listings and start-ups, not over them. */
-.career-body,
-.career-page .visa { transition: margin-right var(--panel-ms) var(--ease-out); }
-.main.is-saved-open .career-body,
-.main.is-saved-tall .visa { margin-right: var(--saved-room, 310px); }
-.career-page .main.is-saved-tall .visa { width: auto; }
+/* Side by side only: once the page stacks (≤ 1100px) the list sits above the
+   listings, so there is nothing beside it to move. */
+@media (min-width: 1101px) {
+  .career-body,
+  .career-page .visa { transition: margin-right var(--panel-ms) var(--ease-out); }
+  .main.is-saved-open .career-body,
+  .main.is-saved-tall .visa { margin-right: var(--saved-room, 310px); }
+  .career-page .main.is-saved-tall .visa { width: auto; }
+}
 /* Each row opens the listing it names, so it is a <button> now. A button is
    inline-block and centre-aligned by default and the rows are full-width text,
    so the three defaults have to be put back before the drawn spacing means
@@ -1056,4 +1060,33 @@
   .job-detail { margin-top: 0; }
 
   .visa { max-width: 100%; }
+}
+
+
+/* --- phones ------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .career-top { gap: 14px; }
+  .profile-card { height: auto; gap: 14px; padding: 16px; flex-wrap: wrap; border-radius: 16px; }
+  .profile-card__avatar.avatar { width: 64px; height: 64px; flex: 0 0 64px; font-size: 24px; }
+  .profile-card > div:not(.profile-card__avatar) { flex: 1 1 0; min-width: 0; }
+  .profile-card__name { font-size: 30px; }
+  .profile-card__meta { font-size: 13px; }
+  .profile-card__cta { margin-left: 0; width: 100%; justify-content: center; }
+
+  .saved-rail-slot { flex: 1 1 100%; min-width: 0; height: 132px; }
+  .saved-rail { height: 132px; border-radius: 16px; }
+
+  .career-tools { gap: 14px; margin: 18px 0 10px; }
+  .filters { gap: 14px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter { white-space: nowrap; font-size: 11px; padding-block: 6px 3px; }
+
+  .jobs { grid-template-columns: minmax(0, 1fr); }
+  .startups, .startup-detail, .job-detail { padding: 18px 16px; border-radius: 16px; }
+
+  .visa { padding: 16px; }
+  .visa__cta { width: 100%; justify-content: center; }
+
+  .modal.msg { padding: 22px 18px 18px; }
+  .warn-tip { max-width: calc(100vw - 32px); }
 }

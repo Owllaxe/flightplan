@@ -593,7 +593,12 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
 
   /* --- input -------------------------------------------------------------- */
 
+  /* At phone widths css/plan.css lays the board out as a plain scrolling stack
+     of cards, so the whiteboard gestures stand down and the page scrolls. */
+  const stacked = window.matchMedia('(max-width: 900px)');
+
   canvas.addEventListener('pointerdown', (e) => {
+    if (stacked.matches) return;
     if (e.button === 2) return;                       // leave the context menu alone
     const t = e.target instanceof Element ? e.target : null;
 
@@ -618,6 +623,7 @@ export function initWhiteboard({ canvas, stage, ink, panels, board, tools, zoom,
   canvas.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
 
   canvas.addEventListener('wheel', (e) => {
+    if (stacked.matches) return;
     e.preventDefault();                               // ctrl/cmd+wheel = trackpad pinch
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
     const dy = clamp(e.deltaY * unit, -320, 320);

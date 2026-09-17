@@ -440,7 +440,35 @@ function renderGrid() {
   if (F.flags.open) parts.push('open to chat');
   if (F.q.trim()) parts.push(`“${F.q.trim()}”`);
   $('alResult').textContent = `Showing ${list.length} of ${ALUMNI.length} alumni${parts.length ? ` · ${parts.join(' + ')}` : ''}`;
-  $('alClear').disabled = !anyFilter();
+  $('alClear').hidden = !anyFilter();
+  $('alPanelDone').textContent = `Show ${list.length} alumni`;
+  renderTags();
+}
+
+/* --- rendering: the Filters button + active tags ----------------------------
+   The panel's picks (major, field, course) are the ones out of sight once it
+   closes, so they are the ones echoed as tags. The quick toggles show their own
+   state in the row. */
+
+function renderTags() {
+  const tags = [];
+  const tag = (label, off) => h('button', { class: 'al-tag', type: 'button', onclick: off, 'aria-label': `Remove filter: ${label}` },
+    label, h('span', { class: 'al-tag__x', 'aria-hidden': 'true', text: '×' }));
+  F.majors.forEach((k) => tags.push(tag(MAJORS[k], () => { toggleIn(F.majors, k); update(); })));
+  F.fields.forEach((x) => tags.push(tag(x, () => { toggleIn(F.fields, x); update(); })));
+  F.courses.forEach((c) => tags.push(tag(`Took ${c}`, () => { toggleIn(F.courses, c); update(); })));
+  $('alTags').replaceChildren(...tags);
+  $('alTags').hidden = !tags.length;
+
+  const n = F.majors.length + F.fields.length + F.courses.length;
+  $('alFiltersN').textContent = String(n);
+  $('alFiltersN').hidden = !n;
+  $('alFiltersBtn').classList.toggle('is-active', n > 0);
+}
+
+function setPanel(open) {
+  $('alPanel').hidden = !open;
+  $('alFiltersBtn').setAttribute('aria-expanded', String(open));
 }
 
 /* --- rendering: header stats ------------------------------------------------ */
@@ -757,10 +785,17 @@ function boot() {
   $('alQ').addEventListener('input', (e) => { F.q = e.target.value; saveFilters(); renderGrid(); });
   $('alClear').addEventListener('click', clearAll);
   $('alFind').addEventListener('click', () => { $('alQ').focus(); $('alQ').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  /* the panel starts closed; its picks stay visible as tags */
+  setPanel(false);
+
+  $('alFiltersBtn').addEventListener('click', () => setPanel($('alPanel').hidden));
+  $('alPanelDone').addEventListener('click', () => { setPanel(false); $('alFiltersBtn').focus(); });
+  $('alPanelClear').addEventListener('click', () => { F.majors = []; F.fields = []; F.courses = []; update(); });
 
   document.querySelectorAll('[data-flag]').forEach((b) => b.addEventListener('click', () => {
     const k = b.dataset.flag;
-    if (k === 'country' && !me().country) { $('alCountry').focus(); return; }
+    /* no country yet: open the panel at the country picker instead */
+    if (k === 'country' && !me().country) { setPanel(true); $('alCountry').focus(); return; }
     F.flags[k] = !F.flags[k];
     update();
   }));
@@ -772,7 +807,9 @@ function boot() {
 
   /* Escape closes the detail pane when no modal is open. */
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && openId && !document.querySelector('.modal-backdrop.is-open')) closeDetail();
+    if (e.key !== 'Escape' || document.querySelector('.modal-backdrop.is-open')) return;
+    if (!$('alPanel').hidden) { setPanel(false); $('alFiltersBtn').focus(); return; }
+    if (openId) closeDetail();
   });
 
   wireComposer();

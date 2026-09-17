@@ -76,3 +76,28 @@
 .block--phys { background: var(--sch-phys);      color: var(--sch-phys-ink); }
 .block--math { background: var(--sch-math);      color: var(--green); font-size: 10.5px; }
 .block--psy  { background: var(--sch-psy);      color: var(--sch-psy-ink); }
+
+/* --- phones ------------------------------------------------------------------
+   Five course chips cannot share 340px, so they become a row you swipe; the
+   week grid keeps all seven days but tightens its gutters and block type. */
+@media (max-width: 600px) {
+  .schedule { --course-h: 88px; --course-gap: 10px; border-radius: 16px; padding-bottom: 40px; }
+  .courses {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 128px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 0 12px 6px;
+    scrollbar-width: none;
+  }
+  .courses::-webkit-scrollbar { display: none; }
+  .course { scroll-snap-align: start; border-radius: 14px; padding: 10px 12px 0; }
+  .course__credits { margin-top: 10px; }
+  .week { margin: 18px 8px 0 36px; }
+  .week__hour { font-size: 9.5px; right: calc(100% + 6px); }
+  .week__days { font-size: 11px; top: calc(100% + 12px); }
+  .week__days span { padding-left: 4px; }
+  .block { font-size: 7.5px; line-height: 1.1; text-align: center; letter-spacing: -.01em; }
+  .block--engl, .block--math { font-size: 7.5px; }
+}

@@ -380,3 +380,26 @@
 
   .pf-exp { gap: 24px 32px; }
 }
+
+/* --- phones ------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .pf-header { min-height: 0; padding: 16px 14px 18px; border-radius: 16px; }
+  .pf-header__top { gap: 14px; flex-wrap: wrap; align-items: center; }
+  .pf-header__avatar.avatar { width: 64px; height: 64px; flex: 0 0 64px; font-size: 24px; }
+  .pf-header__top > div { flex: 1 1 0; }
+  .pf-header__name { font-size: 30px; margin-top: 0; }
+  .pf-header__meta { font-size: 13px; margin-top: 4px; }
+  .pf-header__cta { margin: 0; width: 100%; justify-content: center; }
+  .pf-header__body { margin-top: 16px; gap: 14px; }
+  .pf-ident, .pf-stats { flex-basis: 100%; }
+  .pf-stats { min-height: 0; padding: 12px 16px; border-radius: 14px; }
+  .pf-stat__num { font-size: 34px; }
+  .pf-stat__label { font-size: 12px; }
+  .pf-saved, .pf-exp { min-height: 0; padding: 16px; border-radius: 16px; }
+  .pf-exp { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .advisor__value, .pf-ident__value, .pf-ident__text { overflow-wrap: anywhere; min-width: 0; }
+  .advisor, .advisor > * { min-width: 0; }
+  .page-profile .schedule { padding-bottom: 40px; }
+  .page-profile .courses { padding: 0 12px 6px; }
+  .page-profile .week { margin: 18px 8px 0 36px; }
+}

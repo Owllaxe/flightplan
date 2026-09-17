@@ -68,13 +68,63 @@
 .al-search__clear { font-size: 12.5px; font-weight: 500; color: var(--accent); white-space: nowrap; }
 .al-search__clear[disabled] { color: var(--ink-3); cursor: default; }
 
-/* Three labelled groups — MAJOR, FIELD, MY COURSES — so it is obvious they are
-   different axes and that they combine with AND. The two chips an
-   international student needs most sit in their own row above them. */
-.al-groups { display: grid; gap: 12px; margin-top: 14px; }
+/* --- quick toggles, the Filters button, the panel, the tags ---------------- */
+
+.al-quick { display: flex; gap: 7px; flex: none; }
+
+.al-filters-btn {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 40px; padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-alt);
+  font-size: 13px; font-weight: 500; color: var(--ink-2);
+  transition: border-color .15s ease, color .15s ease;
+}
+.al-filters-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.al-filters-btn:hover,
+.al-filters-btn[aria-expanded="true"] { border-color: var(--accent-line); color: var(--ink); }
+.al-filters-btn.is-active { border-color: var(--accent); color: var(--accent); }
+.al-filters-btn__n {
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--accent); color: #fff;
+  font-size: 11px; font-weight: 600; line-height: 18px; text-align: center;
+}
+
+.al-panel {
+  margin-top: 14px;
+  padding: 16px 18px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--panel-alt);
+}
+.al-panel__grid { display: grid; gap: 14px; }
+.al-panel__hint { font-size: 12px; color: var(--ink-3); align-self: center; }
+.al-panel__foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--rule);
+}
+
+.al-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.al-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 6px 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-tint);
+  font-size: 12px; color: var(--ink);
+}
+.al-tag__x { font-size: 14px; line-height: 1; color: var(--ink-3); }
+.al-tag:hover .al-tag__x { color: var(--accent); }
+
+.al-result-row { display: flex; align-items: baseline; gap: 12px; margin-top: 12px; }
+.al-result-row .al-result { margin: 0; }
+
+/* Inside the panel: labelled groups, so it stays obvious they are different
+   axes that combine with AND. */
 .al-group { display: flex; align-items: baseline; gap: 12px; }
 .al-group__label {
-  flex: 0 0 92px;
+  flex: 0 0 130px;
   font-family: var(--font-mono);
   font-size: 8.5px;
   letter-spacing: .13em;
@@ -414,7 +464,32 @@
 @media (max-width: 1100px) {
   .al-body { grid-template-columns: minmax(0, 1fr); }
 }
+@media (max-width: 1100px) {
+  .al-search__row { flex-wrap: wrap; }
+  .al-search__input { flex: 1 1 100%; }
+}
 @media (max-width: 640px) {
+  .al-quick { flex-wrap: wrap; }
   .al-group { flex-direction: column; gap: 6px; }
   .al-group__label { flex-basis: auto; }
+}
+
+/* --- phones ------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .al-head { gap: 14px; margin-bottom: 14px; }
+  .al-head__title { font-size: 40px; }
+  .al-head__cta { margin-left: 0; width: 100%; justify-content: center; }
+  .al-box { padding: 14px; }
+  .al-search__row { gap: 8px; }
+  .al-quick { flex: 1 1 auto; flex-wrap: wrap; }
+  .al-filters-btn { height: 34px; }
+  .al-group__label { flex-basis: auto; }
+  .al-group { flex-direction: column; gap: 6px; }
+  .al-panel { padding: 12px; }
+  .al-panel__foot .btn { flex: 1; justify-content: center; }
+  .al-grid { grid-template-columns: minmax(0, 1fr); }
+  /* the detail opens below the list; land it under the fixed top bar */
+  .al-detail { scroll-margin-top: 72px; }
+  .modal.al-compose { padding: 22px 16px 18px; max-height: calc(100dvh - 24px); overflow-y: auto; }
+  .al-compose__actions .btn { flex: 1 1 calc(50% - 8px); justify-content: center; }
 }
