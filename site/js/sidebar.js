@@ -236,28 +236,41 @@ function initBrand() {
 
 /* --- phones and small tablets: the sidebar becomes a top bar ----------------
    At 900px and below css/base.css turns the rail into a 56px bar holding the
-   brand and this button; the rest of the rail (nav, THIS TERM, theme, avatar,
-   sign out) opens as a full-screen menu under it. */
+   brand and a three-bar menu button; the rest of the rail (nav, THIS TERM,
+   theme, avatar, sign out) opens as a full-screen menu under it.
+
+   The button is in each page's HTML with an inline click handler, so it still
+   works on a phone that has an older copy of this file cached. This adds what
+   the inline handler does not: Escape to close, and closing the menu when the
+   window grows past the phone layout. The button is only built here for a page
+   that somehow lacks it. */
+function setMenu(bar, open) {
+  const btn = bar.querySelector('.sidebar__menu-btn');
+  bar.classList.toggle('is-open', open);
+  document.body.classList.toggle('nav-open', open);
+  if (btn) {
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+}
+
 function buildMenuButton() {
   document.querySelectorAll('.sidebar').forEach((bar) => {
-    if (bar.querySelector('.sidebar__menu-btn')) return;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'sidebar__menu-btn';
-    btn.setAttribute('aria-expanded', 'false');
-    btn.setAttribute('aria-label', 'Open menu');
-    btn.innerHTML = '<span></span><span></span><span></span>';
-    const set = (open) => {
-      bar.classList.toggle('is-open', open);
-      document.body.classList.toggle('nav-open', open);
-      btn.setAttribute('aria-expanded', String(open));
-      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    };
-    btn.addEventListener('click', () => set(!bar.classList.contains('is-open')));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && bar.classList.contains('is-open')) { set(false); btn.focus(); } });
-    /* leaving the phone layout (rotating, resizing) must not strand an open menu */
-    window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => { if (e.matches) set(false); });
-    bar.querySelector('.sidebar__brand').insertAdjacentElement('afterend', btn);
+    let btn = bar.querySelector('.sidebar__menu-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sidebar__menu-btn';
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open menu');
+      btn.innerHTML = '<span></span><span></span><span></span>';
+      btn.addEventListener('click', () => setMenu(bar, !bar.classList.contains('is-open')));
+      bar.querySelector('.sidebar__brand').insertAdjacentElement('afterend', btn);
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && bar.classList.contains('is-open')) { setMenu(bar, false); btn.focus(); }
+    });
+    window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => { if (e.matches) setMenu(bar, false); });
   });
 }
 

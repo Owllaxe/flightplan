@@ -36,6 +36,11 @@ try {
       <p class="sidebar__title">Flightplan</p>
       <p class="sidebar__tagline">DEGREE&nbsp;+&nbsp;CAREER</p>
     </div>
+    <!-- Phones (≤ 900px): the three-bar button top right opens the menu. The
+         handler is inline on purpose, so the button works even when a phone
+         still has an older cached js/sidebar.js. -->
+    <button class="sidebar__menu-btn" type="button" aria-expanded="false" aria-label="Open menu"
+            onclick="var b=this.closest('.sidebar'),o=!b.classList.contains('is-open');b.classList.toggle('is-open',o);document.body.classList.toggle('nav-open',o);this.setAttribute('aria-expanded',o);this.setAttribute('aria-label',o?'Close menu':'Open menu')"><span></span><span></span><span></span></button>
     <nav class="sidebar__nav">
       <a class="sidebar__link" href="index.html">Home</a>
       <a class="sidebar__link" href="planner.html">Planner</a>
