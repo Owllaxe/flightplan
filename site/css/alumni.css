@@ -170,15 +170,19 @@
 
 .al-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  /* the list carries two cards a row now, so it takes more of the width */
+  grid-template-columns: minmax(0, 2.1fr) minmax(290px, 1fr);
   gap: 20px;
   align-items: start;
 }
 
+/* Two to a row, whatever the rail leaves: three 232px cards to a row meant
+   every line of a card wrapped twice. Half the row each, so the cards can
+   breathe — see the padding and type sizes below. */
 .al-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 /* --- alumni card ------------------------------------------------------------ */
@@ -186,11 +190,11 @@
 .al-card {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 11px;
   background: var(--panel);
   border: 1px solid var(--rule);
-  border-radius: 14px;
-  padding: 16px 16px 14px;
+  border-radius: 16px;
+  padding: 20px 20px 18px;
   cursor: pointer;
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
@@ -198,28 +202,28 @@
 .al-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .al-card.is-selected { border-color: var(--accent); }
 
-.al-card__top { display: flex; align-items: center; gap: 11px; }
+.al-card__top { display: flex; align-items: center; gap: 13px; }
 .al-avatar {
-  width: 40px; height: 40px; flex: 0 0 40px;
+  width: 52px; height: 52px; flex: 0 0 52px;
   border-radius: 50%;
   display: grid; place-items: center;
   background: var(--accent-tint);
   color: var(--accent);
   font-family: var(--font-serif);
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 600;
 }
-.al-card__name { font-size: 14.5px; font-weight: 600; color: var(--ink); line-height: 1.2; }
-.al-card__year { font-size: 11.5px; color: var(--ink-3); }
+.al-card__name { font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.25; }
+.al-card__year { font-size: 12.5px; color: var(--ink-3); margin-top: 1px; }
 
-.al-card__now { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
-.al-card__path { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+.al-card__now { font-size: 13.5px; color: var(--ink); line-height: 1.45; }
+.al-card__path { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
 .al-card__path b { font-weight: 500; color: var(--ink-3); }
 
 .al-card__visa {
   align-self: flex-start;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .06em;
   padding: 3px 8px;
   border-radius: 999px;
@@ -227,10 +231,10 @@
   color: var(--ink-2);
 }
 
-.al-topics { display: flex; flex-wrap: wrap; gap: 5px; }
+.al-topics { display: flex; flex-wrap: wrap; gap: 6px; }
 .al-topic {
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 12px;
+  padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
   color: var(--ink-2);
@@ -238,20 +242,20 @@
 
 /* The shared-context ribbon: the single strongest reason a card gets opened. */
 .al-card__shared {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--accent);
   background: var(--accent-soft);
-  border-radius: 7px;
-  padding: 5px 8px;
+  border-radius: 8px;
+  padding: 7px 10px;
 }
 
-.al-card__reply { font-size: 11px; color: var(--ink-3); }
+.al-card__reply { font-size: 12px; color: var(--ink-3); }
 .al-card__reply--slow { color: var(--amber); }
 
-.al-card__actions { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 4px; }
+.al-card__actions { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 6px; }
 .al-card__ask { flex: 1; }
 .al-bookmark {
-  width: 32px; height: 32px; flex: 0 0 32px;
+  width: 36px; height: 36px; flex: 0 0 36px;
   display: grid; place-items: center;
   border: 1px solid var(--border);
   border-radius: 9px;
@@ -487,9 +491,15 @@
   .al-group { flex-direction: column; gap: 6px; }
   .al-panel { padding: 12px; }
   .al-panel__foot .btn { flex: 1; justify-content: center; }
-  .al-grid { grid-template-columns: minmax(0, 1fr); }
+  .al-card { padding: 16px; }
+  .al-avatar { width: 46px; height: 46px; flex-basis: 46px; font-size: 17px; }
   /* the detail opens below the list; land it under the fixed top bar */
   .al-detail { scroll-margin-top: 72px; }
   .modal.al-compose { padding: 22px 16px 18px; max-height: calc(100dvh - 24px); overflow-y: auto; }
   .al-compose__actions .btn { flex: 1 1 calc(50% - 8px); justify-content: center; }
+}
+
+/* one card a row only once two would be too narrow to read */
+@media (max-width: 640px) {
+  .al-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
 }
