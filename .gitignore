@@ -16,3 +16,6 @@ desktop.ini
 # Python (site/tools/*.py)
 __pycache__/
 *.pyc
+
+# local-only copy of the site used for the demo recording
+/jordandemo/
