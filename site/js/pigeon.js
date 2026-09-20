@@ -15,8 +15,9 @@ const FPS = 15;
 const COLS = 11;
 const ROWS = 11;
 
-/* entry -> loop x N -> accent -> exit, exactly as B flattens a segment. */
-const SEGMENTS = {
+/* entry -> loop x N -> accent -> exit, exactly as B flattens a segment.
+   Exported so pigeon-demo.html can play the same table rather than copy it. */
+export const SEGMENTS = {
   idle: { loop: [0, 1, 2, 3, 4, 4, 4, 4, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 10, 11, 12, 12, 12, 12, 13, 14, 15, 15, 16, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17] },
   excited: { entry: [18, 19, 20, 21, 22, 23, 24], loop: [25, 26, 27, 28, 29, 29, 29, 30, 31, 32, 33, 34, 35, 36, 37, 37, 37, 38, 39, 39, 39, 39, 40, 41], exit: [22, 21, 20, 19, 42] },
   sleepy: { entry: [42, 42, 42, 42, 42, 43, 44, 45, 46, 47, 48], loop: [48, 48, 48, 48, 49, 50, 51, 51, 51, 51, 51, 52, 53, 54, 54, 54] },
@@ -389,7 +390,7 @@ const BODY_2 = 'M12,5 C60,3 130,5 187,4 C196,5 197,14 197,32 C196,58 198,80 195,
 const TAIL_FILL = 'M-4,0 L25,0 L24,7 C26,16 28,25 32,34 C22,28 12,20 -2,8 Z';
 const TAIL_INK = 'M23,7 C25,16 28,25 32,34 C22,28 12,20 -1,8';
 
-function outline() {
+export function outline() {
   return [
     svg('pg-bubble__shape', { viewBox: '0 0 200 100', preserveAspectRatio: 'none' },
       [['pg-bubble__fill', BODY], ['pg-bubble__ink', BODY], ['pg-bubble__ink pg-bubble__ink--2', BODY_2]]),

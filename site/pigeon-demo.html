@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pigeon — Flightplan</title>
+<script>
+  /* the theme the rest of the site is on, read before paint */
+  try { if (localStorage.getItem('flightplan.brand') === 'nyu') document.documentElement.dataset.brand = 'nyu'; } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css?v=8648adda">
+<style>
+  /* Demo-only page: one bird, one bubble, nothing else. The bubble parts reuse
+     base.css's .pg-bubble rules, so it is drawn exactly as it is on the site. */
+  .pgd { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+
+  .pgd__head { padding: 22px 26px 0; }
+  .pgd__eyebrow { font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; color: var(--ink-3); }
+  .pgd__title { font-family: var(--font-hand); font-weight: 400; font-size: 34px; line-height: 1.05; color: var(--ink); margin-top: 6px; }
+
+  /* the stage: bird centred, bubble hung off it */
+  .pgd__floor { flex: 1 1 auto; display: grid; place-items: center; padding: 20px; }
+  .pgd__bird {
+    position: relative;
+    width: clamp(220px, min(52vh, 46vw), 560px);
+    aspect-ratio: 280 / 297;
+    background-image: url('assets/b/pigeon-stage.webp');
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+  .pgd__bird:focus-visible { outline: 2px solid var(--accent); outline-offset: 8px; border-radius: 16px; }
+
+  .pgd__bird .pg-bubble { max-width: min(320px, 42vw); }
+  .pgd-bubble__head { font-family: var(--font-nav); font-size: 20px; line-height: 1.2; color: var(--pg-head); }
+  .pgd-bubble__line { font-family: var(--font-nav); font-size: 16px; line-height: 1.35; color: var(--pg-text); margin-top: 6px; text-wrap: pretty; }
+
+  /* controls */
+  .pgd__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; padding: 0 20px 26px; }
+  .pgd-tab {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--panel);
+    font-size: 13px; color: var(--ink-2);
+  }
+  .pgd-tab:hover { border-color: var(--accent-line); color: var(--ink); }
+  .pgd-tab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pgd__play { margin-left: 6px; }
+  .pgd__hint { width: 100%; text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+
+  @media (max-width: 700px) {
+    .pgd__head { padding: 16px 16px 0; }
+    .pgd__title { font-size: 26px; }
+    .pgd__bird { width: min(74vw, 46vh); }
+    .pgd__bird .pg-bubble { max-width: 60vw; font-size: 13px; }
+    .pgd-bubble__head { font-size: 16px; }
+    .pgd-bubble__line { font-size: 13.5px; }
+  }
+</style>
+</head>
+<body class="page-pigeon-demo">
+
+<div class="pgd">
+  <header class="pgd__head">
+    <p class="pgd__eyebrow">FLIGHTPLAN · MASCOT</p>
+    <h1 class="pgd__title">The pigeon</h1>
+  </header>
+
+  <div class="pgd__floor">
+    <!-- The sprite sheet is 11 × 11 frames; js/pigeon-demo.js steps
+         background-position at 15fps, the same way the site does. -->
+    <div class="pgd__bird" id="pgDemoStage" role="img" aria-label="The Flightplan pigeon" tabindex="0">
+      <div class="pg-bubble" id="pgDemoBubble" role="status">
+        <p class="pgd-bubble__head" id="pgDemoHead">Idle</p>
+        <p class="pgd-bubble__line" id="pgDemoLine">Just here, keeping an eye on your plan.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pgd__bar">
+    <div id="pgDemoTabs" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+    <button class="pgd-tab pgd__play" type="button" id="pgDemoPlay" aria-pressed="true">Pause</button>
+    <p class="pgd__hint">Click the pigeon for the next animation.</p>
+  </div>
+</div>
+
+<script type="module" src="js/pigeon-demo.js"></script>
+
+</body>
+</html>
