@@ -275,21 +275,26 @@ function h(tag, cls, text) {
 
 const OPEN_KEY = 'flightplan.pigeonBubble';
 
+/* Closing the bubble is taken as "not now, thanks", and it carries: once you
+   have opened or closed it yourself, every page in this browser session follows
+   that last choice. Until then each page has its own sensible default. */
 function bubbleWanted() {
   try {
     const all = JSON.parse(sessionStorage.getItem(OPEN_KEY) || '{}');
-    if (PAGE in all) return all[PAGE];
+    if (typeof all.last === 'boolean') return all.last;
   } catch { /* fall through */ }
   /* on a phone the bubble would cover most of the screen: start closed */
   if (window.matchMedia('(max-width: 900px)').matches) return false;
   return !['index', 'planner', 'visa'].includes(PAGE);
 }
 
-function rememberBubble(open) {
+/* Only a choice the student made is remembered — `setBubble` passes `byUser`
+   for a click on the bird, the ✕ or "Tuck me away", and leaves it off when it
+   is only restoring the page's own default. */
+function rememberBubble(open, byUser) {
+  if (!byUser) return;
   try {
-    const all = JSON.parse(sessionStorage.getItem(OPEN_KEY) || '{}');
-    all[PAGE] = open;
-    sessionStorage.setItem(OPEN_KEY, JSON.stringify(all));
+    sessionStorage.setItem(OPEN_KEY, JSON.stringify({ last: open }));
   } catch { /* ignore */ }
 }
 
@@ -438,11 +443,11 @@ function positionBubble() {
   }
 }
 
-function setBubble(open) {
+function setBubble(open, byUser = true) {
   if (!bubble) return;
   if (open) renderBubble();
   bubble.hidden = !open;
-  rememberBubble(open);
+  rememberBubble(open, byUser);
   const bird = document.getElementById('pigeon-stage');
   if (bird) bird.setAttribute('aria-expanded', String(open));
   if (dockBox) flip(dockBox);
@@ -454,7 +459,7 @@ function initBubble(box) {
   /* The bubble's own clicks must not start a drag on the bird. */
   bubble.addEventListener('pointerdown', (e) => e.stopPropagation());
   box.prepend(bubble);
-  setBubble(bubbleWanted());
+  setBubble(bubbleWanted(), false);
 }
 
 /* --- dragging ---------------------------------------------------------------
@@ -514,7 +519,7 @@ function setPeek(box, on, remember = true) {
       : 'Click to talk to the pigeon — drag to move it';
   }
   if (on) {
-    setBubble(false);
+    setBubble(false, false);
     /* the edge position is the stylesheet's; only the height it sits at is kept */
     box.style.removeProperty('left');
     box.style.removeProperty('right');

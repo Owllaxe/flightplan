@@ -94,8 +94,6 @@
 
 .saved-rail__list { margin-top: 15px; }
 
-/* Open list: everything under the profile row slides left by the rail's width,
-   so the list drops down beside the listings and start-ups, not over them. */
 /* The scrim behind the open list. It covers the page, not the rail: the rail's
    slot sits above it, so the list stays crisp while everything else recedes. */
 .saved-scrim {
@@ -110,7 +108,7 @@
 /* the corner pigeon sits above the page, so it recedes with everything else */
 body.saved-open .mascot { opacity: .3; filter: blur(2px); pointer-events: none; transition: opacity .18s ease; }
 @keyframes savedScrimIn { from { opacity: 0; } to { opacity: 1; } }
-}
+
 /* Each row opens the listing it names, so it is a <button> now. A button is
    inline-block and centre-aligned by default and the rows are full-width text,
    so the three defaults have to be put back before the drawn spacing means
