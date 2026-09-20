@@ -1,93 +1,63 @@
 /* The pigeon, on its own — pigeon-demo.html.
 
-   A stage for the mascot: one big bird in the middle of an empty screen, its
-   speech bubble open beside it, walking through every animation it has.
+   A stage for the mascot: one big bird in the middle of an empty screen with
+   the site's own speech bubble open beside it — the same bubble, with the same
+   reminders, outreach button and cheer line the rest of the site shows — while
+   it walks through every animation it has.
 
-   It plays the SAME table js/pigeon.js uses (SEGMENTS) and draws the SAME
-   hand-drawn bubble (outline), both imported rather than copied, so this page
-   cannot drift from the pigeon on the real site. Importing that module is
-   otherwise inert here: its dock looks for `#pigeon-stage` or a sidebar, and
-   this page has neither. */
+   Everything here is driven through js/pigeon.js rather than copied from it:
+   the page carries the same `#pigeon-stage` inside a `.mascot` box that any
+   other page does, so that module builds the bubble, and `playPigeon` runs the
+   frames. This page only decides what to play and when. */
 
-import { SEGMENTS, outline } from './pigeon.js';
+import { SEGMENTS, playPigeon, openBubble } from './pigeon.js';
 
 const FPS = 15;
-const COLS = 11;
-const ROWS = 11;
 
-/* The order the demo walks through, with what the bubble says for each and how
-   many times a looping segment repeats before moving on. */
+/* The order the demo walks through. `loops` is how many times a looping
+   segment repeats before the next animation takes over; `hold` is how long an
+   endlessly looping one (idle, sleepy) stays on screen. */
 const SHOW = [
-  { key: 'idle', label: 'Idle', line: 'Just here, keeping an eye on your plan.', loops: 1 },
-  { key: 'excited', label: 'Excited', line: 'You ticked something off — that is a star in the jar.', loops: 2 },
-  { key: 'sleepy', label: 'Sleepy', line: 'Two quiet minutes and I nod off. Any click wakes me.', loops: 3 },
-  { key: 'crying', label: 'Sad', line: 'That deadline went past. We can still fix it.', loops: 1 },
-  { key: 'angry', label: 'Annoyed', line: 'That course is out of prerequisite order!', loops: 1 },
+  { key: 'idle', label: 'Idle', hold: 4200 },
+  { key: 'excited', label: 'Excited', loops: 2 },
+  { key: 'sleepy', label: 'Sleepy', hold: 5200 },
+  { key: 'crying', label: 'Sad', loops: 1 },
+  { key: 'angry', label: 'Annoyed', loops: 1 },
 ];
 
-const stage = document.getElementById('pgDemoStage');
-const bubble = document.getElementById('pgDemoBubble');
-const head = document.getElementById('pgDemoHead');
-const line = document.getElementById('pgDemoLine');
 const tabs = document.getElementById('pgDemoTabs');
 const playBtn = document.getElementById('pgDemoPlay');
+const now = document.getElementById('pgDemoNow');
 
-/* --- the sprite ------------------------------------------------------------- */
-
-function draw(i) {
-  const w = stage.clientWidth;
-  const h = stage.clientHeight;
-  if (!w || !h) return;
-  stage.style.backgroundSize = `${COLS * w}px ${ROWS * h}px`;
-  stage.style.backgroundPosition = `${-(i % COLS) * w}px ${-Math.floor(i / COLS) * h}px`;
+/** How long js/pigeon.js will be busy with one segment, in ms. */
+function span(item) {
+  const seg = SEGMENTS[item.key];
+  if (!seg) return 2000;
+  if (item.hold) return item.hold;
+  const n = (seg.entry || []).length
+    + (seg.loop || []).length * Math.max(1, item.loops || 1)
+    + (seg.accent || []).length
+    + (seg.exit || []).length;
+  return (n / FPS) * 1000 + 200;      /* + a beat on the idle it returns to */
 }
 
-/** One flat list of frames for a segment: entry, the loop N times, accent, exit. */
-function frames(key, loops) {
-  const seg = SEGMENTS[key];
-  if (!seg) return [];
-  const out = [];
-  const add = (a) => { if (a) out.push(...a); };
-  add(seg.entry);
-  for (let i = 0; i < Math.max(1, loops); i += 1) add(seg.loop);
-  add(seg.accent);
-  add(seg.exit);
-  return out;
-}
-
-/* --- the walk-through ------------------------------------------------------- */
-
-let at = 0;            /* which entry of SHOW is on screen */
+let at = 0;
 let timer = null;
-let playing = true;
-let auto = true;       /* auto = advance to the next animation when this one ends */
+let auto = true;
 
 function paintChrome() {
   const item = SHOW[at];
-  head.textContent = item.label;
-  line.textContent = item.line;
-  [...tabs.children].forEach((b) => {
-    b.setAttribute('aria-pressed', String(b.dataset.seg === item.key));
-  });
+  now.textContent = item.label;
+  [...tabs.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.seg === item.key)));
   document.title = `Pigeon — ${item.label}`;
 }
 
 function run() {
-  clearInterval(timer);
+  clearTimeout(timer);
   const item = SHOW[at];
-  const list = frames(item.key, item.loops);
   paintChrome();
-  draw(list[0]);
-  if (!playing) return;
-
-  let i = 0;
-  timer = setInterval(() => {
-    i += 1;
-    if (i >= list.length) {
-      if (!auto) { i = 0; } else { next(); return; }
-    }
-    draw(list[i]);
-  }, 1000 / FPS);
+  playPigeon(item.key, item.loops);
+  if (auto) timer = setTimeout(next, span(item));
 }
 
 function next() {
@@ -99,15 +69,14 @@ function show(key) {
   const i = SHOW.findIndex((s) => s.key === key);
   if (i < 0) return;
   at = i;
-  auto = false;              /* picking one holds it until Play again */
-  playing = true;
+  auto = false;                 /* picking one holds it until Play all */
   paintPlay();
   run();
 }
 
 function paintPlay() {
-  playBtn.textContent = playing && auto ? 'Pause' : 'Play all';
-  playBtn.setAttribute('aria-pressed', String(playing && auto));
+  playBtn.textContent = auto ? 'Pause' : 'Play all';
+  playBtn.setAttribute('aria-pressed', String(auto));
 }
 
 /* --- wiring ----------------------------------------------------------------- */
@@ -124,38 +93,16 @@ SHOW.forEach((item) => {
 });
 
 playBtn.addEventListener('click', () => {
-  if (playing && auto) { playing = false; clearInterval(timer); }
-  else { playing = true; auto = true; run(); }
+  auto = !auto;
   paintPlay();
+  if (auto) next(); else clearTimeout(timer);
 });
 
-/* Clicking the bird itself skips to the next animation, which is the handiest
-   control while recording. */
-stage.addEventListener('click', () => { auto = true; playing = true; paintPlay(); next(); });
+document.getElementById('pgDemoNext').addEventListener('click', () => { auto = true; paintPlay(); next(); });
 
-/* The bubble's tail is parked on the beak, which sits at this share of a frame
-   — the same measurement js/pigeon.js uses for the real bubble. */
-const BEAK = { x: 0.221, y: 0.296 };
-const TIP = { dx: 6, dy: 26 };
-
-function placeBubble() {
-  const w = stage.offsetWidth;
-  const h = stage.offsetHeight;
-  const right = w - (BEAK.x * w - TIP.dx);
-  bubble.style.right = `${right}px`;
-  bubble.style.bottom = `${h - (BEAK.y * h - TIP.dy)}px`;
-
-  /* On a narrow screen there is not always room to the bird's left, so the
-     bubble is pulled back until it clears the edge; the tail still leaves it
-     towards the beak. */
-  const r = bubble.getBoundingClientRect();
-  if (r.left < 12) bubble.style.right = `${right + r.left - 12}px`;
-}
-
-bubble.prepend(...outline());
-placeBubble();
-if ('ResizeObserver' in window) new ResizeObserver(placeBubble).observe(stage);
-window.addEventListener('resize', placeBubble);
-
+/* js/pigeon.js wires the bird itself (click opens and closes the bubble, drag
+   moves it), and it restores whatever the session last remembered — so the
+   bubble is opened here, since this page is about showing it. */
+openBubble();
 paintPlay();
 run();

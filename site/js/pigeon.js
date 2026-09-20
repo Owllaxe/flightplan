@@ -455,6 +455,12 @@ function setBubble(open, byUser = true) {
   positionBubble();
 }
 
+/* Opening it from outside the module — pigeon-demo.html shows the bubble the
+   whole time, whatever the session last remembered. */
+export function openBubble() {
+  setBubble(true, false);
+}
+
 function initBubble(box) {
   bubble = h('div', 'pg-bubble');
   /* The bubble's own clicks must not start a drag on the bird. */
