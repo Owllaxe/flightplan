@@ -349,6 +349,10 @@
   .rz-menu { display: none !important; }
 }
 
+/* The editor is a dense two-column form; the full-size bird sat on top of the
+   right-hand cards, so this page gets the small one. */
+.page-resume .mascot { width: var(--mascot-sm); }
+
 /* --- phones ------------------------------------------------------------------ */
 @media (max-width: 600px) {
   .rz-title { font-size: 34px; }

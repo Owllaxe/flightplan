@@ -333,7 +333,22 @@
 .al-prep__item .check { margin-top: 1px; }
 .al-prep__item.is-done span { color: var(--ink-3); text-decoration: line-through; }
 .al-prep__rule { font-size: 12px; color: var(--ink-2); margin-top: 10px; line-height: 1.45; }
-.al-bank { margin-top: 14px; }
+.al-bank { margin-top: 10px; }
+
+/* the folded question bank */
+.al-bank-fold { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 10px; }
+.al-bank-fold__sum {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  list-style: none; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--accent);
+}
+.al-bank-fold__sum::-webkit-details-marker { display: none; }
+.al-bank-fold__chev {
+  width: 8px; height: 8px; flex: none;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+}
+.al-bank-fold[open] .al-bank-fold__chev { transform: rotate(-135deg); }
 .al-bank__label {
   font-family: var(--font-mono);
   font-size: 8.5px;

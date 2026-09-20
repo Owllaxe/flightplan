@@ -544,14 +544,14 @@ function renderConvos() {
 /* --- rendering: question bank ----------------------------------------------- */
 
 function renderBank() {
-  const hint = h('p', { class: 'al-convo__meta', id: 'alBankHint', text: 'Tap a question to add it to your message.' });
+  const hint = h('p', { class: 'al-convo__meta', id: 'alBankHint', text: 'Tap one to add it to your message.' });
   $('alBank').replaceChildren(
     ...Object.entries(QUESTIONS).map(([k, qs]) => [
       h('p', { class: 'al-bank__label', text: PURPOSES[k].label.toUpperCase() }),
       ...qs.map((q) => h('button', { type: 'button', class: 'al-bank__q', text: q, onclick: () => {
         if (composeId) { insertQuestion(q); return; }
         if (openId) { compose(openId, { question: q }); return; }
-        hint.textContent = 'Open someone’s card first, then tap a question to add it.';
+        hint.textContent = 'Open someone’s card first.';
       } })),
     ]).flat(),
     hint);

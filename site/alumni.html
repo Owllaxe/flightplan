@@ -22,8 +22,8 @@ try {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=663db8d1">
-<link rel="stylesheet" href="css/alumni.css?v=f4f416a5">
+<link rel="stylesheet" href="css/base.css?v=8648adda">
+<link rel="stylesheet" href="css/alumni.css?v=26b7321a">
 </head>
 <body class="alumni-page">
 
@@ -153,12 +153,16 @@ try {
         <!-- 5 · before you ask ---------------------------------------------->
         <section class="al-box" id="alPrep">
           <h2 class="al-rail__title">Before you ask</h2>
-          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-read"><span>Read their path first</span></label>
-          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-three"><span>Write three specific questions</span></label>
-          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-fifteen"><span>Ask for 15 minutes, and keep to it</span></label>
-          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-thanks"><span>Send thanks within a day</span></label>
-          <p class="al-prep__rule">Ask for a referral on the second conversation, not the first.</p>
-          <div class="al-bank" id="alBank"></div>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-read"><span>Read their path</span></label>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-three"><span>Bring three questions</span></label>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-fifteen"><span>Keep to 15 minutes</span></label>
+          <label class="al-prep__item"><input class="check" type="checkbox" data-check="al-prep-thanks"><span>Say thanks next day</span></label>
+          <p class="al-prep__rule">Referrals: second chat, not the first.</p>
+          <!-- The question bank is long, so it folds away until it is wanted. -->
+          <details class="al-bank-fold">
+            <summary class="al-bank-fold__sum">Question ideas<span class="al-bank-fold__chev" aria-hidden="true"></span></summary>
+            <div class="al-bank" id="alBank"></div>
+          </details>
         </section>
 
         <!-- 6 · alumni detail — takes the rail when a card opens ------------->

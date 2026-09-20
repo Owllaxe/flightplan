@@ -591,13 +591,34 @@ img { display: block; }
 /* Planner: only the head pokes in from the right edge, low on the screen. The
    bird leans in from off-screen; everything below the helmet stays past the
    edge. Dragging slides it up and down that edge. */
+/* Tucked away: only the head pokes in from the right edge. Home, Goals and the
+   Planner each size and place their own mascot, and those rules are more
+   specific than this one, so the three geometry values that define the tuck are
+   forced. The vertical position is left to whatever holds it (a page rule, or
+   an inline top from dragging it up the edge). */
 .mascot--peek {
-  --peek: clamp(150px, min(24vh, 15vw), 260px);
-  width: var(--peek);
-  right: calc(var(--peek) * -.52);
-  bottom: calc(var(--peek) * .05);
+  --peek: clamp(120px, min(24vh, 15vw), 260px);
+  width: var(--peek) !important;
+  left: auto !important;
+  right: calc(var(--peek) * -.52) !important;
 }
-.mascot--peek #pigeon-stage { transform: rotate(-38deg); transform-origin: 50% 60%; }
+.mascot--peek #pigeon-stage {
+  width: 100% !important;
+  transform: rotate(-38deg);
+  transform-origin: 50% 60%;
+}
+/* the Goals bird stands on a planet; tucked at the edge it leaves it behind */
+.mascot--peek .planet { display: none; }
+
+/* the button that tucks it away sits at the foot of the bubble */
+.pg-bubble__tuck {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-nav);
+  font-size: 13px;
+  color: var(--pg-from);
+}
+.pg-bubble__tuck:hover { color: var(--pg-head); }
 
 /* --- modal ----------------------------------------------------------------- */
 

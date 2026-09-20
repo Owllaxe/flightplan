@@ -147,9 +147,7 @@ new MutationObserver(() => {
 
 /* --- the dock ---------------------------------------------------------------
    Every signed-in page gets a pigeon. Home, Goals, Resume and Visa
-   carry their own mascot markup; Profile has no pigeon by request; Career,
-   Alumni and Planner get one
-   built here. On Planner only the head pokes in from the right edge, so it
+   carry their own mascot markup; Career, Alumni and Planner get one built here. On Planner only the head pokes in from the right edge, so it
    never covers the board. The login page has its own bird and is left alone. */
 
 const PAGE = (location.pathname.split('/').pop() || 'index.html').replace(/\.html$/, '') || 'index';
@@ -158,9 +156,8 @@ function ensureDock() {
   let bird = document.getElementById('pigeon-stage');
   if (bird) return bird;
   if (!document.querySelector('.sidebar')) return null;       /* login, embedded app */
-  if (PAGE === 'profile') return null;                         /* no bird on Profile */
   const box = document.createElement('div');
-  box.className = 'mascot mascot--injected' + (PAGE === 'planner' ? ' mascot--peek' : '');
+  box.className = 'mascot mascot--injected';
   bird = document.createElement('div');
   bird.id = 'pigeon-stage';
   bird.setAttribute('aria-label', 'Your pigeon');
@@ -346,6 +343,15 @@ function renderBubble() {
 
   const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   bubble.append(h('div', 'pg-bubble__cheer', CHEERS[(doy + PAGE.length) % CHEERS.length]));
+
+  /* Out of the way, please: the bird slides to the right edge and leaves only
+     its head poking in, the way it sits on the Planner. Clicking the head
+     brings it back. */
+  const tuck = h('button', 'pg-bubble__tuck', 'Tuck me away \u2192');
+  tuck.type = 'button';
+  tuck.title = 'Send the pigeon to the edge of the screen';
+  tuck.addEventListener('click', () => { if (dockBox) setPeek(dockBox, true); });
+  bubble.append(tuck);
   bubble.prepend(...outline());
 }
 
@@ -474,7 +480,54 @@ function writePos(pos) {
   } catch { /* storage blocked: the bird just forgets */ }
 }
 
+/* --- tucked away ------------------------------------------------------------
+   The bird can be sent to the right edge, where only its head pokes in — the
+   Planner's resting state, now available on every page. Tapping the head brings
+   it back. Remembered per page, like its position; the Planner starts tucked. */
+
+const PEEK_KEY = 'flightplan.pigeonPeek';
+
 const isPeek = (box) => box.classList.contains('mascot--peek');
+
+function readPeek() {
+  try {
+    const all = JSON.parse(localStorage.getItem(PEEK_KEY) || '{}');
+    if (PAGE in all) return !!all[PAGE];
+  } catch { /* fall through */ }
+  return PAGE === 'planner';
+}
+
+function writePeek(on) {
+  try {
+    const all = JSON.parse(localStorage.getItem(PEEK_KEY) || '{}');
+    all[PAGE] = on;
+    localStorage.setItem(PEEK_KEY, JSON.stringify(all));
+  } catch { /* storage blocked: it just forgets */ }
+}
+
+function setPeek(box, on, remember = true) {
+  box.classList.toggle('mascot--peek', on);
+  const bird = box.querySelector('#pigeon-stage');
+  if (bird) {
+    bird.title = on
+      ? 'Click to bring the pigeon back'
+      : 'Click to talk to the pigeon — drag to move it';
+  }
+  if (on) {
+    setBubble(false);
+    /* the edge position is the stylesheet's; only the height it sits at is kept */
+    box.style.removeProperty('left');
+    box.style.removeProperty('right');
+    box.style.removeProperty('bottom');
+  } else {
+    unplace(box);
+  }
+  if (remember) writePeek(on);
+  positionBubble();
+}
+
+/* The control that sends it away lives in the speech bubble (see renderBubble),
+   so the whole thing is one gesture: click the bird, then "Tuck me away". */
 
 /* Not enough room to the bird's left for the bubble: open it on the right. */
 function flip(box) {
@@ -525,7 +578,7 @@ function initDock() {
   bird.title = 'Click to talk to the pigeon — drag to move it';
 
   initBubble(box);
-  restore(box);
+  if (readPeek()) setPeek(box, true, false); else restore(box);
   /* The box can still change size after this (the Goals planet image loads
      late, the bird scales with the window), so the tail is re-aimed whenever
      it does. */
@@ -553,20 +606,35 @@ function initDock() {
     const { moved } = drag;
     box.classList.remove('is-dragging');
     drag = null;
-    if (moved) { save(box); return; }
+    if (moved) {
+      /* dropped against the right edge: tuck it away there */
+      if (!isPeek(box) && box.getBoundingClientRect().right >= window.innerWidth - 2) {
+        writePos(null);
+        setPeek(box, true);
+        return;
+      }
+      save(box);
+      return;
+    }
     if (e.type !== 'pointerup') return;
-    /* A plain click: wake a dozing bird, otherwise open or close the bubble. */
+    /* A plain click: bring a tucked bird back, wake a dozing one, otherwise
+       open or close the bubble. */
+    if (isPeek(box)) { setPeek(box, false); return; }
     if (expr === 'sleepy') { restPigeon(); return; }
     setBubble(bubble.hidden);
   };
   bird.addEventListener('pointerup', end);
   bird.addEventListener('pointercancel', end);
 
-  bird.addEventListener('dblclick', () => { unplace(box); writePos(null); });
+  bird.addEventListener('dblclick', () => { unplace(box); writePos(null); setPeek(box, false); });
 
   bird.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { setBubble(bubble.hidden); e.preventDefault(); return; }
-    if (e.key === 'Home' || e.key === 'Escape') { unplace(box); writePos(null); e.preventDefault(); return; }
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (isPeek(box)) setPeek(box, false); else setBubble(bubble.hidden);
+      e.preventDefault();
+      return;
+    }
+    if (e.key === 'Home' || e.key === 'Escape') { unplace(box); writePos(null); setPeek(box, false); e.preventDefault(); return; }
     const step = e.shiftKey ? 60 : 20;
     const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
     if (!d) return;
@@ -578,7 +646,9 @@ function initDock() {
 
   /* Keep a moved bird on screen when the window changes size. */
   window.addEventListener('resize', () => {
-    if (box.style.top) restore(box); else flip(box);
+    if (isPeek(box)) { /* the edge keeps it */ }
+    else if (box.style.top) restore(box);
+    else flip(box);
     positionBubble();
   });
 

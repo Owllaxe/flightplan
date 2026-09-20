@@ -298,31 +298,31 @@ toggles.forEach((btn) => btn.addEventListener('click', toggleExpanded));
 
 const isSavedOpen = () => rail.classList.contains('is-open');
 
-/** Tall enough for the whole list, but never past the bottom of the window. */
+/** Tall enough for the whole list, but never past the bottom of the window. A
+    list longer than the window fills it to the bottom and scrolls inside. */
 function savedHeight() {
   const head = 52;                                  /* header + its 15px gap */
   const want = head + savedList.scrollHeight;
-  const room = window.innerHeight - rail.getBoundingClientRect().top - 24;
+  const room = window.innerHeight - rail.getBoundingClientRect().top - 16;
   return Math.max(180, Math.min(want, room));
 }
 
-/* Opening the list also moves the listings and the start-ups panel out of its
-   way: the page gets a right-hand margin as wide as the rail (plus the row's
-   gap), and the two panels slide left into the space that is left, so the list
-   drops all the way down beside them instead of covering the start-ups. */
+/* The open list drops over the page rather than pushing it about: everything
+   behind it is dimmed and blurred by a scrim, and nothing moves sideways.
+   Clicking the scrim closes the list, like any other overlay on the site. */
 const mainEl = document.querySelector('.main');
 
+const scrim = document.createElement('div');
+scrim.className = 'saved-scrim';
+scrim.hidden = true;
+scrim.addEventListener('click', () => setSavedOpen(false));
+document.body.append(scrim);
+
 function setSavedOpen(on) {
-  if (on) {
-    rail.style.setProperty('--saved-open-h', `${savedHeight()}px`);
-    const gap = parseFloat(getComputedStyle(rail.parentElement.parentElement).columnGap) || 23;
-    mainEl.style.setProperty('--saved-room', `${rail.getBoundingClientRect().width + gap}px`);
-  }
-  /* the visa strip only steps aside when a long list actually reaches it */
-  const strip = mainEl.querySelector('.visa');
-  const reach = rail.getBoundingClientRect().top + savedHeight();
-  mainEl.classList.toggle('is-saved-tall', on && !!strip && reach > strip.getBoundingClientRect().top);
+  if (on) rail.style.setProperty('--saved-open-h', `${savedHeight()}px`);
+  scrim.hidden = !on;
   mainEl.classList.toggle('is-saved-open', on);
+  document.body.classList.toggle('saved-open', on);   /* the pigeon recedes too */
   rail.classList.toggle('is-open', on);
   saved.setAttribute('aria-expanded', String(on));
   saved.setAttribute('aria-label', on ? 'Collapse the saved list' : 'Show the whole saved list');
@@ -721,60 +721,60 @@ const TAG_LABEL = {
 };
 
 const STARTUPS = {
-  nimbus: {
-    mono: 'NN', tone: 'peach', title: 'Nimbus Notes',
-    meta: 'EdTech · Pre-seed · Founded 2025 · 4 people · Pittsburgh, PA',
+  duolingo: {
+    mono: 'DL', tone: 'peach', title: 'Duolingo',
+    meta: 'Consumer software · Founded 2011 · Public (DUOL) · Pittsburgh, PA',
     blurbs: [
-      'Nimbus Notes turns a lecture recording into a clean set of notes and a study guide before the class has left the room. Two CS juniors built it after a semester of unreadable handwriting.',
-      'About two thousand students across nine campuses used it through finals last spring. Founded by alumni of the School of Computer Science; the team works out of the incubator space on Henry Street.',
+      'Duolingo was founded in Pittsburgh in 2011 by Carnegie Mellon professor Luis von Ahn and Severin Hacker, and teaches dozens of languages through short daily lessons. It has been a public company since 2021 and still runs its headquarters here.',
+      'Student roles sit with the learning and platform teams: you take one scoped piece of the product, ship it behind an experiment, and see what it does to real learner data. Alumni across the company do the mentoring.',
     ],
     roles: [
-      { cat: 'internship', name: 'Front-End Engineer', meta: 'Remote · 10 hrs / week · Paid' },
-      { cat: 'internship', name: 'Content Lead', meta: 'Remote · 8 hrs / week · Paid' },
-    ],
-  },
-  fernweg: {
-    mono: 'FW', tone: 'sage', title: 'Fernweg',
-    meta: 'Travel Tech · Seed · Founded 2024 · 6 people · Pittsburgh + Ithaca',
-    blurbs: [
-      'Fernweg is trip planning built by students for students — group itineraries, a shared budget that settles itself, and edits everyone sees at once.',
-      'The team is six people across two campuses and ran its first paid trips over spring break. They are hiring for the semester, not for the summer, so the hours fit around classes.',
-    ],
-    roles: [
-      { cat: 'internship', name: 'Product Designer', meta: 'Remote · 10 hrs / week · Paid' },
-      { cat: 'internship', name: 'iOS Engineer', meta: 'Hybrid · 12 hrs / week · Paid' },
+      { cat: 'internship', name: 'Software Engineering Intern, Learning', meta: 'Hybrid · Summer · Paid' },
+      { cat: 'internship', name: 'Data Science Intern', meta: 'Hybrid · Summer · Paid' },
       { cat: 'oncampus', name: 'Campus Ambassador', meta: 'On-campus · 5 hrs / week · Paid' },
-      { cat: 'oncampus', name: 'Campus Ambassador, Ithaca', meta: 'On-campus · 5 hrs / week · Paid' },
     ],
   },
-  loopline: {
-    mono: 'LL', tone: 'amber', title: 'Loopline',
-    meta: 'Fintech · Pre-seed · Founded 2026 · 3 people · Pittsburgh, PA',
+  astrobotic: {
+    mono: 'AB', tone: 'sage', title: 'Astrobotic Technology',
+    meta: 'Space robotics · Founded 2007 · Carnegie Mellon spin-out · Pittsburgh, PA',
     blurbs: [
-      'Loopline settles up the group chat. Rent, groceries and club dues in one ledger, without three apps and a spreadsheet nobody trusts.',
-      'Three founders, all seniors, running on a pre-seed cheque and a waitlist of about four hundred. They want one engineer who has opinions about double-entry bookkeeping.',
+      'Astrobotic was founded in 2007 by Carnegie Mellon robotics professor Red Whittaker to deliver payloads to the Moon. It builds landers, rovers and the flight software behind them, and works under NASA delivery contracts out of its Pittsburgh headquarters.',
+      'Student roles are hands-on and on-site: flight software testing, avionics bring-up, and time in the high bay next to hardware that is actually going to fly.',
     ],
     roles: [
-      { cat: 'internship', name: 'Backend Engineer', meta: 'Remote · 12 hrs / week · Paid' },
+      { cat: 'internship', name: 'Flight Software Intern', meta: 'On-site · 12 hrs / week · Paid' },
+      { cat: 'internship', name: 'Avionics Test Intern', meta: 'On-site · Summer · Paid' },
+      { cat: 'research', name: 'Rover Autonomy Research Assistant', meta: 'On-site · 10 hrs / week · Paid' },
     ],
   },
-  verdant: {
-    mono: 'VL', tone: 'slate', title: 'Verdant Labs',
-    meta: 'Sustainability · Seed · Founded 2023 · 9 people · Pittsburgh, PA',
+  aurora: {
+    mono: 'AU', tone: 'amber', title: 'Aurora Innovation',
+    meta: 'Self-driving · Founded 2017 · Public (AUR) · Pittsburgh, PA',
     blurbs: [
-      'Verdant Labs weighs what a dining hall throws away and turns it into a number the kitchen can act on that same week. Three pilot campuses so far.',
-      'Nine people, half of them alumni, and the only start-up here with hardware in the field. Expect a loading dock, a scale that needs recalibrating, and real data.',
+      'Aurora was founded in 2017 by Chris Urmson, Sterling Anderson and Drew Bagnell — two of them with Carnegie Mellon robotics roots — and builds the self-driving system behind long-haul trucking on Texas highways. Pittsburgh is one of its main engineering sites.',
+      'Student roles run in perception and simulation: you work on one part of the stack, measure it against logged miles, and defend the numbers in a review.',
     ],
     roles: [
-      { cat: 'research', name: 'Data Analyst', meta: 'Hybrid · 8 hrs / week · Paid' },
-      { cat: 'internship', name: 'Hardware Engineer', meta: 'On-site · 12 hrs / week · Paid' },
-      { cat: 'oncampus', name: 'Operations Lead', meta: 'On-campus · 10 hrs / week · Paid' },
+      { cat: 'internship', name: 'Perception Intern', meta: 'Hybrid · Summer · Paid' },
+      { cat: 'internship', name: 'Simulation Engineering Intern', meta: 'Hybrid · Summer · Paid' },
+    ],
+  },
+  skild: {
+    mono: 'SK', tone: 'slate', title: 'Skild AI',
+    meta: 'Robotics AI · Founded 2023 · Carnegie Mellon spin-out · Pittsburgh, PA',
+    blurbs: [
+      'Skild AI was founded in 2023 by Carnegie Mellon professors Deepak Pathak and Abhinav Gupta to build a single model that can drive many different robots, rather than one policy per machine. The company is based in Pittsburgh.',
+      'Student roles are research-shaped: collect and clean robot data, run training jobs, and write up what moved the benchmark and what did not.',
+    ],
+    roles: [
+      { cat: 'research', name: 'Robot Learning Research Intern', meta: 'On-site · 12 hrs / week · Paid' },
+      { cat: 'internship', name: 'Data Infrastructure Intern', meta: 'Hybrid · Summer · Paid' },
     ],
   },
 };
 
 /** Which record the directory is showing. */
-let wideSlug = 'nimbus';
+let wideSlug = 'duolingo';
 
 function renderWide(slug) {
   const rec = STARTUPS[slug];
@@ -849,7 +849,7 @@ function template(rec) {
   const role = rec.roles[0] ? rec.roles[0].name : 'open';
   return `Hi ${rec.title} team,
 
-I'm ${first}, a Carnegie Mellon undergraduate. I found you through the Flightplan alum start-up directory and your ${role} opening caught my eye.
+I'm ${first}, a Carnegie Mellon undergraduate. I found you through the Flightplan alum-founded directory and your ${role} opening caught my eye.
 
 [two lines on why you, and one thing you would want to work on]
 
@@ -859,7 +859,7 @@ Thanks,
 ${first}`;
 }
 
-let msgSlug = 'nimbus';
+let msgSlug = 'duolingo';
 
 function loadMessage(slug) {
   const rec = STARTUPS[slug];
@@ -877,6 +877,30 @@ function loadMessage(slug) {
    the composer is already filled by the time app.js shows it. */
 document.querySelectorAll('[data-message]').forEach((btn) => {
   btn.addEventListener('click', () => loadMessage(btn.dataset.message));
+});
+
+/* --- Apply ------------------------------------------------------------------
+   There is no outbox in the prototype, so Apply records that you applied: the
+   button becomes "Applied ✓", the card is marked, and it survives a reload
+   through the shared store — the same contract the bookmark star has. */
+
+const applyKey = (slug) => `startup-applied-${slug}`;
+
+function paintApply(btn) {
+  const on = Boolean(store.get('checks', applyKey(btn.dataset.apply), false));
+  btn.textContent = on ? 'Applied ✓' : 'Apply →';
+  btn.classList.toggle('is-applied', on);
+  btn.setAttribute('aria-pressed', String(on));
+  btn.closest('.startup')?.classList.toggle('is-applied', on);
+}
+
+document.querySelectorAll('[data-apply]').forEach((btn) => {
+  paintApply(btn);
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();          /* never open the card's detail as well */
+    store.toggle('checks', applyKey(btn.dataset.apply));
+    paintApply(btn);
+  });
 });
 
 let draftTimer = null;
@@ -997,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /** The six listings the rail starts with, so a first visit does not open on an
     empty panel. Written straight to the store rather than to the DOM, so the
     card icons agree with the rail — and only ever once. */
-const SEED_SAVED = ['job-3', 'job-2', 'job-5', 'job-4', 'job-7', 'startup-nimbus'];
+const SEED_SAVED = ['job-3', 'job-2', 'job-5', 'job-4', 'job-7', 'startup-duolingo'];
 
 function seedSaved() {
   if (store.get('lists', 'career-seed')) return;

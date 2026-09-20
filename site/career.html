@@ -22,8 +22,8 @@ try {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=663db8d1">
-<link rel="stylesheet" href="css/career.css?v=77b247d2">
+<link rel="stylesheet" href="css/base.css?v=8648adda">
+<link rel="stylesheet" href="css/career.css?v=556f212f">
 </head>
 <body class="career-page">
 
@@ -126,8 +126,8 @@ try {
               <span class="saved-rail__title">UX Research Intern</span>
               <span class="saved-rail__sub">Meridian Studio · Remote</span>
             </button>
-            <button class="saved-rail__item" type="button" data-tone="sage" data-saved-ref="startup-nimbus">
-              <span class="saved-rail__title">Nimbus Notes</span>
+            <button class="saved-rail__item" type="button" data-tone="sage" data-saved-ref="startup-duolingo">
+              <span class="saved-rail__title">Duolingo</span>
               <span class="saved-rail__sub">EdTech · Pre-seed · 2 open roles</span>
             </button>
           </div>
@@ -474,7 +474,7 @@ try {
 
       <section class="startups" id="startups">
         <div class="startups__head">
-          <h2 class="startups__title">STUDENT ALUM START-UPS</h2>
+          <h2 class="startups__title">ALUM-FOUNDED COMPANIES</h2>
           <button class="icon-btn startups__back" id="startupsBack" type="button"
                   aria-controls="startupsWide" aria-expanded="false"
                   aria-label="Open the full start-up directory">
@@ -484,79 +484,72 @@ try {
 
         <div class="startups__body">
         <div class="startups__list scroll" id="startupsList">
-          <article class="startup" tabindex="0" data-startup="nimbus"
-                   data-detail="Nimbus Notes turns every lecture into a clean set of notes and a study guide, generated while the class is still fresh. Built by two CS juniors after a semester of unreadable handwriting.&#10;&#10;Currently hiring two students: one front-end engineer and one content lead. Both roles are remote, paid, and around ten hours a week.">
+          <article class="startup" tabindex="0" data-startup="duolingo"
+                   data-detail="Duolingo was founded in Pittsburgh in 2011 by Carnegie Mellon professor Luis von Ahn and Severin Hacker, and teaches dozens of languages through short daily lessons. It has been a public company since 2021 and still runs its headquarters here.&#10;&#10;Student roles sit with the learning and platform teams: you take one scoped piece of the product, ship it behind an experiment, and see what it does to real learner data.">
             <div class="startup__row">
-              <div class="startup__logo" aria-hidden="true">NN</div>
+              <div class="startup__logo" aria-hidden="true">DL</div>
               <div style="flex:1 1 auto;min-width:0">
-                <h3 class="startup__name">Nimbus Notes</h3>
-                <p class="startup__meta">EdTech · Pre-seed · 2 open roles</p>
+                <h3 class="startup__name">Duolingo</h3>
+                <p class="startup__meta">Consumer software · Pittsburgh, PA · 3 student roles</p>
               </div>
-              <button class="bookmark" data-bookmark="startup-nimbus" aria-label="Save start-up"><img src="assets/bookmark.svg" alt=""></button>
+              <button class="bookmark" data-bookmark="startup-duolingo" aria-label="Save Duolingo"><img src="assets/bookmark.svg" alt=""></button>
             </div>
-            <p class="startup__blurb">AI-powered lecture notes and study guides for college courses.</p>
+            <p class="startup__blurb">The language-learning app, started at Carnegie Mellon and still headquartered in Pittsburgh.</p>
             <div class="startup__foot">
-              <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
-              <img src="assets/instagram.svg" alt="Instagram">
-              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="nimbus" aria-label="Message Nimbus Notes"><img src="assets/mail.svg" alt=""></button>
-              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="nimbus">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="duolingo" aria-label="Message Duolingo"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm btn--ghost" type="button" data-modal="messageStartup" data-message="duolingo">Message</button>
+              <button class="btn btn--sm startup__apply" type="button" data-apply="duolingo">Apply →</button>
             </div>
           </article>
-
-          <article class="startup" tabindex="0" data-startup="fernweg"
-                   data-detail="Fernweg is a trip-planning app built by students, for students — group itineraries, shared budgets, and real-time collaboration for spring break and study-abroad trips.&#10;&#10;The team is four people across two campuses. They are looking for a designer, an iOS engineer, and two campus ambassadors for the spring semester.">
+          <article class="startup" tabindex="0" data-startup="astrobotic"
+                   data-detail="Astrobotic was founded in 2007 by Carnegie Mellon robotics professor Red Whittaker to deliver payloads to the Moon. It builds landers, rovers and the flight software behind them, and works under NASA delivery contracts out of its Pittsburgh headquarters.&#10;&#10;Student roles are hands-on and on-site: flight software testing, avionics bring-up, and time in the high bay next to hardware that is actually going to fly.">
             <div class="startup__row">
-              <div class="startup__logo" aria-hidden="true">FW</div>
+              <div class="startup__logo" aria-hidden="true">AB</div>
               <div style="flex:1 1 auto;min-width:0">
-                <h3 class="startup__name">Fernweg</h3>
-                <p class="startup__meta">Travel Tech · Seed · 4 open roles</p>
+                <h3 class="startup__name">Astrobotic Technology</h3>
+                <p class="startup__meta">Space robotics · Pittsburgh, PA · 3 student roles</p>
               </div>
-              <button class="bookmark" data-bookmark="startup-fernweg" aria-label="Save start-up"><img src="assets/bookmark.svg" alt=""></button>
+              <button class="bookmark" data-bookmark="startup-astrobotic" aria-label="Save Astrobotic Technology"><img src="assets/bookmark.svg" alt=""></button>
             </div>
-            <p class="startup__blurb">Group trip planning for spring break and study abroad.</p>
+            <p class="startup__blurb">Lunar landers and rovers, built on the North Side by a Carnegie Mellon robotics spin-out.</p>
             <div class="startup__foot">
-              <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
-              <img src="assets/instagram.svg" alt="Instagram">
-              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="fernweg" aria-label="Message Fernweg"><img src="assets/mail.svg" alt=""></button>
-              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="fernweg">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="astrobotic" aria-label="Message Astrobotic Technology"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm btn--ghost" type="button" data-modal="messageStartup" data-message="astrobotic">Message</button>
+              <button class="btn btn--sm startup__apply" type="button" data-apply="astrobotic">Apply →</button>
             </div>
           </article>
-
-          <article class="startup" tabindex="0" data-startup="loopline"
-                   data-detail="Loopline settles up the group chat. Split rent, groceries, and club dues without three apps and a spreadsheet.&#10;&#10;One open role: a part-time backend engineer who has opinions about ledgers.">
+          <article class="startup" tabindex="0" data-startup="aurora"
+                   data-detail="Aurora was founded in 2017 by Chris Urmson, Sterling Anderson and Drew Bagnell — two of them with Carnegie Mellon robotics roots — and builds the self-driving system behind long-haul trucking on Texas highways. Pittsburgh is one of its main engineering sites.&#10;&#10;Student roles run in perception and simulation: you work on one part of the stack, measure it against logged miles, and defend the numbers in a review.">
             <div class="startup__row">
-              <div class="startup__logo" aria-hidden="true">LL</div>
+              <div class="startup__logo" aria-hidden="true">AU</div>
               <div style="flex:1 1 auto;min-width:0">
-                <h3 class="startup__name">Loopline</h3>
-                <p class="startup__meta">Fintech · Pre-seed · 1 open role</p>
+                <h3 class="startup__name">Aurora Innovation</h3>
+                <p class="startup__meta">Self-driving · Pittsburgh, PA · 2 student roles</p>
               </div>
-              <button class="bookmark" data-bookmark="startup-loopline" aria-label="Save start-up"><img src="assets/bookmark.svg" alt=""></button>
+              <button class="bookmark" data-bookmark="startup-aurora" aria-label="Save Aurora Innovation"><img src="assets/bookmark.svg" alt=""></button>
             </div>
-            <p class="startup__blurb">Peer-to-peer expense splitting for roommates and clubs.</p>
+            <p class="startup__blurb">Self-driving trucks, from a team that came out of Carnegie Mellon robotics.</p>
             <div class="startup__foot">
-              <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
-              <img src="assets/instagram.svg" alt="Instagram">
-              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="loopline" aria-label="Message Loopline"><img src="assets/mail.svg" alt=""></button>
-              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="loopline">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="aurora" aria-label="Message Aurora Innovation"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm btn--ghost" type="button" data-modal="messageStartup" data-message="aurora">Message</button>
+              <button class="btn btn--sm startup__apply" type="button" data-apply="aurora">Apply →</button>
             </div>
           </article>
-
-          <article class="startup" tabindex="0" data-startup="verdant"
-                   data-detail="Verdant Labs weighs what dining halls throw away and turns it into a number the kitchen can act on. Three pilot campuses so far.&#10;&#10;Three open roles: data, hardware, and one operations lead who does not mind a loading dock.">
+          <article class="startup" tabindex="0" data-startup="skild"
+                   data-detail="Skild AI was founded in 2023 by Carnegie Mellon professors Deepak Pathak and Abhinav Gupta to build a single model that can drive many different robots, rather than one policy per machine. The company is based in Pittsburgh.&#10;&#10;Student roles are research-shaped: collect and clean robot data, run training jobs, and write up what moved the benchmark and what did not.">
             <div class="startup__row">
-              <div class="startup__logo" aria-hidden="true">VL</div>
+              <div class="startup__logo" aria-hidden="true">SK</div>
               <div style="flex:1 1 auto;min-width:0">
-                <h3 class="startup__name">Verdant Labs</h3>
-                <p class="startup__meta">Sustainability · Seed · 3 open roles</p>
+                <h3 class="startup__name">Skild AI</h3>
+                <p class="startup__meta">Robotics AI · Pittsburgh, PA · 2 student roles</p>
               </div>
-              <button class="bookmark" data-bookmark="startup-verdant" aria-label="Save start-up"><img src="assets/bookmark.svg" alt=""></button>
+              <button class="bookmark" data-bookmark="startup-skild" aria-label="Save Skild AI"><img src="assets/bookmark.svg" alt=""></button>
             </div>
-            <p class="startup__blurb">Campus composting and waste-tracking tools for dining halls.</p>
+            <p class="startup__blurb">General-purpose robot brains, founded by two Carnegie Mellon robotics professors.</p>
             <div class="startup__foot">
-              <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
-              <img src="assets/instagram.svg" alt="Instagram">
-              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="verdant" aria-label="Message Verdant Labs"><img src="assets/mail.svg" alt=""></button>
-              <button class="btn btn--sm" type="button" data-modal="messageStartup" data-message="verdant">Message →</button>
+              <button class="startup__mail" type="button" data-modal="messageStartup" data-message="skild" aria-label="Message Skild AI"><img src="assets/mail.svg" alt=""></button>
+              <button class="btn btn--sm btn--ghost" type="button" data-modal="messageStartup" data-message="skild">Message</button>
+              <button class="btn btn--sm startup__apply" type="button" data-apply="skild">Apply →</button>
             </div>
           </article>
         </div>
@@ -564,7 +557,7 @@ try {
         <!-- The swipe-over directory view. The skeleton below never changes
              shape — the sweep staggers this block's top-level children, so
              js/career.js refills the inner text and rows rather than rebuilding
-             them. Seeded with the Nimbus Notes record, which is the one a no-JS
+             them. Seeded with the Duolingo record, which is the one a no-JS
              load shows and the one selected when the directory opens cold. -->
         <div class="startups__wide scroll" id="startupsWide">
           <p class="eyebrow">DIRECTORY RECORD</p>
@@ -572,7 +565,7 @@ try {
           <div class="startups__wide-id">
             <div class="startup__logo startups__wide-logo" id="wideLogo" data-tone="peach" aria-hidden="true">NN</div>
             <div>
-              <h3 class="startups__wide-title" id="wideTitle">Nimbus Notes</h3>
+              <h3 class="startups__wide-title" id="wideTitle">Duolingo</h3>
               <p class="startups__wide-meta" id="wideMeta">EdTech · Pre-seed · Founded 2025 · 4 people · Pittsburgh, PA</p>
             </div>
           </div>
@@ -602,17 +595,15 @@ try {
 
           <p class="eyebrow startups__wide-label">Contact</p>
           <div class="startups__wide-foot">
-            <span class="icon-discord" role="img" aria-label="Discord" style="position:relative;display:block;flex:0 0 32px;width:32px;height:32px;overflow:hidden"><img class="icon-discord__body" src="assets/discord-a.svg" alt="" style="position:absolute;top:16.67%;right:8.22%;bottom:18.75%;left:8.34%;width:auto;height:auto"><img class="icon-discord__eyes" src="assets/discord-b.svg" alt="" style="position:absolute;top:43.75%;right:31.25%;bottom:43.75%;left:31.25%;width:auto;height:auto"></span>
-            <img src="assets/instagram.svg" alt="Instagram">
-            <button class="startup__mail" type="button" id="wideMail" data-modal="messageStartup" data-message="nimbus" aria-label="Message this start-up"><img src="assets/mail.svg" alt=""></button>
-            <button class="btn btn--sm" type="button" id="wideMsg" data-modal="messageStartup" data-message="nimbus">Message →</button>
+            <button class="startup__mail" type="button" id="wideMail" data-modal="messageStartup" data-message="duolingo" aria-label="Message this company"><img src="assets/mail.svg" alt=""></button>
+            <button class="btn btn--sm" type="button" id="wideMsg" data-modal="messageStartup" data-message="duolingo">Message →</button>
           </div>
         </div>
         </div>
       </section>
 
       <section class="startup-detail scroll" id="startupDetail">
-        <h2 class="startup-detail__title" id="startupDetailTitle">Fernweg</h2>
+        <h2 class="startup-detail__title" id="startupDetailTitle">Duolingo</h2>
         <div class="startup-detail__body" id="startupDetailBody"></div>
       </section>
 

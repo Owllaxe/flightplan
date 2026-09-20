@@ -42,6 +42,8 @@
   height: 180px;
   z-index: 20;
 }
+/* while the list is open the slot rises above the scrim */
+.main.is-saved-open .saved-rail-slot { z-index: 22; }
 
 .saved-rail {
   position: absolute;
@@ -94,14 +96,20 @@
 
 /* Open list: everything under the profile row slides left by the rail's width,
    so the list drops down beside the listings and start-ups, not over them. */
-/* Side by side only: once the page stacks (≤ 1100px) the list sits above the
-   listings, so there is nothing beside it to move. */
-@media (min-width: 1101px) {
-  .career-body,
-  .career-page .visa { transition: margin-right var(--panel-ms) var(--ease-out); }
-  .main.is-saved-open .career-body,
-  .main.is-saved-tall .visa { margin-right: var(--saved-room, 310px); }
-  .career-page .main.is-saved-tall .visa { width: auto; }
+/* The scrim behind the open list. It covers the page, not the rail: the rail's
+   slot sits above it, so the list stays crisp while everything else recedes. */
+.saved-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  background: rgba(27, 25, 22, .22);
+  backdrop-filter: blur(2px);
+  animation: savedScrimIn .18s ease-out;
+}
+.saved-scrim[hidden] { display: none; }
+/* the corner pigeon sits above the page, so it recedes with everything else */
+body.saved-open .mascot { opacity: .3; filter: blur(2px); pointer-events: none; transition: opacity .18s ease; }
+@keyframes savedScrimIn { from { opacity: 0; } to { opacity: 1; } }
 }
 /* Each row opens the listing it names, so it is a <button> now. A button is
    inline-block and centre-aligned by default and the rows are full-width text,
@@ -534,18 +542,22 @@
    the directory reads as four distinct records at a glance without introducing
    a fifth palette. The tint is the fill and the full-strength hue is the ink —
    the same relationship every `.tag` on the page has. */
-.startup[data-startup="nimbus"]   .startup__logo { background: var(--accent-tint);  color: var(--accent); }
-.startup[data-startup="fernweg"]  .startup__logo { background: var(--green-tint);   color: var(--green); }
-.startup[data-startup="loopline"] .startup__logo { background: var(--amber-tint);   color: var(--amber); }
-.startup[data-startup="verdant"]  .startup__logo { background: var(--newgrad-tint); color: var(--newgrad); }
-.startup__name { font-family: var(--font-serif); font-size: 17px; }
-.startup__meta { font-size: 12.5px; color: var(--ink-3); margin-top: 2px; }
-.startup__blurb { font-size: 13px; color: var(--ink-2); margin-top: 14px; }
+.startup[data-startup="duolingo"]   .startup__logo { background: var(--green-tint);   color: var(--green); }
+.startup[data-startup="astrobotic"] .startup__logo { background: var(--accent-tint);  color: var(--accent); }
+.startup[data-startup="aurora"]     .startup__logo { background: var(--amber-tint);   color: var(--amber); }
+.startup[data-startup="skild"]      .startup__logo { background: var(--newgrad-tint); color: var(--newgrad); }
+.startup__name { font-family: var(--font-serif); font-size: 18.5px; line-height: 1.2; }
+.startup__meta { font-size: 13px; color: var(--ink-3); margin-top: 3px; }
+.startup__blurb { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin-top: 14px; }
 
 /* The contact row is laid out in every card at every moment — that is what
    keeps the list from jumping as the pointer crosses it. Only its paint is
    toggled, and the card's own growth is a transform, so neither the siblings
    nor the panel ever move. */
+.startup__apply { margin-left: 0; }
+.startup__apply.is-applied { background: var(--green); }
+.startup.is-applied { border-color: var(--green); }
+
 .startup__foot {
   display: flex; align-items: center; justify-content: flex-end; gap: 10px;
   margin-top: 16px;
@@ -690,7 +702,7 @@
   border-bottom: 1px solid var(--border);
 }
 .startups__role:last-child { border-bottom: 0; }
-.startups__role-name { font-family: var(--font-serif); font-size: 15px; }
+.startups__role-name { font-family: var(--font-serif); font-size: 16px; }
 .startups__role-meta { margin-left: auto; font-size: 12px; color: var(--ink-3); }
 
 .startups__wide-foot {
@@ -713,7 +725,7 @@
    job card. Nothing swipes — see career.js `openDetail`. */
 .startup-detail.is-rising { animation: jobRise var(--card-ms) var(--ease-out) both; }
 .startup-detail__title { font-family: var(--font-hand); font-size: 30px; font-weight: 400; margin-bottom: 18px; }
-.startup-detail__body p { font-size: 13px; color: var(--ink-2); margin-bottom: 16px; }
+.startup-detail__body p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin-bottom: 16px; }
 
 .is-detail .startups__title { font-size: 20px; }
 
@@ -1008,6 +1020,7 @@
    timers, so the state still switches, just without the choreography. */
 
 @media (prefers-reduced-motion: reduce) {
+  .saved-scrim { animation: none; backdrop-filter: none; }
   .career-page {
     --panel-ms: 0ms;
     --card-ms: 0ms;
@@ -1075,6 +1088,8 @@
 
   .saved-rail-slot { flex: 1 1 100%; min-width: 0; height: 132px; }
   .saved-rail { height: 132px; border-radius: 16px; }
+  /* room to read the whole title once the list is open on a narrow screen */
+  .saved-rail.is-open .saved-rail__title { white-space: normal; margin-right: 0; }
 
   .career-tools { gap: 14px; margin: 18px 0 10px; }
   .filters { gap: 14px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
