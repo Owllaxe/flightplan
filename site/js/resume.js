@@ -22,6 +22,55 @@ import { readIdentity } from './sidebar.js';
 
 const page = document.body;
 
+/* --- where "back" goes ------------------------------------------------------
+   The editor is opened from Profile and from Career, and it used to send
+   everyone to Profile. It now goes back where the student came from: the
+   referring page when the browser gives one, otherwise the last one remembered
+   for this tab, otherwise Profile as before. Only this site's own pages are
+   accepted, so the link can never be pointed somewhere else. */
+
+const BACK_KEY = 'flightplan.resumeBack';
+
+const BACK_LABEL = {
+  'index.html': 'Home',
+  'career.html': 'Career',
+  'profile.html': 'Profile',
+  'plan.html': 'Goals',
+  'planner.html': 'Planner',
+  'alumni.html': 'Alumni',
+  'visa.html': 'Visa',
+};
+
+function pageFromReferrer() {
+  try {
+    const ref = new URL(document.referrer);
+    if (ref.origin !== location.origin) return null;
+    const file = ref.pathname.split('/').pop() || 'index.html';
+    return file in BACK_LABEL ? file : null;
+  } catch {
+    return null;   /* no referrer, or not a URL we can read */
+  }
+}
+
+function initBack() {
+  const link = document.querySelector('.rz-back');
+  if (!link) return;
+  let target = pageFromReferrer();
+  if (target) {
+    try { sessionStorage.setItem(BACK_KEY, target); } catch { /* ignore */ }
+  } else {
+    try {
+      const saved = sessionStorage.getItem(BACK_KEY);
+      if (saved && saved in BACK_LABEL) target = saved;
+    } catch { /* ignore */ }
+  }
+  target = target || 'profile.html';
+  link.href = target;
+  link.textContent = `← Back to ${BACK_LABEL[target]}`;
+}
+
+initBack();
+
 const DOC_BUCKET = 'lists';
 const DOC_KEY = 'rz-doc';
 
