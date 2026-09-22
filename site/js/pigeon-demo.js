@@ -100,6 +100,14 @@ playBtn.addEventListener('click', () => {
 
 document.getElementById('pgDemoNext').addEventListener('click', () => { auto = true; paintPlay(); next(); });
 
+/* The site holds the pigeon still when the computer asks for less motion, so
+   say so here rather than let the page look broken. */
+const lessMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const motionNote = document.getElementById('pgDemoMotion');
+const paintMotion = () => { motionNote.hidden = !lessMotion.matches; };
+lessMotion.addEventListener('change', paintMotion);
+paintMotion();
+
 /* js/pigeon.js wires the bird itself (click opens and closes the bubble, drag
    moves it), and it restores whatever the session last remembered — so the
    bubble is opened here, since this page is about showing it. */

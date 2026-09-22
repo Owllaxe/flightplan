@@ -499,7 +499,31 @@ img { display: block; }
 /* Width is left to whichever mascot box holds it: the corner one fills its
    260px container, the whiteboard's is pinned to 177px by css/plan.css. Setting
    it on the id here would outrank both. */
-.mascot #pigeon-stage { width: 100%; }
+.mascot #pigeon-stage { width: 100%; position: relative; z-index: 2; }
+
+/* Its moon (js/pigeon.js adds it under the bird). Same proportions as the Goals
+   board's planet — 95.9% of the bird's width, tucked 13% up under its feet and
+   4.1% to the left — and drawn behind the bird so the feet stand on it. */
+.mascot .mascot__moon {
+  display: block;
+  position: relative;
+  z-index: 1;
+  width: 95.9%;
+  height: auto;
+  margin: -13% 0 0 -4.1%;
+  /* Only the top of the moon needs to show: this pulls the box's bottom edge up
+     by about a third of the bird's width, so a box pinned to the bottom of the screen
+     lets the rest of the moon hang below it. The bird stays where it was. */
+  margin-bottom: -35%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Safari before 15 has no aspect-ratio, which left the bird 0px tall — so it
+   neither showed nor animated. The padding box gives it the same shape. */
+@supports not (aspect-ratio: 1 / 1) {
+  .mascot #pigeon-stage { height: 0; padding-bottom: 106.07%; }   /* % of the box, which is the bird's own width */
+}
 .is-dragging #pigeon-stage { cursor: grabbing; }
 #pigeon-stage:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
 /* --- the pigeon's speech bubble (build B's #pigeon-dock bubble) -------------

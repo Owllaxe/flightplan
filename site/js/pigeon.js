@@ -579,11 +579,28 @@ function restore(box) {
   } else flip(box);
 }
 
+/* The bird stands on its moon, as it does in build B's dock and on the Goals
+   board. Goals ships the moon in its markup; every other page gets it here,
+   right under the bird, so there is one moon per pigeon wherever it appears. */
+const MOON_SRC = new URL('../assets/planet-lg.png', import.meta.url).href;
+
+function addMoon(box, bird) {
+  if (box.querySelector('.planet')) return;
+  const moon = document.createElement('img');
+  moon.className = 'planet mascot__moon';
+  moon.src = MOON_SRC;
+  moon.alt = '';
+  moon.decoding = 'async';
+  moon.draggable = false;
+  bird.insertAdjacentElement('afterend', moon);
+}
+
 function initDock() {
   const bird = ensureDock();
   const box = bird && bird.closest('.mascot, .pl-mascot, .gb-mascot');
   if (!box || bird.dataset.draggable) return;
   dockBox = box;
+  addMoon(box, bird);
   bird.dataset.draggable = '1';
   bird.tabIndex = 0;
   bird.setAttribute('role', 'button');

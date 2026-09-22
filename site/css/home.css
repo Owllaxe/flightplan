@@ -263,7 +263,7 @@
 .page-home .mascot { width: var(--mascot-sm); right: 8px; bottom: 0; }
 
 @media (max-width: 1100px) {
-  .page-home .main { padding-bottom: calc(var(--mascot-sm) * 1.061 + 30px); }   /* clears the bird at any size */
+  .page-home .main { padding-bottom: calc(var(--mascot-sm) * 1.47 + 30px); }   /* clears the bird and the top of its moon at any size */
 }
 
 /* --- phones ----------------------------------------------------------------- */

@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&family=Playfair+Display:wght@500;600;700&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=8648adda">
+<link rel="stylesheet" href="css/base.css?v=2f6bd6be">
 <style>
   /* Demo-only page: one bird and its bubble, nothing else. The markup below is
      the same `.mascot` + `#pigeon-stage` pair every other page carries, so
@@ -41,6 +41,8 @@
   }
   .page-pigeon-demo .pg-bubble { max-width: min(300px, 40vw); }
   .page-pigeon-demo .mascot #pigeon-stage { width: 100%; }
+  /* here the whole moon is on show, rather than sinking below the edge */
+  .page-pigeon-demo .mascot .mascot__moon { margin-bottom: 0; }
 
   /* controls */
   .pgd__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; padding: 18px 20px 26px; }
@@ -55,6 +57,13 @@
   .pgd-tab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
   .pgd__now { width: 100%; text-align: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
   .pgd__hint { width: 100%; text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+  .pgd__motion {
+    width: 100%; max-width: 560px; margin: 8px auto 0;
+    padding: 10px 14px; border-radius: 10px;
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    font-size: 13px; line-height: 1.45; color: var(--ink-2); text-align: center;
+  }
+  .pgd__motion[hidden] { display: none; }
 
   @media (max-width: 700px) {
     .pgd__head { padding: 16px 16px 0; }
@@ -97,6 +106,13 @@
     <button class="pgd-tab" type="button" id="pgDemoPlay" aria-pressed="true">Pause</button>
     <button class="pgd-tab" type="button" id="pgDemoNext">Next →</button>
     <p class="pgd__hint">The bubble is the real one: click the bird to close or open it, or drag the bird about.</p>
+    <!-- Shown only when the computer asks sites to cut motion (macOS: System
+         Settings → Accessibility → Display → Reduce motion). The site honours
+         that, so the pigeon holds still — this says why, instead of looking broken. -->
+    <p class="pgd__motion" id="pgDemoMotion" hidden>
+      Your computer has <b>Reduce motion</b> turned on, so the pigeon is holding still on purpose.
+      On a Mac: System Settings → Accessibility → Display → turn off “Reduce motion”, then reload.
+    </p>
   </div>
 </div>
 
